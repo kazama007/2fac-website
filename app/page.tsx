@@ -1,8 +1,44 @@
 "use client";
 import { useState, useEffect } from "react";
 
-function generateTOTP(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+function base32ToBytes(base32: string): Uint8Array {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+  let bits = 0, value = 0;
+  const output: number[] = [];
+  const clean = base32.toUpperCase().replace(/=+$/, "");
+  for (const char of clean) {
+    const idx = alphabet.indexOf(char);
+    if (idx === -1) continue;
+    value = (value << 5) | idx;
+    bits += 5;
+    if (bits >= 8) {
+      output.push((value >>> (bits - 8)) & 255);
+      bits -= 8;
+    }
+  }
+  return new Uint8Array(output);
+}
+
+async function generateTOTP(secret: string): Promise<string> {
+  const key = base32ToBytes(secret);
+  const epoch = Math.floor(Date.now() / 1000);
+  const time = Math.floor(epoch / 30);
+  const timeBuffer = new ArrayBuffer(8);
+  const timeView = new DataView(timeBuffer);
+  timeView.setUint32(4, time, false);
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw", key, { name: "HMAC", hash: "SHA-1" }, false, ["sign"]
+  );
+  const signature = await crypto.subtle.sign("HMAC", cryptoKey, timeBuffer);
+  const hash = new Uint8Array(signature);
+  const offset = hash[hash.length - 1] & 0xf;
+  const code = (
+    ((hash[offset] & 0x7f) << 24) |
+    ((hash[offset + 1] & 0xff) << 16) |
+    ((hash[offset + 2] & 0xff) << 8) |
+    (hash[offset + 3] & 0xff)
+  ) % 1000000;
+  return code.toString().padStart(6, "0");
 }
 
 export default function Home() {
@@ -11,22 +47,35 @@ export default function Home() {
   const [timeLeft, setTimeLeft] = useState(30);
   const [generated, setGenerated] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const timer = setInterval(() => {
+    const timer = setInterval(async () => {
       const seconds = 30 - (Math.floor(Date.now() / 1000) % 30);
       setTimeLeft(seconds);
       if (generated && secret) {
-        setCode(generateTOTP());
+        try {
+          const newCode = await generateTOTP(secret);
+          setCode(newCode);
+        } catch {
+          setError("Invalid secret key!");
+        }
       }
     }, 1000);
     return () => clearInterval(timer);
   }, [generated, secret]);
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!secret) return;
-    setCode(generateTOTP());
-    setGenerated(true);
+    try {
+      const newCode = await generateTOTP(secret);
+      setCode(newCode);
+      setGenerated(true);
+      setError("");
+    } catch {
+      setError("Invalid secret key! Base32 format mein daalo.");
+      setGenerated(false);
+    }
   };
 
   const handleCopy = () => {
@@ -38,16 +87,16 @@ export default function Home() {
   return (
     <main style={{
       minHeight: "100vh",
-      background: "#080c1a",
+      background: "#0d1530",
       color: "#ffffff",
       fontFamily: "Inter, sans-serif",
-      backgroundImage: "radial-gradient(circle, #1a2040 1px, transparent 1px)",
+      backgroundImage: "radial-gradient(circle, #2a3560 1px, transparent 1px)",
       backgroundSize: "30px 30px",
     }}>
 
       {/* Navbar */}
       <nav style={{
-        padding: "30px 40px",
+        padding: "14px 40px",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
@@ -59,12 +108,8 @@ export default function Home() {
         background: "transparent",
       }}>
         <div style={{ display: "flex", alignItems: "center" }}>
-  <img
-    src="/logo.png"
-    alt="2fa.ac logo"
-    style={{ height: "30px", width: "auto" }}
-  />
-</div>
+          <img src="/logo.png" alt="2fa.ac logo" style={{ height: "30px", width: "auto" }} />
+        </div>
         <div style={{ display: "flex", gap: "30px" }}>
           <a href="/tools" style={{ color: "#a0a0b0", textDecoration: "none" }}>Tools</a>
           <a href="/blog" style={{ color: "#a0a0b0", textDecoration: "none" }}>Blog</a>
@@ -72,10 +117,10 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Hero Text - Tool se upar */}
+      {/* Hero Text */}
       <section style={{
         textAlign: "center",
-        padding: "50px 20px 30px",
+        padding: "30px 20px 16px",
         maxWidth: "800px",
         margin: "0 auto",
       }}>
@@ -87,32 +132,28 @@ export default function Home() {
           padding: "6px 16px",
           fontSize: "13px",
           color: "#7c3aed",
-          marginBottom: "20px",
+          marginBottom: "16px",
         }}>
           300+ daily users trust 2fa.ac
         </div>
         <h1 style={{
-          fontSize: "40px",
+          fontSize: "28px",
           fontWeight: "800",
-          lineHeight: "1.1",
-          marginBottom: "16px",
+          lineHeight: "1.2",
+          marginBottom: "10px",
           background: "linear-gradient(135deg, #ffffff 0%, #7c3aed 100%)",
           WebkitBackgroundClip: "text",
           WebkitTextFillColor: "transparent",
         }}>
           Free Security Tools for Everyone
         </h1>
-        <p style={{
-          fontSize: "18px",
-          color: "#a0a0b0",
-          lineHeight: "1.6",
-        }}>
+        <p style={{ fontSize: "14px", color: "#a0a0b0", lineHeight: "1.6" }}>
           20+ free cybersecurity tools. Bilkul free, koi signup nahi.
         </p>
       </section>
 
       {/* 2FA Tool */}
-      <section style={{ maxWidth: "1200px", margin: "30px auto 60px", padding: "0 20px" }}>
+      <section style={{ maxWidth: "1300px", margin: "20px auto 60px", padding: "0 20px" }}>
         <div style={{
           background: "rgba(255,255,255,0.03)",
           border: "1px solid rgba(124,58,237,0.5)",
@@ -139,21 +180,25 @@ export default function Home() {
           <input
             type="text"
             value={secret}
-            onChange={(e) => setSecret(e.target.value.toUpperCase())}
+            onChange={(e) => setSecret(e.target.value.toUpperCase().trim())}
             placeholder="Secret Key daalo (jaise: JBSWY3DPEHPK3PXP)"
             style={{
               width: "100%",
               padding: "16px 20px",
               background: "rgba(255,255,255,0.06)",
-              border: "1px solid rgba(255,255,255,0.15)",
+              border: error ? "1px solid #ef4444" : "1px solid rgba(255,255,255,0.15)",
               borderRadius: "12px",
               color: "white",
               fontSize: "15px",
-              marginBottom: "16px",
+              marginBottom: "12px",
               boxSizing: "border-box",
               outline: "none",
             }}
           />
+
+          {error && (
+            <p style={{ color: "#ef4444", fontSize: "13px", marginBottom: "12px" }}>{error}</p>
+          )}
 
           <button
             onClick={handleGenerate}
