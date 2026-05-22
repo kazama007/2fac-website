@@ -1,45 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-
-function base32ToBytes(base32: string): Uint8Array {
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-  let bits = 0, value = 0;
-  const output: number[] = [];
-  const clean = base32.toUpperCase().replace(/=+$/, "");
-  for (const char of clean) {
-    const idx = alphabet.indexOf(char);
-    if (idx === -1) continue;
-    value = (value << 5) | idx;
-    bits += 5;
-    if (bits >= 8) {
-      output.push((value >>> (bits - 8)) & 255);
-      bits -= 8;
-    }
-  }
-  return new Uint8Array(output);
-}
-
-async function generateTOTP(secret: string): Promise<string> {
-  const key = base32ToBytes(secret);
-  const epoch = Math.floor(Date.now() / 1000);
-  const time = Math.floor(epoch / 30);
-  const timeBuffer = new ArrayBuffer(8);
-  const timeView = new DataView(timeBuffer);
-  timeView.setUint32(4, time, false);
-  const cryptoKey = await crypto.subtle.importKey(
-    "raw", key, { name: "HMAC", hash: "SHA-1" }, false, ["sign"]
-  );
-  const signature = await crypto.subtle.sign("HMAC", cryptoKey, timeBuffer);
-  const hash = new Uint8Array(signature);
-  const offset = hash[hash.length - 1] & 0xf;
-  const code = (
-    ((hash[offset] & 0x7f) << 24) |
-    ((hash[offset + 1] & 0xff) << 16) |
-    ((hash[offset + 2] & 0xff) << 8) |
-    (hash[offset + 3] & 0xff)
-  ) % 1000000;
-  return code.toString().padStart(6, "0");
-}
+import { generateTOTP } from "./totp";
 
 export default function Home() {
   const [secret, setSecret] = useState("");
@@ -55,8 +16,7 @@ export default function Home() {
       setTimeLeft(seconds);
       if (generated && secret) {
         try {
-          const newCode = await generateTOTP(secret);
-          setCode(newCode);
+          setCode(await generateTOTP(secret));
         } catch {
           setError("Invalid secret key!");
         }
@@ -87,10 +47,10 @@ export default function Home() {
   return (
     <main style={{
       minHeight: "100vh",
-      background: "#0d1530",
+      background: "#111827",
       color: "#ffffff",
       fontFamily: "Inter, sans-serif",
-      backgroundImage: "radial-gradient(circle, #2a3560 1px, transparent 1px)",
+      backgroundImage: "radial-gradient(circle, #1f2937 1px, transparent 1px)",
       backgroundSize: "30px 30px",
     }}>
 
@@ -153,12 +113,12 @@ export default function Home() {
       </section>
 
       {/* 2FA Tool */}
-      <section style={{ maxWidth: "1300px", margin: "20px auto 60px", padding: "0 20px" }}>
+      <section style={{ maxWidth: "1200px", margin: "20px auto 60px", padding: "0 20px" }}>
         <div style={{
           background: "rgba(255,255,255,0.03)",
           border: "1px solid rgba(124,58,237,0.5)",
           borderRadius: "20px",
-          padding: "60px 80px",
+          padding: "80px 120px",
           textAlign: "center",
         }}>
           <div style={{
@@ -314,41 +274,44 @@ export default function Home() {
           gap: "20px",
         }}>
           {[
-            { icon: "🔐", name: "TOTP Generator", desc: "Google Authenticator jaise OTP banao", tag: "Auth" },
-            { icon: "🔑", name: "Password Generator", desc: "Strong secure password banao", tag: "Password" },
-            { icon: "💪", name: "Password Strength", desc: "Password kitna strong hai check karo", tag: "Password" },
-            { icon: "🔓", name: "Backup Code Generator", desc: "2FA backup codes generate karo", tag: "Auth" },
-            { icon: "📱", name: "QR Code Generator", desc: "Authenticator ke liye QR banao", tag: "Auth" },
-            { icon: "🔍", name: "JWT Decoder", desc: "JWT token decode karo", tag: "Developer" },
-            { icon: "#️⃣", name: "Hash Generator", desc: "MD5, SHA-256, SHA-512 hash banao", tag: "Developer" },
-            { icon: "🆔", name: "UUID Generator", desc: "Unique ID generate karo", tag: "Developer" },
-            { icon: "📝", name: "Base64 Encoder", desc: "Text ko Base64 mein convert karo", tag: "Developer" },
-            { icon: "🔗", name: "Link Checker", desc: "Scam links check karo", tag: "Security" },
-            { icon: "🌐", name: "DNS Lookup", desc: "Domain DNS records dekho", tag: "Security" },
-            { icon: "📍", name: "IP Lookup", desc: "IP address ki location dekho", tag: "Security" },
+            { icon: "🔐", name: "TOTP Generator", desc: "Google Authenticator jaise OTP banao", tag: "Auth", href: "/" },
+            { icon: "🔑", name: "Password Generator", desc: "Strong secure password banao", tag: "Password", href: "/tools/password-generator" },
+            { icon: "💪", name: "Password Strength", desc: "Password kitna strong hai check karo", tag: "Password", href: "/tools/password-strength" },
+            { icon: "🔓", name: "Backup Code Generator", desc: "2FA backup codes generate karo", tag: "Auth", href: "/tools/backup-codes" },
+            { icon: "📱", name: "QR Code Generator", desc: "Authenticator ke liye QR banao", tag: "Auth", href: "/tools/qr-generator" },
+            { icon: "🔍", name: "JWT Decoder", desc: "JWT token decode karo", tag: "Developer", href: "/tools/jwt-decoder" },
+            { icon: "#️⃣", name: "Hash Generator", desc: "MD5, SHA-256, SHA-512 hash banao", tag: "Developer", href: "/tools/hash-generator" },
+            { icon: "🆔", name: "UUID Generator", desc: "Unique ID generate karo", tag: "Developer", href: "/tools/uuid-generator" },
+            { icon: "📝", name: "Base64 Encoder", desc: "Text ko Base64 mein convert karo", tag: "Developer", href: "/tools/base64" },
+            { icon: "🔗", name: "Link Checker", desc: "Scam links check karo", tag: "Security", href: "/tools/link-checker" },
+            { icon: "🌐", name: "DNS Lookup", desc: "Domain DNS records dekho", tag: "Security", href: "/tools/dns-lookup" },
+            { icon: "📍", name: "IP Lookup", desc: "IP address ki location dekho", tag: "Security", href: "/tools/ip-lookup" },
           ].map((tool) => (
-            <div key={tool.name} style={{
-              background: "rgba(255,255,255,0.03)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: "12px",
-              padding: "24px",
-              cursor: "pointer",
-            }}>
-              <div style={{ fontSize: "32px", marginBottom: "12px" }}>{tool.icon}</div>
+            <a key={tool.name} href={tool.href} style={{ textDecoration: "none" }}>
               <div style={{
-                display: "inline-block",
-                background: "rgba(124,58,237,0.15)",
-                color: "#7c3aed",
-                fontSize: "11px",
-                padding: "2px 10px",
-                borderRadius: "10px",
-                marginBottom: "10px",
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: "12px",
+                padding: "24px",
+                cursor: "pointer",
+                height: "100%",
               }}>
-                {tool.tag}
+                <div style={{ fontSize: "32px", marginBottom: "12px" }}>{tool.icon}</div>
+                <div style={{
+                  display: "inline-block",
+                  background: "rgba(124,58,237,0.15)",
+                  color: "#7c3aed",
+                  fontSize: "11px",
+                  padding: "2px 10px",
+                  borderRadius: "10px",
+                  marginBottom: "10px",
+                }}>
+                  {tool.tag}
+                </div>
+                <h3 style={{ fontSize: "16px", fontWeight: "600", marginBottom: "8px", color: "#fff" }}>{tool.name}</h3>
+                <p style={{ fontSize: "13px", color: "#a0a0b0", lineHeight: "1.5", margin: 0 }}>{tool.desc}</p>
               </div>
-              <h3 style={{ fontSize: "16px", fontWeight: "600", marginBottom: "8px" }}>{tool.name}</h3>
-              <p style={{ fontSize: "13px", color: "#a0a0b0", lineHeight: "1.5", margin: 0 }}>{tool.desc}</p>
-            </div>
+            </a>
           ))}
         </div>
       </section>
