@@ -1,6 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
 import { generateTOTP } from "./totp";
+import AnimatedBackground from "./background";
+
+interface SavedKey {
+  name: string;
+  secret: string;
+  addedAt: string;
+  addedTime: string;
+}
 
 export default function Home() {
   const [secret, setSecret] = useState("");
@@ -9,6 +17,12 @@ export default function Home() {
   const [generated, setGenerated] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
+  const [savedKeys, setSavedKeys] = useState<SavedKey[]>([]);
+
+  useEffect(() => {
+    const keys = localStorage.getItem("2fa-saved-keys");
+    if (keys) setSavedKeys(JSON.parse(keys));
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(async () => {
@@ -32,8 +46,21 @@ export default function Home() {
       setCode(newCode);
       setGenerated(true);
       setError("");
+      const now = new Date();
+      const alreadyExists = savedKeys.find(k => k.secret === secret);
+      if (!alreadyExists) {
+        const newKey: SavedKey = {
+          name: "Account " + (savedKeys.length + 1),
+          secret: secret,
+          addedAt: now.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }),
+          addedTime: now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }),
+        };
+        const updated = [...savedKeys, newKey];
+        setSavedKeys(updated);
+        localStorage.setItem("2fa-saved-keys", JSON.stringify(updated));
+      }
     } catch {
-      setError("Invalid secret key! Base32 format mein daalo.");
+      setError("Invalid secret key! Please enter a valid Base32 key.");
       setGenerated(false);
     }
   };
@@ -47,16 +74,15 @@ export default function Home() {
   return (
     <main style={{
       minHeight: "100vh",
-      background: "#111827",
+      background: "#080c18",
       color: "#ffffff",
       fontFamily: "Inter, sans-serif",
-      backgroundImage: "radial-gradient(circle, #1f2937 1px, transparent 1px)",
-      backgroundSize: "30px 30px",
+      position: "relative",
     }}>
+      <AnimatedBackground />
 
-      {/* Navbar */}
       <nav style={{
-        padding: "14px 40px",
+        padding: "22px 40px",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
@@ -65,61 +91,44 @@ export default function Home() {
         position: "sticky",
         top: 0,
         zIndex: 100,
-        background: "transparent",
+        background: "rgba(8,12,24,0.85)",
       }}>
         <div style={{ display: "flex", alignItems: "center" }}>
           <img src="/logo.png" alt="2fa.ac logo" style={{ height: "30px", width: "auto" }} />
         </div>
-        <div style={{ display: "flex", gap: "30px" }}>
+        <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
           <a href="/tools" style={{ color: "#a0a0b0", textDecoration: "none" }}>Tools</a>
           <a href="/blog" style={{ color: "#a0a0b0", textDecoration: "none" }}>Blog</a>
           <a href="/about" style={{ color: "#a0a0b0", textDecoration: "none" }}>About</a>
         </div>
       </nav>
 
-      {/* Hero Text */}
-      <section style={{
-        textAlign: "center",
-        padding: "30px 20px 16px",
-        maxWidth: "800px",
-        margin: "0 auto",
-      }}>
-        <div style={{
-          display: "inline-block",
-          background: "rgba(124,58,237,0.15)",
-          border: "1px solid #7c3aed",
-          borderRadius: "20px",
-          padding: "6px 16px",
-          fontSize: "13px",
-          color: "#7c3aed",
-          marginBottom: "16px",
-        }}>
-          300+ daily users trust 2fa.ac
+      <section style={{ maxWidth: "1200px", margin: "30px auto 20px", padding: "0 20px", position: "relative", zIndex: 1 }}>
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "12px" }}>
+          <a href="/saved-keys" style={{
+            background: "rgba(124,58,237,0.2)",
+            border: "1px solid #7c3aed",
+            color: "#7c3aed",
+            textDecoration: "none",
+            padding: "8px 16px",
+            borderRadius: "8px",
+            fontSize: "14px",
+            fontWeight: "600",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+          }}>
+            🔑 2FA History
+          </a>
         </div>
-        <h1 style={{
-          fontSize: "28px",
-          fontWeight: "800",
-          lineHeight: "1.2",
-          marginBottom: "10px",
-          background: "linear-gradient(135deg, #ffffff 0%, #7c3aed 100%)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-        }}>
-          Free Security Tools for Everyone
-        </h1>
-        <p style={{ fontSize: "14px", color: "#a0a0b0", lineHeight: "1.6" }}>
-          20+ free cybersecurity tools. Bilkul free, koi signup nahi.
-        </p>
-      </section>
 
-      {/* 2FA Tool */}
-      <section style={{ maxWidth: "1200px", margin: "20px auto 60px", padding: "0 20px" }}>
         <div style={{
-          background: "rgba(255,255,255,0.03)",
+          background: "rgba(8,12,24,0.7)",
           border: "1px solid rgba(124,58,237,0.5)",
           borderRadius: "20px",
-          padding: "80px 120px",
+          padding: "20px 60px",
           textAlign: "center",
+          backdropFilter: "blur(20px)",
         }}>
           <div style={{
             width: "56px", height: "56px",
@@ -133,15 +142,15 @@ export default function Home() {
           <h2 style={{ fontSize: "26px", fontWeight: "700", marginBottom: "8px", color: "#fff" }}>
             2FA Code Generator
           </h2>
-          <p style={{ color: "#a0a0b0", fontSize: "15px", marginBottom: "32px" }}>
-            Secret key daalo — OTP turant generate hoga
+          <p style={{ color: "#a0a0b0", fontSize: "15px", marginBottom: "24px" }}>
+            Enter your secret key to instantly generate a 2FA code
           </p>
 
           <input
             type="text"
             value={secret}
             onChange={(e) => setSecret(e.target.value.toUpperCase().trim())}
-            placeholder="Secret Key daalo (jaise: JBSWY3DPEHPK3PXP)"
+            placeholder="Enter Secret Key (e.g. JBSWY3DPEHPK3PXP)"
             style={{
               width: "100%",
               padding: "16px 20px",
@@ -182,22 +191,22 @@ export default function Home() {
               background: "rgba(124,58,237,0.1)",
               border: "1px solid rgba(124,58,237,0.3)",
               borderRadius: "14px",
-              padding: "30px",
+              padding: "16px",
             }}>
-              <p style={{ fontSize: "12px", color: "#a0a0b0", marginBottom: "12px", letterSpacing: "2px" }}>
+              <p style={{ fontSize: "12px", color: "#a0a0b0", marginBottom: "8px", letterSpacing: "2px" }}>
                 YOUR 2FA CODE
               </p>
               <div style={{
-                fontSize: "80px",
+                fontSize: "60px",
                 fontWeight: "800",
                 letterSpacing: "14px",
                 color: "#7c3aed",
                 fontFamily: "monospace",
-                marginBottom: "20px",
+                marginBottom: "12px",
               }}>
                 {code.slice(0, 3)} {code.slice(3)}
               </div>
-              <div style={{ marginBottom: "20px" }}>
+              <div style={{ marginBottom: "12px" }}>
                 <div style={{
                   background: "rgba(255,255,255,0.1)",
                   borderRadius: "4px",
@@ -215,13 +224,13 @@ export default function Home() {
                   }} />
                 </div>
                 <span style={{ fontSize: "13px", color: "#a0a0b0" }}>
-                  {timeLeft} seconds mein expire hoga
+                  Expires in {timeLeft} seconds
                 </span>
               </div>
               <button
                 onClick={handleCopy}
                 style={{
-                  padding: "12px 36px",
+                  padding: "10px 30px",
                   background: copied ? "#22c55e" : "rgba(255,255,255,0.1)",
                   color: "white",
                   border: "1px solid rgba(255,255,255,0.2)",
@@ -237,7 +246,42 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Trust Metrics */}
+      <section style={{
+        textAlign: "center",
+        padding: "30px 20px",
+        maxWidth: "800px",
+        margin: "0 auto",
+        position: "relative",
+        zIndex: 1,
+      }}>
+        <div style={{
+          display: "inline-block",
+          background: "rgba(124,58,237,0.15)",
+          border: "1px solid #7c3aed",
+          borderRadius: "20px",
+          padding: "6px 16px",
+          fontSize: "13px",
+          color: "#7c3aed",
+          marginBottom: "16px",
+        }}>
+          Trusted by 300+ daily users
+        </div>
+        <h1 style={{
+          fontSize: "28px",
+          fontWeight: "800",
+          lineHeight: "1.2",
+          marginBottom: "10px",
+          background: "linear-gradient(135deg, #ffffff 0%, #7c3aed 100%)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+        }}>
+          Free Security Tools for Everyone
+        </h1>
+        <p style={{ fontSize: "14px", color: "#a0a0b0", lineHeight: "1.6" }}>
+          20+ free cybersecurity tools. Completely free, no signup required.
+        </p>
+      </section>
+
       <section style={{
         display: "flex",
         justifyContent: "center",
@@ -246,6 +290,8 @@ export default function Home() {
         borderTop: "1px solid rgba(255,255,255,0.08)",
         borderBottom: "1px solid rgba(255,255,255,0.08)",
         flexWrap: "wrap",
+        position: "relative",
+        zIndex: 1,
       }}>
         {[
           { num: "20+", label: "Security Tools" },
@@ -260,41 +306,40 @@ export default function Home() {
         ))}
       </section>
 
-      {/* Tools Grid */}
-      <section style={{ padding: "80px 40px", maxWidth: "1100px", margin: "0 auto" }}>
+      <section style={{ padding: "60px 40px", maxWidth: "1100px", margin: "0 auto", position: "relative", zIndex: 1 }}>
         <h2 style={{ textAlign: "center", fontSize: "36px", fontWeight: "700", marginBottom: "12px" }}>
           All Tools — 100% Free
         </h2>
         <p style={{ textAlign: "center", color: "#a0a0b0", marginBottom: "50px" }}>
-          Koi account nahi, koi payment nahi — bas use karo
+          No account required, no payment — just use it
         </p>
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
           gap: "20px",
         }}>
           {[
-            { icon: "🔐", name: "TOTP Generator", desc: "Google Authenticator jaise OTP banao", tag: "Auth", href: "/" },
-            { icon: "🔑", name: "Password Generator", desc: "Strong secure password banao", tag: "Password", href: "/tools/password-generator" },
-            { icon: "💪", name: "Password Strength", desc: "Password kitna strong hai check karo", tag: "Password", href: "/tools/password-strength" },
-            { icon: "🔓", name: "Backup Code Generator", desc: "2FA backup codes generate karo", tag: "Auth", href: "/tools/backup-codes" },
-            { icon: "📱", name: "QR Code Generator", desc: "Authenticator ke liye QR banao", tag: "Auth", href: "/tools/qr-generator" },
-            { icon: "🔍", name: "JWT Decoder", desc: "JWT token decode karo", tag: "Developer", href: "/tools/jwt-decoder" },
-            { icon: "#️⃣", name: "Hash Generator", desc: "MD5, SHA-256, SHA-512 hash banao", tag: "Developer", href: "/tools/hash-generator" },
-            { icon: "🆔", name: "UUID Generator", desc: "Unique ID generate karo", tag: "Developer", href: "/tools/uuid-generator" },
-            { icon: "📝", name: "Base64 Encoder", desc: "Text ko Base64 mein convert karo", tag: "Developer", href: "/tools/base64" },
-            { icon: "🔗", name: "Link Checker", desc: "Scam links check karo", tag: "Security", href: "/tools/link-checker" },
-            { icon: "🌐", name: "DNS Lookup", desc: "Domain DNS records dekho", tag: "Security", href: "/tools/dns-lookup" },
-            { icon: "📍", name: "IP Lookup", desc: "IP address ki location dekho", tag: "Security", href: "/tools/ip-lookup" },
+            { icon: "🔐", name: "TOTP Generator", desc: "Generate OTP codes like Google Authenticator", tag: "Auth", href: "/" },
+            { icon: "🔑", name: "Password Generator", desc: "Generate strong secure passwords", tag: "Password", href: "/tools/password-generator" },
+            { icon: "💪", name: "Password Strength", desc: "Check how strong your password is", tag: "Password", href: "/tools/password-strength" },
+            { icon: "🔓", name: "Backup Code Generator", desc: "Generate 2FA backup codes", tag: "Auth", href: "/tools/backup-codes" },
+            { icon: "📱", name: "QR Code Generator", desc: "Generate QR codes for authenticator apps", tag: "Auth", href: "/tools/qr-generator" },
+            { icon: "🔍", name: "JWT Decoder", desc: "Decode and verify JWT tokens", tag: "Developer", href: "/tools/jwt-decoder" },
+            { icon: "#️⃣", name: "Hash Generator", desc: "Generate MD5, SHA-256, SHA-512 hashes", tag: "Developer", href: "/tools/hash-generator" },
+            { icon: "🆔", name: "UUID Generator", desc: "Generate unique IDs instantly", tag: "Developer", href: "/tools/uuid-generator" },
+            { icon: "📝", name: "Base64 Encoder", desc: "Encode and decode Base64 text", tag: "Developer", href: "/tools/base64" },
+            { icon: "🔗", name: "Link Checker", desc: "Check links for scams and phishing", tag: "Security", href: "/tools/link-checker" },
+            { icon: "🌐", name: "DNS Lookup", desc: "Check domain DNS records", tag: "Security", href: "/tools/dns-lookup" },
+            { icon: "📍", name: "IP Lookup", desc: "Find location of any IP address", tag: "Security", href: "/tools/ip-lookup" },
           ].map((tool) => (
             <a key={tool.name} href={tool.href} style={{ textDecoration: "none" }}>
               <div style={{
-                background: "rgba(255,255,255,0.03)",
+                background: "rgba(8,12,24,0.6)",
                 border: "1px solid rgba(255,255,255,0.08)",
                 borderRadius: "12px",
                 padding: "24px",
                 cursor: "pointer",
-                height: "100%",
+                backdropFilter: "blur(10px)",
               }}>
                 <div style={{ fontSize: "32px", marginBottom: "12px" }}>{tool.icon}</div>
                 <div style={{
@@ -316,13 +361,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer style={{
         textAlign: "center",
         padding: "40px",
         borderTop: "1px solid rgba(255,255,255,0.08)",
         color: "#a0a0b0",
         fontSize: "14px",
+        position: "relative",
+        zIndex: 1,
       }}>
         © 2025 2fa.ac — Free Cybersecurity Tools for Everyone
       </footer>
