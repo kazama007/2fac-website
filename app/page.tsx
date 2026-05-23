@@ -18,6 +18,8 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
   const [savedKeys, setSavedKeys] = useState<SavedKey[]>([]);
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const keys = localStorage.getItem("2fa-saved-keys");
@@ -71,28 +73,82 @@ export default function Home() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const categories = [
+    {
+      name: "Authentication", color: "#7c3aed", icon: "🔐",
+      tools: [
+        { icon: "🔐", name: "TOTP Generator", desc: "Generate OTP codes like Google Authenticator", href: "/" },
+        { icon: "📱", name: "QR Code Generator", desc: "Generate QR codes for authenticator apps", href: "/tools/qr-generator" },
+      ]
+    },
+    {
+      name: "Password", color: "#3b82f6", icon: "🔑",
+      tools: [
+        { icon: "🔑", name: "Password Generator", desc: "Generate strong secure passwords", href: "/tools/password-generator" },
+        { icon: "💪", name: "Password Strength", desc: "Check how strong your password is", href: "/tools/password-strength" },
+        { icon: "🔓", name: "Password Breach Checker", desc: "Check if your password was leaked in a data breach", href: "/tools/password-breach" },
+      ]
+    },
+    {
+      name: "Developer", color: "#22c55e", icon: "👨‍💻",
+      tools: [
+        { icon: "🔍", name: "JWT Decoder", desc: "Decode and verify JWT tokens", href: "/tools/jwt-decoder" },
+        { icon: "#️⃣", name: "Hash Generator", desc: "Generate MD5, SHA-256, SHA-512 hashes", href: "/tools/hash-generator" },
+        { icon: "🆔", name: "UUID Generator", desc: "Generate unique IDs instantly", href: "/tools/uuid-generator" },
+        { icon: "📝", name: "Base64 Encoder", desc: "Encode and decode Base64 text", href: "/tools/base64" },
+        { icon: "📋", name: "JSON Formatter", desc: "Format and validate JSON data", href: "/tools/json-formatter" },
+      ]
+    },
+    {
+      name: "Security", color: "#ef4444", icon: "🛡️",
+      tools: [
+        { icon: "🔗", name: "Link Checker", desc: "Check links for scams and phishing", href: "/tools/link-checker" },
+        { icon: "🌐", name: "DNS Lookup", desc: "Check domain DNS records", href: "/tools/dns-lookup" },
+        { icon: "📍", name: "IP Lookup", desc: "Find location of any IP address", href: "/tools/ip-lookup" },
+        { icon: "🏢", name: "WHOIS Lookup", desc: "Check domain owner and registration info", href: "/tools/whois-lookup" },
+      ]
+    },
+  ];
+
+  const allTools = categories.flatMap(c => c.tools.map(t => ({ ...t, category: c.name, color: c.color })));
+
+  const filtered = allTools
+    .filter(t => activeCategory === "All" ? true : t.category === activeCategory)
+    .filter(t => search === "" ? true : t.name.toLowerCase().includes(search.toLowerCase()) || t.desc.toLowerCase().includes(search.toLowerCase()));
+
+  const ToolCard = ({ tool, color }: { tool: any; color: string }) => (
+    <a href={tool.href} style={{ textDecoration: "none" }}>
+      <div style={{
+        background: "rgba(255,255,255,0.03)",
+        border: `1px solid ${color}22`,
+        borderRadius: "12px",
+        padding: "20px",
+        cursor: "pointer",
+        backdropFilter: "blur(10px)",
+        height: "100%",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "10px" }}>
+          <div style={{ width: "40px", height: "40px", background: `${color}22`, borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px", flexShrink: 0 }}>
+            {tool.icon}
+          </div>
+          <div>
+            <h4 style={{ fontSize: "15px", fontWeight: "600", margin: 0, color: "#fff" }}>{tool.name}</h4>
+            <span style={{ fontSize: "11px", color: color, background: `${color}22`, padding: "1px 8px", borderRadius: "10px" }}>
+              {tool.category || tool.name}
+            </span>
+          </div>
+        </div>
+        <p style={{ fontSize: "13px", color: "#a0a0b0", lineHeight: "1.5", margin: 0 }}>{tool.desc}</p>
+      </div>
+    </a>
+  );
+
   return (
-    <main style={{
-      minHeight: "100vh",
-      background: "#080c18",
-      color: "#1a1a2e",
-      fontFamily: "Inter, sans-serif",
-      position: "relative",
-    }}>
+    <main style={{ minHeight: "100vh", background: "#0a0a1a", color: "#ffffff", fontFamily: "Inter, sans-serif", position: "relative" }}>
       <AnimatedBackground />
 
-      <nav style={{
-        padding: "22px 40px",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        borderBottom: "1px solid rgba(255,255,255,0.08)",
-        backdropFilter: "blur(10px)",
-        position: "sticky",
-        top: 0,
-        zIndex: 100,
-        background: "rgba(8,12,24,0.85)",
-      }}>
+      {/* Navbar */}
+      <nav style={{ padding: "22px 40px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 100, background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 4px 30px rgba(0,0,0,0.1)" }}>
         <div style={{ display: "flex", alignItems: "center" }}>
           <img src="/logo.png" alt="2fa.ac logo" style={{ height: "30px", width: "auto" }} />
         </div>
@@ -103,142 +159,40 @@ export default function Home() {
         </div>
       </nav>
 
+      {/* 2FA Tool */}
       <section style={{ maxWidth: "1200px", margin: "30px auto 20px", padding: "0 20px", position: "relative", zIndex: 1 }}>
         <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "12px" }}>
-          <a href="/saved-keys" style={{
-            background: "rgba(124,58,237,0.2)",
-            border: "1px solid #7c3aed",
-            color: "#7c3aed",
-            textDecoration: "none",
-            padding: "8px 16px",
-            borderRadius: "8px",
-            fontSize: "14px",
-            fontWeight: "600",
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-          }}>
+          <a href="/saved-keys" style={{ background: "rgba(124,58,237,0.2)", border: "1px solid #7c3aed", color: "#7c3aed", textDecoration: "none", padding: "8px 16px", borderRadius: "8px", fontSize: "14px", fontWeight: "600", display: "flex", alignItems: "center", gap: "6px" }}>
             🔑 2FA History
           </a>
         </div>
 
-        <div style={{
-          background: "rgba(8,12,24,0.7)",
-          border: "1px solid rgba(124,58,237,0.5)",
-          borderRadius: "20px",
-          padding: "20px 60px",
-          textAlign: "center",
-          backdropFilter: "blur(20px)",
-        }}>
-          <div style={{
-            width: "56px", height: "56px",
-            background: "rgba(124,58,237,0.2)",
-            borderRadius: "14px",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            margin: "0 auto 16px",
-            fontSize: "28px",
-          }}>🔐</div>
+        <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "20px", padding: "20px 60px", textAlign: "center", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}>
+          <div style={{ width: "56px", height: "56px", background: "rgba(124,58,237,0.2)", borderRadius: "14px", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", fontSize: "28px" }}>🔐</div>
+          <h2 style={{ fontSize: "26px", fontWeight: "700", marginBottom: "8px", color: "#fff" }}>2FA Code Generator</h2>
+          <p style={{ color: "#a0a0b0", fontSize: "15px", marginBottom: "24px" }}>Enter your secret key to instantly generate a 2FA code</p>
 
-          <h2 style={{ fontSize: "26px", fontWeight: "700", marginBottom: "8px", color: "#fff" }}>
-            2FA Code Generator
-          </h2>
-          <p style={{ color: "#a0a0b0", fontSize: "15px", marginBottom: "24px" }}>
-            Enter your secret key to instantly generate a 2FA code
-          </p>
+          <input type="text" value={secret} onChange={(e) => setSecret(e.target.value.toUpperCase().trim())} placeholder="Enter Secret Key (e.g. JBSWY3DPEHPK3PXP)" style={{ width: "100%", padding: "16px 20px", background: "rgba(255,255,255,0.06)", border: error ? "1px solid #ef4444" : "1px solid rgba(255,255,255,0.15)", borderRadius: "12px", color: "white", fontSize: "15px", marginBottom: "12px", boxSizing: "border-box", outline: "none" }} />
 
-          <input
-            type="text"
-            value={secret}
-            onChange={(e) => setSecret(e.target.value.toUpperCase().trim())}
-            placeholder="Enter Secret Key (e.g. JBSWY3DPEHPK3PXP)"
-            style={{
-              width: "100%",
-              padding: "16px 20px",
-              background: "rgba(255,255,255,0.06)",
-              border: error ? "1px solid #ef4444" : "1px solid rgba(255,255,255,0.15)",
-              borderRadius: "12px",
-              color: "white",
-              fontSize: "15px",
-              marginBottom: "12px",
-              boxSizing: "border-box",
-              outline: "none",
-            }}
-          />
+          {error && <p style={{ color: "#ef4444", fontSize: "13px", marginBottom: "12px" }}>{error}</p>}
 
-          {error && (
-            <p style={{ color: "#ef4444", fontSize: "13px", marginBottom: "12px" }}>{error}</p>
-          )}
-
-          <button
-            onClick={handleGenerate}
-            style={{
-              width: "100%",
-              padding: "16px",
-              background: "#7c3aed",
-              color: "white",
-              border: "none",
-              borderRadius: "12px",
-              fontSize: "17px",
-              fontWeight: "600",
-              cursor: "pointer",
-              marginBottom: generated ? "24px" : "0",
-            }}>
+          <button onClick={handleGenerate} style={{ width: "100%", padding: "16px", background: "#7c3aed", color: "white", border: "none", borderRadius: "12px", fontSize: "17px", fontWeight: "600", cursor: "pointer", marginBottom: generated ? "24px" : "0" }}>
             Generate Code
           </button>
 
           {generated && (
-            <div style={{
-              background: "rgba(124,58,237,0.1)",
-              border: "1px solid rgba(124,58,237,0.3)",
-              borderRadius: "14px",
-              padding: "16px",
-            }}>
-              <p style={{ fontSize: "12px", color: "#a0a0b0", marginBottom: "8px", letterSpacing: "2px" }}>
-                YOUR 2FA CODE
-              </p>
-              <div style={{
-                fontSize: "60px",
-                fontWeight: "800",
-                letterSpacing: "14px",
-                color: "#7c3aed",
-                fontFamily: "monospace",
-                marginBottom: "12px",
-              }}>
+            <div style={{ background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: "14px", padding: "16px" }}>
+              <p style={{ fontSize: "12px", color: "#a0a0b0", marginBottom: "8px", letterSpacing: "2px" }}>YOUR 2FA CODE</p>
+              <div style={{ fontSize: "60px", fontWeight: "800", letterSpacing: "14px", color: "#7c3aed", fontFamily: "monospace", marginBottom: "12px" }}>
                 {code.slice(0, 3)} {code.slice(3)}
               </div>
               <div style={{ marginBottom: "12px" }}>
-                <div style={{
-                  background: "rgba(255,255,255,0.1)",
-                  borderRadius: "4px",
-                  height: "6px",
-                  overflow: "hidden",
-                  maxWidth: "300px",
-                  margin: "0 auto 8px",
-                }}>
-                  <div style={{
-                    width: `${(timeLeft / 30) * 100}%`,
-                    height: "100%",
-                    background: timeLeft > 10 ? "#7c3aed" : "#ef4444",
-                    borderRadius: "4px",
-                    transition: "width 1s linear",
-                  }} />
+                <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: "4px", height: "6px", overflow: "hidden", maxWidth: "300px", margin: "0 auto 8px" }}>
+                  <div style={{ width: `${(timeLeft / 30) * 100}%`, height: "100%", background: timeLeft > 10 ? "#7c3aed" : "#ef4444", borderRadius: "4px", transition: "width 1s linear" }} />
                 </div>
-                <span style={{ fontSize: "13px", color: "#a0a0b0" }}>
-                  Expires in {timeLeft} seconds
-                </span>
+                <span style={{ fontSize: "13px", color: "#a0a0b0" }}>Expires in {timeLeft} seconds</span>
               </div>
-              <button
-                onClick={handleCopy}
-                style={{
-                  padding: "10px 30px",
-                  background: copied ? "#22c55e" : "rgba(255,255,255,0.1)",
-                  color: "white",
-                  border: "1px solid rgba(255,255,255,0.2)",
-                  borderRadius: "10px",
-                  fontSize: "15px",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                }}>
+              <button onClick={handleCopy} style={{ padding: "10px 30px", background: copied ? "#22c55e" : "rgba(255,255,255,0.1)", color: "white", border: "1px solid rgba(255,255,255,0.2)", borderRadius: "10px", fontSize: "15px", fontWeight: "600", cursor: "pointer" }}>
                 {copied ? "✓ Copied!" : "Copy Code"}
               </button>
             </div>
@@ -246,35 +200,12 @@ export default function Home() {
         </div>
       </section>
 
-      <section style={{
-        textAlign: "center",
-        padding: "30px 20px",
-        maxWidth: "800px",
-        margin: "0 auto",
-        position: "relative",
-        zIndex: 1,
-      }}>
-        <div style={{
-          display: "inline-block",
-          background: "rgba(124,58,237,0.15)",
-          border: "1px solid #7c3aed",
-          borderRadius: "20px",
-          padding: "6px 16px",
-          fontSize: "13px",
-          color: "#7c3aed",
-          marginBottom: "16px",
-        }}>
+      {/* Hero Text */}
+      <section style={{ textAlign: "center", padding: "30px 20px", maxWidth: "800px", margin: "0 auto", position: "relative", zIndex: 1 }}>
+        <div style={{ display: "inline-block", background: "rgba(124,58,237,0.15)", border: "1px solid #7c3aed", borderRadius: "20px", padding: "6px 16px", fontSize: "13px", color: "#7c3aed", marginBottom: "16px" }}>
           Trusted by 300+ daily users
         </div>
-        <h1 style={{
-          fontSize: "28px",
-          fontWeight: "800",
-          lineHeight: "1.2",
-          marginBottom: "10px",
-          background: "linear-gradient(135deg, #ffffff 0%, #7c3aed 100%)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-        }}>
+        <h1 style={{ fontSize: "28px", fontWeight: "800", lineHeight: "1.2", marginBottom: "10px", background: "linear-gradient(135deg, #ffffff 0%, #7c3aed 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
           Free Security Tools for Everyone
         </h1>
         <p style={{ fontSize: "14px", color: "#a0a0b0", lineHeight: "1.6" }}>
@@ -282,17 +213,8 @@ export default function Home() {
         </p>
       </section>
 
-      <section style={{
-        display: "flex",
-        justifyContent: "center",
-        gap: "60px",
-        padding: "40px 20px",
-        borderTop: "1px solid rgba(255,255,255,0.08)",
-        borderBottom: "1px solid rgba(255,255,255,0.08)",
-        flexWrap: "wrap",
-        position: "relative",
-        zIndex: 1,
-      }}>
+      {/* Trust Metrics */}
+      <section style={{ display: "flex", justifyContent: "center", gap: "60px", padding: "40px 20px", borderTop: "1px solid rgba(255,255,255,0.08)", borderBottom: "1px solid rgba(255,255,255,0.08)", flexWrap: "wrap", position: "relative", zIndex: 1 }}>
         {[
           { num: "20+", label: "Security Tools" },
           { num: "300+", label: "Daily Users" },
@@ -306,70 +228,83 @@ export default function Home() {
         ))}
       </section>
 
+      {/* Tools Section */}
       <section style={{ padding: "60px 40px", maxWidth: "1100px", margin: "0 auto", position: "relative", zIndex: 1 }}>
-        <h2 style={{ textAlign: "center", fontSize: "36px", fontWeight: "700", marginBottom: "12px" }}>
-          All Tools — 100% Free
-        </h2>
-        <p style={{ textAlign: "center", color: "#a0a0b0", marginBottom: "50px" }}>
-          No account required, no payment — just use it
-        </p>
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-          gap: "20px",
-        }}>
-          {[
-            { icon: "🔐", name: "TOTP Generator", desc: "Generate OTP codes like Google Authenticator", tag: "Auth", href: "/" },
-            { icon: "🔑", name: "Password Generator", desc: "Generate strong secure passwords", tag: "Password", href: "/tools/password-generator" },
-            { icon: "💪", name: "Password Strength", desc: "Check how strong your password is", tag: "Password", href: "/tools/password-strength" },
-            { icon: "🔓", name: "Backup Code Generator", desc: "Generate 2FA backup codes", tag: "Auth", href: "/tools/backup-codes" },
-            { icon: "📱", name: "QR Code Generator", desc: "Generate QR codes for authenticator apps", tag: "Auth", href: "/tools/qr-generator" },
-            { icon: "🔍", name: "JWT Decoder", desc: "Decode and verify JWT tokens", tag: "Developer", href: "/tools/jwt-decoder" },
-            { icon: "#️⃣", name: "Hash Generator", desc: "Generate MD5, SHA-256, SHA-512 hashes", tag: "Developer", href: "/tools/hash-generator" },
-            { icon: "🆔", name: "UUID Generator", desc: "Generate unique IDs instantly", tag: "Developer", href: "/tools/uuid-generator" },
-            { icon: "📝", name: "Base64 Encoder", desc: "Encode and decode Base64 text", tag: "Developer", href: "/tools/base64" },
-            { icon: "🔗", name: "Link Checker", desc: "Check links for scams and phishing", tag: "Security", href: "/tools/link-checker" },
-            { icon: "🌐", name: "DNS Lookup", desc: "Check domain DNS records", tag: "Security", href: "/tools/dns-lookup" },
-            { icon: "📍", name: "IP Lookup", desc: "Find location of any IP address", tag: "Security", href: "/tools/ip-lookup" },
-          ].map((tool) => (
-            <a key={tool.name} href={tool.href} style={{ textDecoration: "none" }}>
-              <div style={{
-                background: "rgba(8,12,24,0.6)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                borderRadius: "12px",
-                padding: "24px",
-                cursor: "pointer",
-                backdropFilter: "blur(10px)",
-              }}>
-                <div style={{ fontSize: "32px", marginBottom: "12px" }}>{tool.icon}</div>
-                <div style={{
-                  display: "inline-block",
-                  background: "rgba(124,58,237,0.15)",
-                  color: "#7c3aed",
-                  fontSize: "11px",
-                  padding: "2px 10px",
-                  borderRadius: "10px",
-                  marginBottom: "10px",
-                }}>
-                  {tool.tag}
-                </div>
-                <h3 style={{ fontSize: "16px", fontWeight: "600", marginBottom: "8px", color: "#fff" }}>{tool.name}</h3>
-                <p style={{ fontSize: "13px", color: "#a0a0b0", lineHeight: "1.5", margin: 0 }}>{tool.desc}</p>
-              </div>
-            </a>
+        <h2 style={{ textAlign: "center", fontSize: "36px", fontWeight: "700", marginBottom: "12px" }}>All Tools — 100% Free</h2>
+        <p style={{ textAlign: "center", color: "#a0a0b0", marginBottom: "30px" }}>No account required, no payment — just use it</p>
+
+        {/* Search Bar */}
+        <div style={{ maxWidth: "500px", margin: "0 auto 24px", position: "relative" }}>
+          <span style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", fontSize: "18px" }}>🔍</span>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search tools... (e.g. JWT, Password, DNS)"
+            style={{ width: "100%", padding: "14px 20px 14px 46px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "12px", color: "white", fontSize: "15px", boxSizing: "border-box", outline: "none" }}
+          />
+          {search && (
+            <button onClick={() => setSearch("")} style={{ position: "absolute", right: "14px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#a0a0b0", cursor: "pointer", fontSize: "18px" }}>✕</button>
+          )}
+        </div>
+
+        {/* Category Filter */}
+        <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginBottom: "40px", flexWrap: "wrap" }}>
+          {["All", ...categories.map(c => c.name)].map(cat => (
+            <button key={cat} onClick={() => { setActiveCategory(cat); setSearch(""); }} style={{ padding: "8px 20px", background: activeCategory === cat && !search ? "#7c3aed" : "rgba(255,255,255,0.05)", border: activeCategory === cat && !search ? "none" : "1px solid rgba(255,255,255,0.1)", borderRadius: "20px", color: "white", cursor: "pointer", fontSize: "14px", fontWeight: activeCategory === cat && !search ? "600" : "400" }}>
+              {cat === "All" ? "🌟 All" : categories.find(c => c.name === cat)?.icon + " " + cat}
+            </button>
           ))}
         </div>
+
+        {/* Search Results */}
+        {search !== "" ? (
+          <div>
+            <p style={{ color: "#a0a0b0", fontSize: "14px", marginBottom: "16px" }}>
+              {filtered.length} result{filtered.length !== 1 ? "s" : ""} for "<span style={{ color: "#fff" }}>{search}</span>"
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px" }}>
+              {filtered.length === 0 ? (
+                <div style={{ gridColumn: "1/-1", textAlign: "center", padding: "40px", color: "#a0a0b0" }}>
+                  <div style={{ fontSize: "40px", marginBottom: "12px" }}>🔍</div>
+                  No tools found for "{search}"
+                </div>
+              ) : filtered.map(tool => (
+                <ToolCard key={tool.name} tool={tool} color={tool.color} />
+              ))}
+            </div>
+          </div>
+        ) : activeCategory === "All" ? (
+          categories.map(category => (
+            <div key={category.name} style={{ marginBottom: "48px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
+                <div style={{ width: "40px", height: "40px", background: `${category.color}22`, border: `1px solid ${category.color}44`, borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px" }}>
+                  {category.icon}
+                </div>
+                <div>
+                  <h3 style={{ fontSize: "20px", fontWeight: "700", margin: 0, color: "#fff" }}>{category.name} Tools</h3>
+                  <p style={{ fontSize: "13px", color: "#a0a0b0", margin: 0 }}>{category.tools.length} tools available</p>
+                </div>
+                <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.08)", marginLeft: "12px" }} />
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px" }}>
+                {category.tools.map(tool => (
+                  <ToolCard key={tool.name} tool={{ ...tool, category: category.name }} color={category.color} />
+                ))}
+              </div>
+            </div>
+          ))
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px" }}>
+            {filtered.map(tool => (
+              <ToolCard key={tool.name} tool={tool} color={tool.color} />
+            ))}
+          </div>
+        )}
       </section>
 
-      <footer style={{
-        textAlign: "center",
-        padding: "40px",
-        borderTop: "1px solid rgba(255,255,255,0.08)",
-        color: "#a0a0b0",
-        fontSize: "14px",
-        position: "relative",
-        zIndex: 1,
-      }}>
+      {/* Footer */}
+      <footer style={{ textAlign: "center", padding: "40px", borderTop: "1px solid rgba(255,255,255,0.08)", color: "#a0a0b0", fontSize: "14px", position: "relative", zIndex: 1 }}>
         © 2025 2fa.ac — Free Cybersecurity Tools for Everyone
       </footer>
     </main>
