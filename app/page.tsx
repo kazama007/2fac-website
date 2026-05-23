@@ -75,7 +75,7 @@ export default function Home() {
     <main style={{
       minHeight: "100vh",
       background: "#080c18",
-      color: "#ffffff",
+      color: "#1a1a2e",
       fontFamily: "Inter, sans-serif",
       position: "relative",
     }}>

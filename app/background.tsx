@@ -21,7 +21,7 @@ export default function AnimatedBackground() {
       baseX: number; baseY: number;
     }[] = [];
 
-    for (let i = 0; i < 350; i++) {
+    for (let i = 0; i < 1220; i++) {
       const x = Math.random() * width;
       const y = Math.random() * height;
       particles.push({
