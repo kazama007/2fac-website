@@ -21,7 +21,7 @@ export default function AnimatedBackground() {
       baseX: number; baseY: number;
     }[] = [];
 
-    for (let i = 0; i < 120; i++) {
+    for (let i = 0; i < 350; i++) {
       const x = Math.random() * width;
       const y = Math.random() * height;
       particles.push({
@@ -65,7 +65,7 @@ export default function AnimatedBackground() {
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(124,58,237,${p.opacity})`;
+        ctx.fillStyle = `rgba(255,255,255,${p.opacity})`;
         ctx.fill();
       });
 
@@ -76,7 +76,7 @@ export default function AnimatedBackground() {
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < 100) {
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(124,58,237,${0.2 * (1 - dist / 100)})`;
+            ctx.strokeStyle = `rgba(255,255,255,${0.15 * (1 - dist / 100)})`;
             ctx.lineWidth = 0.5;
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
