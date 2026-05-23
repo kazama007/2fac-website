@@ -12,6 +12,7 @@ interface SavedKey {
 
 export default function Home() {
   const [secret, setSecret] = useState("");
+  const [showTools, setShowTools] = useState(false);
   const [code, setCode] = useState("");
   const [timeLeft, setTimeLeft] = useState(30);
   const [generated, setGenerated] = useState(false);
@@ -171,15 +172,11 @@ export default function Home() {
           <div style={{ width: "56px", height: "56px", background: "rgba(124,58,237,0.2)", borderRadius: "14px", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", fontSize: "28px" }}>🔐</div>
           <h2 style={{ fontSize: "26px", fontWeight: "700", marginBottom: "8px", color: "#fff" }}>2FA Code Generator</h2>
           <p style={{ color: "#a0a0b0", fontSize: "15px", marginBottom: "24px" }}>Enter your secret key to instantly generate a 2FA code</p>
-
           <input type="text" value={secret} onChange={(e) => setSecret(e.target.value.toUpperCase().trim())} placeholder="Enter Secret Key (e.g. JBSWY3DPEHPK3PXP)" style={{ width: "100%", padding: "16px 20px", background: "rgba(255,255,255,0.06)", border: error ? "1px solid #ef4444" : "1px solid rgba(255,255,255,0.15)", borderRadius: "12px", color: "white", fontSize: "15px", marginBottom: "12px", boxSizing: "border-box", outline: "none" }} />
-
           {error && <p style={{ color: "#ef4444", fontSize: "13px", marginBottom: "12px" }}>{error}</p>}
-
           <button onClick={handleGenerate} style={{ width: "100%", padding: "16px", background: "#7c3aed", color: "white", border: "none", borderRadius: "12px", fontSize: "17px", fontWeight: "600", cursor: "pointer", marginBottom: generated ? "24px" : "0" }}>
             Generate Code
           </button>
-
           {generated && (
             <div style={{ background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: "14px", padding: "16px" }}>
               <p style={{ fontSize: "12px", color: "#a0a0b0", marginBottom: "8px", letterSpacing: "2px" }}>YOUR 2FA CODE</p>
@@ -215,12 +212,7 @@ export default function Home() {
 
       {/* Trust Metrics */}
       <section style={{ display: "flex", justifyContent: "center", gap: "60px", padding: "40px 20px", borderTop: "1px solid rgba(255,255,255,0.08)", borderBottom: "1px solid rgba(255,255,255,0.08)", flexWrap: "wrap", position: "relative", zIndex: 1 }}>
-        {[
-          { num: "20+", label: "Security Tools" },
-          { num: "300+", label: "Daily Users" },
-          { num: "99.9%", label: "Uptime" },
-          { num: "100%", label: "Free Forever" },
-        ].map((item) => (
+        {[{ num: "20+", label: "Security Tools" }, { num: "300+", label: "Daily Users" }, { num: "99.9%", label: "Uptime" }, { num: "100%", label: "Free Forever" }].map((item) => (
           <div key={item.label} style={{ textAlign: "center" }}>
             <div style={{ fontSize: "32px", fontWeight: "700", color: "#7c3aed" }}>{item.num}</div>
             <div style={{ fontSize: "14px", color: "#a0a0b0", marginTop: "4px" }}>{item.label}</div>
@@ -236,16 +228,8 @@ export default function Home() {
         {/* Search Bar */}
         <div style={{ maxWidth: "500px", margin: "0 auto 24px", position: "relative" }}>
           <span style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", fontSize: "18px" }}>🔍</span>
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search tools... (e.g. JWT, Password, DNS)"
-            style={{ width: "100%", padding: "14px 20px 14px 46px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "12px", color: "white", fontSize: "15px", boxSizing: "border-box", outline: "none" }}
-          />
-          {search && (
-            <button onClick={() => setSearch("")} style={{ position: "absolute", right: "14px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#a0a0b0", cursor: "pointer", fontSize: "18px" }}>✕</button>
-          )}
+          <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search tools... (e.g. JWT, Password, DNS)" style={{ width: "100%", padding: "14px 20px 14px 46px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "12px", color: "white", fontSize: "15px", boxSizing: "border-box", outline: "none" }} />
+          {search && <button onClick={() => setSearch("")} style={{ position: "absolute", right: "14px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#a0a0b0", cursor: "pointer", fontSize: "18px" }}>✕</button>}
         </div>
 
         {/* Category Filter */}
@@ -257,7 +241,7 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Search Results */}
+        {/* Tools Grid */}
         {search !== "" ? (
           <div>
             <p style={{ color: "#a0a0b0", fontSize: "14px", marginBottom: "16px" }}>
@@ -269,9 +253,7 @@ export default function Home() {
                   <div style={{ fontSize: "40px", marginBottom: "12px" }}>🔍</div>
                   No tools found for "{search}"
                 </div>
-              ) : filtered.map(tool => (
-                <ToolCard key={tool.name} tool={tool} color={tool.color} />
-              ))}
+              ) : filtered.map(tool => <ToolCard key={tool.name} tool={tool} color={tool.color} />)}
             </div>
           </div>
         ) : activeCategory === "All" ? (
@@ -288,24 +270,69 @@ export default function Home() {
                 <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.08)", marginLeft: "12px" }} />
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px" }}>
-                {category.tools.map(tool => (
-                  <ToolCard key={tool.name} tool={{ ...tool, category: category.name }} color={category.color} />
-                ))}
+                {category.tools.map(tool => <ToolCard key={tool.name} tool={{ ...tool, category: category.name }} color={category.color} />)}
               </div>
             </div>
           ))
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px" }}>
-            {filtered.map(tool => (
-              <ToolCard key={tool.name} tool={tool} color={tool.color} />
-            ))}
+            {filtered.map(tool => <ToolCard key={tool.name} tool={tool} color={tool.color} />)}
           </div>
         )}
       </section>
 
       {/* Footer */}
-      <footer style={{ textAlign: "center", padding: "40px", borderTop: "1px solid rgba(255,255,255,0.08)", color: "#a0a0b0", fontSize: "14px", position: "relative", zIndex: 1 }}>
-        © 2025 2fa.ac — Free Cybersecurity Tools for Everyone
+      <footer style={{ background: "#080c18", borderTop: "1px solid rgba(255,255,255,0.08)", position: "relative", zIndex: 1 }}>
+        <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "60px 40px 40px", display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: "40px" }}>
+          <div>
+            <img src="/logo.png" alt="2fa.ac" style={{ height: "32px", marginBottom: "16px" }} />
+            <p style={{ fontSize: "14px", color: "#a0a0b0", lineHeight: "1.7", maxWidth: "260px" }}>
+              Free cybersecurity tools — 2FA, passwords, JWT, DNS and more. Browser-only, zero signup required.
+            </p>
+          </div>
+          <div>
+            <h4 style={{ fontSize: "11px", fontWeight: "700", color: "#6b7280", letterSpacing: "2px", marginBottom: "20px" }}>POPULAR TOOLS</h4>
+            {[
+              { name: "TOTP Generator", href: "/" },
+              { name: "Password Generator", href: "/tools/password-generator" },
+              { name: "JWT Decoder", href: "/tools/jwt-decoder" },
+              { name: "Hash Generator", href: "/tools/hash-generator" },
+              { name: "IP Lookup", href: "/tools/ip-lookup" },
+              { name: "WHOIS Lookup", href: "/tools/whois-lookup" },
+            ].map(link => (
+              <a key={link.name} href={link.href} style={{ display: "block", color: "#a0a0b0", textDecoration: "none", fontSize: "14px", marginBottom: "12px" }}>{link.name}</a>
+            ))}
+          </div>
+          <div>
+            <h4 style={{ fontSize: "11px", fontWeight: "700", color: "#6b7280", letterSpacing: "2px", marginBottom: "20px" }}>CATEGORIES</h4>
+            {[
+              { name: "Authentication", href: "/" },
+              { name: "Password Tools", href: "/tools/password-generator" },
+              { name: "Developer Tools", href: "/tools/jwt-decoder" },
+              { name: "Security Tools", href: "/tools/link-checker" },
+              { name: "DNS & Network", href: "/tools/dns-lookup" },
+              { name: "Blog", href: "/blog" },
+            ].map(link => (
+              <a key={link.name} href={link.href} style={{ display: "block", color: "#a0a0b0", textDecoration: "none", fontSize: "14px", marginBottom: "12px" }}>{link.name}</a>
+            ))}
+          </div>
+          <div>
+            <h4 style={{ fontSize: "11px", fontWeight: "700", color: "#6b7280", letterSpacing: "2px", marginBottom: "20px" }}>COMPANY & LEGAL</h4>
+            {[
+              { name: "About", href: "/about" },
+              { name: "Blog", href: "/blog" },
+              { name: "Privacy Policy", href: "/privacy" },
+              { name: "Terms of Service", href: "/terms" },
+              { name: "Contact", href: "/contact" },
+            ].map(link => (
+              <a key={link.name} href={link.href} style={{ display: "block", color: "#a0a0b0", textDecoration: "none", fontSize: "14px", marginBottom: "12px" }}>{link.name}</a>
+            ))}
+          </div>
+        </div>
+        <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", padding: "20px 40px", display: "flex", justifyContent: "space-between", alignItems: "center", maxWidth: "1100px", margin: "0 auto" }}>
+          <span style={{ fontSize: "13px", color: "#6b7280" }}>© 2025 2fa.ac — Free Cybersecurity Tools for Everyone</span>
+          <span style={{ fontSize: "13px", color: "#6b7280" }}>Built with ❤️ for Security</span>
+        </div>
       </footer>
     </main>
   );

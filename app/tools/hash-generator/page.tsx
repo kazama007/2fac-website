@@ -179,7 +179,7 @@ export default function HashGenerator() {
         </div>
 
         <div style={{ marginTop: "20px", background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "12px", padding: "16px 20px", fontSize: "13px", color: "#a0a0b0", lineHeight: "1.6" }}>
-          🔒 <strong style={{ color: "#fff" }}>Privacy:</strong> All hashes are generated locally in your browser. Your data is never sent to any server.
+          🔒 <strong style={{ color: "npm run dev#fff" }}>Privacy:</strong> All hashes are generated locally in your browser. Your data is never sent to any server.
         </div>
       </section>
 
