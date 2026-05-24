@@ -12,26 +12,10 @@ export default function AnimatedBackground() {
 
     let width = canvas.width = window.innerWidth;
     let height = canvas.height = window.innerHeight;
-    const mouse = { x: width / 2, y: height / 2 };
 
-    const particles: {
-      x: number; y: number;
-      vx: number; vy: number;
-      size: number; opacity: number;
-      baseX: number; baseY: number;
-    }[] = [];
-
-    for (let i = 0; i < 420; i++) {
-      const x = Math.random() * width;
-      const y = Math.random() * height;
-      particles.push({
-        x, y, baseX: x, baseY: y,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        size: Math.random() * 2 + 0.5,
-        opacity: Math.random() * 0.6 + 0.2,
-      });
-    }
+    const DOT_SPACING = 28;
+    const DOT_RADIUS = 1.2;
+    const mouse = { x: -999, y: -999 };
 
     const onMouseMove = (e: MouseEvent) => {
       mouse.x = e.clientX;
@@ -40,61 +24,47 @@ export default function AnimatedBackground() {
     window.addEventListener("mousemove", onMouseMove);
 
     let animId: number;
+    let lastTime = 0;
+    const FPS = 30; // cap at 30fps — enough for dots
+    const interval = 1000 / FPS;
 
-    const animate = () => {
+    const animate = (now: number) => {
+      animId = requestAnimationFrame(animate);
+      if (now - lastTime < interval) return; // skip frame
+      lastTime = now;
+
       ctx.clearRect(0, 0, width, height);
 
-      particles.forEach(p => {
-        const dx = mouse.x - p.x;
-        const dy = mouse.y - p.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const maxDist = 150;
+      const cols = Math.ceil(width / DOT_SPACING) + 1;
+      const rows = Math.ceil(height / DOT_SPACING) + 1;
+      const glowRadius = 100;
 
-        if (dist < maxDist) {
-          const force = (maxDist - dist) / maxDist;
-          p.vx += (dx / dist) * force * 0.3;
-          p.vy += (dy / dist) * force * 0.3;
-        }
+      for (let col = 0; col < cols; col++) {
+        for (let row = 0; row < rows; row++) {
+          const x = col * DOT_SPACING;
+          const y = row * DOT_SPACING;
 
-        p.vx += (p.baseX - p.x) * 0.003;
-        p.vy += (p.baseY - p.y) * 0.003;
-        p.vx *= 0.95;
-        p.vy *= 0.95;
-        p.x += p.vx;
-        p.y += p.vy;
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255,255,255,${p.opacity})`;
-        ctx.fill();
-      });
-
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
+          const dx = mouse.x - x;
+          const dy = mouse.y - y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 100) {
+
+          if (dist < glowRadius) {
+            const intensity = 1 - dist / glowRadius;
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(255,255,255,${0.15 * (1 - dist / 100)})`;
-            ctx.lineWidth = 0.5;
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.stroke();
+            ctx.arc(x, y, DOT_RADIUS + intensity * 1.2, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${Math.round(80 + intensity * 100)},${Math.round(180 + intensity * 60)},255,${0.25 + intensity * 0.65})`;
+            ctx.fill();
+          } else {
+            ctx.beginPath();
+            ctx.arc(x, y, DOT_RADIUS, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(100,120,180,0.35)";
+            ctx.fill();
           }
         }
       }
-
-      const grd = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 200);
-      grd.addColorStop(0, "rgba(124,58,237,0.12)");
-      grd.addColorStop(1, "rgba(124,58,237,0)");
-      ctx.fillStyle = grd;
-      ctx.fillRect(0, 0, width, height);
-
-      animId = requestAnimationFrame(animate);
     };
 
-    animate();
+    animId = requestAnimationFrame(animate);
 
     const onResize = () => {
       width = canvas.width = window.innerWidth;
