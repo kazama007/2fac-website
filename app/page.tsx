@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { generateTOTP } from "./totp";
 import AnimatedBackground from "./background";
 
@@ -21,6 +21,7 @@ export default function Home() {
   const [savedKeys, setSavedKeys] = useState<SavedKey[]>([]);
   const [activeCategory, setActiveCategory] = useState("All");
   const [search, setSearch] = useState("");
+  const timeoutRef = useRef<any>(null);
 
   useEffect(() => {
     const keys = localStorage.getItem("2fa-saved-keys");
@@ -72,6 +73,15 @@ export default function Home() {
     navigator.clipboard.writeText(code);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setShowTools(true);
+  };
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => setShowTools(false), 200);
   };
 
   const categories = [
@@ -154,9 +164,76 @@ export default function Home() {
           <img src="/logo.png" alt="2fa.ac logo" style={{ height: "30px", width: "auto" }} />
         </div>
         <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
-          <a href="/tools" style={{ color: "#a0a0b0", textDecoration: "none" }}>Tools</a>
-          <a href="/blog" style={{ color: "#a0a0b0", textDecoration: "none" }}>Blog</a>
-          <a href="/about" style={{ color: "#a0a0b0", textDecoration: "none" }}>About</a>
+
+          {/* Tools Dropdown */}
+          <div
+            style={{ position: "relative" }}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            <a href="#" style={{ color: "#a0a0b0", textDecoration: "none", display: "flex", alignItems: "center", gap: "6px", fontSize: "14px", fontWeight: "500", padding: "8px 14px", borderRadius: "8px" }}
+  onMouseEnter={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
+  onMouseLeave={e => { e.currentTarget.style.color = "#a0a0b0"; e.currentTarget.style.background = "transparent"; }}
+>
+  Tools ▾
+</a>
+
+            {showTools && (
+              <div
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+                style={{
+                  position: "absolute",
+                  top: "100%",
+                  right: "0",
+                  background: "#0f0f1e",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  borderRadius: "16px",
+                  padding: "24px",
+                  width: "900px",
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr 1fr 1fr",
+                  gap: "16px",
+                  zIndex: 999,
+                  boxShadow: "0 25px 80px rgba(0,0,0,0.6)",
+                }}>
+                {categories.map(category => (
+                  <div key={category.name}>
+                    <div style={{ fontSize: "11px", fontWeight: "700", color: category.color, letterSpacing: "1px", marginBottom: "10px", paddingBottom: "6px", borderBottom: `1px solid ${category.color}33` }}>
+                      {category.icon} {category.name.toUpperCase()}
+                    </div>
+                    {category.tools.map(tool => (
+                      <a key={tool.name} href={tool.href} style={{ display: "block", padding: "8px 10px", color: "#fff", textDecoration: "none", borderRadius: "8px", marginBottom: "4px" }}
+                        onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.08)")}
+                        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                      >
+                        <div style={{ fontSize: "13px", fontWeight: "600", marginBottom: "2px" }}>{tool.icon} {tool.name}</div>
+                        <div style={{ fontSize: "11px", color: "#6b7280" }}>{tool.desc}</div>
+                      </a>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <a href="/blog" style={{ color: "#a0a0b0", textDecoration: "none", fontSize: "14px", fontWeight: "500", padding: "8px 14px", borderRadius: "8px", transition: "all 0.2s", display: "flex", alignItems: "center", gap: "6px" }}
+  onMouseEnter={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
+  onMouseLeave={e => { e.currentTarget.style.color = "#a0a0b0"; e.currentTarget.style.background = "transparent"; }}
+>
+  Blog
+</a>
+<a href="/about" style={{ color: "#a0a0b0", textDecoration: "none", fontSize: "14px", fontWeight: "500", padding: "8px 14px", borderRadius: "8px", transition: "all 0.2s", display: "flex", alignItems: "center", gap: "6px" }}
+  onMouseEnter={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
+  onMouseLeave={e => { e.currentTarget.style.color = "#a0a0b0"; e.currentTarget.style.background = "transparent"; }}
+>
+  About
+</a>
+
+{/* Get Started Button */}
+<a href="/tools/password-generator" style={{ background: "#7c3aed", color: "white", textDecoration: "none", padding: "9px 20px", borderRadius: "10px", fontSize: "14px", fontWeight: "600", display: "flex", alignItems: "center", gap: "6px" }}>
+  🚀 Get Started
+</a>
         </div>
       </nav>
 
@@ -225,14 +302,12 @@ export default function Home() {
         <h2 style={{ textAlign: "center", fontSize: "36px", fontWeight: "700", marginBottom: "12px" }}>All Tools — 100% Free</h2>
         <p style={{ textAlign: "center", color: "#a0a0b0", marginBottom: "30px" }}>No account required, no payment — just use it</p>
 
-        {/* Search Bar */}
         <div style={{ maxWidth: "500px", margin: "0 auto 24px", position: "relative" }}>
           <span style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", fontSize: "18px" }}>🔍</span>
           <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search tools... (e.g. JWT, Password, DNS)" style={{ width: "100%", padding: "14px 20px 14px 46px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "12px", color: "white", fontSize: "15px", boxSizing: "border-box", outline: "none" }} />
           {search && <button onClick={() => setSearch("")} style={{ position: "absolute", right: "14px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#a0a0b0", cursor: "pointer", fontSize: "18px" }}>✕</button>}
         </div>
 
-        {/* Category Filter */}
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginBottom: "40px", flexWrap: "wrap" }}>
           {["All", ...categories.map(c => c.name)].map(cat => (
             <button key={cat} onClick={() => { setActiveCategory(cat); setSearch(""); }} style={{ padding: "8px 20px", background: activeCategory === cat && !search ? "#7c3aed" : "rgba(255,255,255,0.05)", border: activeCategory === cat && !search ? "none" : "1px solid rgba(255,255,255,0.1)", borderRadius: "20px", color: "white", cursor: "pointer", fontSize: "14px", fontWeight: activeCategory === cat && !search ? "600" : "400" }}>
@@ -241,7 +316,6 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Tools Grid */}
         {search !== "" ? (
           <div>
             <p style={{ color: "#a0a0b0", fontSize: "14px", marginBottom: "16px" }}>
