@@ -11,6 +11,7 @@ interface BlogPost {
   excerpt: string;
   published: boolean;
   createdAt: string;
+  coverImage?: string;
 }
 
 function DotsBackground() {
@@ -58,19 +59,6 @@ function DotsBackground() {
     return () => { cancelAnimationFrame(animId); window.removeEventListener("mousemove", onMouseMove); window.removeEventListener("resize", onResize); };
   }, []);
   return <canvas ref={canvasRef} style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", zIndex: 0, pointerEvents: "none" }} />;
-}
-
-function renderMarkdown(text: string): string {
-  return text
-    .replace(/^# (.+)$/gm, '<h1 style="font-size:28px;font-weight:800;margin:24px 0 12px;color:#1a1a2e">$1</h1>')
-    .replace(/^## (.+)$/gm, '<h2 style="font-size:22px;font-weight:700;margin:20px 0 10px;color:#1a1a2e">$1</h2>')
-    .replace(/^### (.+)$/gm, '<h3 style="font-size:18px;font-weight:600;margin:16px 0 8px;color:#374151">$1</h3>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#1a1a2e;font-weight:700">$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em style="color:#6b7280">$1</em>')
-    .replace(/`(.+?)`/g, '<code style="background:rgba(124,58,237,0.1);color:#7c3aed;padding:2px 6px;border-radius:4px;font-family:monospace">$1</code>')
-    .replace(/^- (.+)$/gm, '<li style="margin:6px 0;color:#6b7280;padding-left:8px">$1</li>')
-    .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" style="color:#7c3aed;text-decoration:underline" target="_blank">$1</a>')
-    .replace(/\n\n/g, '</p><p style="margin:12px 0;color:#6b7280;line-height:1.8">');
 }
 
 export default function BlogPost() {
@@ -127,19 +115,27 @@ export default function BlogPost() {
     <main style={{ minHeight: "100vh", background: "#f8f9ff", color: "#1a1a2e", fontFamily: "Inter, sans-serif", position: "relative" }}>
       <DotsBackground />
 
-      {/* Navbar - DARK same as homepage */}
-      <nav style={{
-        padding: "22px 40px",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        position: "sticky",
-        top: 0,
-        zIndex: 100,
-        background: "#0a0a1a",
-        borderBottom: "1px solid rgba(255,255,255,0.1)",
-        boxShadow: "0 4px 30px rgba(0,0,0,0.3)",
-      }}>
+      <style>{`
+        .blog-content img { max-width: 100%; border-radius: 12px; margin: 16px 0; display: block; }
+        .blog-content h1 { font-size: 28px; font-weight: 800; color: #1a1a2e; margin: 24px 0 12px; }
+        .blog-content h2 { font-size: 22px; font-weight: 700; color: #1a1a2e; margin: 20px 0 10px; }
+        .blog-content h3 { font-size: 18px; font-weight: 600; color: #374151; margin: 16px 0 8px; }
+        .blog-content p { margin: 12px 0; color: #6b7280; line-height: 1.8; }
+        .blog-content ul, .blog-content ol { margin: 12px 0; padding-left: 24px; color: #6b7280; }
+        .blog-content li { margin: 6px 0; line-height: 1.8; }
+        .blog-content strong { color: #1a1a2e; font-weight: 700; }
+        .blog-content em { color: #6b7280; font-style: italic; }
+        .blog-content a { color: #7c3aed; text-decoration: underline; }
+        .blog-content blockquote { border-left: 4px solid #7c3aed; padding-left: 16px; margin: 16px 0; color: #9ca3af; font-style: italic; }
+        .blog-content code { background: rgba(124,58,237,0.1); color: #7c3aed; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+        .blog-content pre { background: #1a1a2e; color: #e2e8f0; padding: 16px; border-radius: 10px; overflow-x: auto; margin: 16px 0; }
+        .blog-content table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+        .blog-content th, .blog-content td { padding: 10px 14px; border: 1px solid rgba(0,0,0,0.1); text-align: left; }
+        .blog-content th { background: rgba(124,58,237,0.1); color: #7c3aed; font-weight: 600; }
+      `}</style>
+
+      {/* Navbar */}
+      <nav style={{ padding: "22px 40px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 100, background: "#0a0a1a", borderBottom: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 4px 30px rgba(0,0,0,0.3)" }}>
         <a href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
           <img src="/logo.png" alt="2fa.ac" style={{ height: "30px" }} />
         </a>
@@ -158,7 +154,7 @@ export default function BlogPost() {
         </a>
 
         {/* Post Header */}
-        <div style={{ marginBottom: "32px" }}>
+        <div style={{ marginBottom: "24px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
             <span style={{ fontSize: "12px", padding: "4px 12px", borderRadius: "10px", background: `${getCategoryColor(post.category)}15`, color: getCategoryColor(post.category), fontWeight: "600" }}>
               {post.category}
@@ -171,13 +167,21 @@ export default function BlogPost() {
           <p style={{ fontSize: "16px", color: "#6b7280", lineHeight: "1.6" }}>{post.excerpt}</p>
         </div>
 
+        {/* Cover Image */}
+        {post.coverImage && (
+          <div style={{ marginBottom: "32px", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 20px rgba(0,0,0,0.1)" }}>
+            <img src={post.coverImage} alt={post.title} style={{ width: "100%", height: "400px", objectFit: "cover", display: "block" }} />
+          </div>
+        )}
+
         {/* Divider */}
         <div style={{ height: "1px", background: "rgba(0,0,0,0.08)", marginBottom: "32px" }} />
 
         {/* Content */}
         <div
+          className="blog-content"
           style={{ fontSize: "15px", lineHeight: "1.8", color: "#6b7280" }}
-          dangerouslySetInnerHTML={{ __html: `<p style="margin:12px 0;color:#6b7280;line-height:1.8">${renderMarkdown(post.content)}</p>` }}
+          dangerouslySetInnerHTML={{ __html: post.content }}
         />
 
         {/* Divider */}

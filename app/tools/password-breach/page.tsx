@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { Navbar, Footer } from "../../shared";
 
 function DotsBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -10,32 +11,28 @@ function DotsBackground() {
     if (!ctx) return;
     let width = canvas.width = window.innerWidth;
     let height = canvas.height = window.innerHeight;
-    const mouse = { x: width / 2, y: height / 2 };
-    const particles: { x: number; y: number; vx: number; vy: number; size: number; opacity: number; baseX: number; baseY: number }[] = [];
-    for (let i = 0; i < 150; i++) {
-      const x = Math.random() * width;
-      const y = Math.random() * height;
-      particles.push({ x, y, baseX: x, baseY: y, vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3, size: Math.random() * 2 + 0.5, opacity: Math.random() * 0.5 + 0.2 });
-    }
+    const DOT_SPACING = 28, DOT_RADIUS = 1.2;
+    const mouse = { x: -999, y: -999 };
     const onMouseMove = (e: MouseEvent) => { mouse.x = e.clientX; mouse.y = e.clientY; };
     window.addEventListener("mousemove", onMouseMove);
     let animId: number;
     const animate = () => {
       ctx.clearRect(0, 0, width, height);
-      particles.forEach(p => {
-        const dx = mouse.x - p.x; const dy = mouse.y - p.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 150) { const force = (150 - dist) / 150; p.vx += (dx / dist) * force * 0.3; p.vy += (dy / dist) * force * 0.3; }
-        p.vx += (p.baseX - p.x) * 0.003; p.vy += (p.baseY - p.y) * 0.003;
-        p.vx *= 0.95; p.vy *= 0.95; p.x += p.vx; p.y += p.vy;
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(124,58,237,${p.opacity})`; ctx.fill();
-      });
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x; const dy = particles[i].y - particles[j].y;
+      const cols = Math.ceil(width / DOT_SPACING) + 1;
+      const rows = Math.ceil(height / DOT_SPACING) + 1;
+      for (let col = 0; col < cols; col++) {
+        for (let row = 0; row < rows; row++) {
+          const x = col * DOT_SPACING, y = row * DOT_SPACING;
+          const dx = mouse.x - x, dy = mouse.y - y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 100) { ctx.beginPath(); ctx.strokeStyle = `rgba(124,58,237,${0.2 * (1 - dist / 100)})`; ctx.lineWidth = 0.5; ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke(); }
+          if (dist < 100) {
+            const intensity = 1 - dist / 100;
+            ctx.beginPath(); ctx.arc(x, y, DOT_RADIUS + intensity * 1.2, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(124,58,237,${0.3 + intensity * 0.5})`; ctx.fill();
+          } else {
+            ctx.beginPath(); ctx.arc(x, y, DOT_RADIUS, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(148,163,184,0.25)"; ctx.fill();
+          }
         }
       }
       animId = requestAnimationFrame(animate);
@@ -53,31 +50,34 @@ async function sha1(str: string): Promise<string> {
   return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase();
 }
 
+const faqs = [
+  { q: "Is my password sent to any server?", a: "No! Your password never leaves your browser. We use k-anonymity: only the first 5 characters of a SHA-1 hash are sent to the HaveIBeenPwned API. Your actual password stays 100% private." },
+  { q: "What is HaveIBeenPwned?", a: "HaveIBeenPwned (HIBP) is the world's largest password breach database, maintained by security researcher Troy Hunt. It contains over 10 billion compromised passwords from real data breaches." },
+  { q: "My password was found in a breach — what should I do?", a: "Change that password immediately on all accounts where you use it. Use our Password Generator to create a strong unique password, and consider enabling 2FA on your accounts." },
+  { q: "My password was not found — does that mean it is safe?", a: "Not necessarily. It means it has not appeared in known public data breaches. You should still use a strong, unique password for every account and enable 2FA wherever possible." },
+  { q: "What is k-anonymity?", a: "K-anonymity is a privacy technique where only a partial hash (first 5 characters) is shared with the API. The server returns all hashes starting with those 5 chars, and we check locally. This ensures your full password hash is never exposed." },
+];
+
 export default function PasswordBreach() {
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const check = async () => {
     if (!password) return;
-    setLoading(true);
-    setError("");
-    setResult(null);
+    setLoading(true); setError(""); setResult(null);
     try {
       const hash = await sha1(password);
       const prefix = hash.slice(0, 5);
       const suffix = hash.slice(5);
-      const res = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`, {
-        headers: { "Add-Padding": "true" }
-      });
+      const res = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`, { headers: { "Add-Padding": "true" } });
       const text = await res.text();
-      const lines = text.split("\n");
-      const found = lines.find(line => line.startsWith(suffix));
+      const found = text.split("\n").find(line => line.startsWith(suffix));
       if (found) {
-        const count = parseInt(found.split(":")[1].trim());
-        setResult({ breached: true, count });
+        setResult({ breached: true, count: parseInt(found.split(":")[1].trim()) });
       } else {
         setResult({ breached: false });
       }
@@ -88,32 +88,22 @@ export default function PasswordBreach() {
   };
 
   return (
-    <main style={{ minHeight: "100vh", background: "#0a0a1a", color: "#ffffff", fontFamily: "Inter, sans-serif", position: "relative" }}>
+    <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0f9ff 100%)", color: "#1a1a2e", fontFamily: "Inter, sans-serif", position: "relative" }}>
       <DotsBackground />
-
-      <nav style={{ padding: "22px 40px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 100, background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-        <a href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
-          <img src="/logo.png" alt="2fa.ac" style={{ height: "30px" }} />
-        </a>
-        <div style={{ display: "flex", gap: "20px" }}>
-          <a href="/" style={{ color: "#a0a0b0", textDecoration: "none", fontSize: "14px" }}>Home</a>
-          <a href="/tools" style={{ color: "#a0a0b0", textDecoration: "none", fontSize: "14px" }}>Tools</a>
-        </div>
-      </nav>
+      <Navbar />
 
       <section style={{ maxWidth: "700px", margin: "40px auto", padding: "0 20px", position: "relative", zIndex: 1 }}>
-        <a href="/" style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "#a0a0b0", textDecoration: "none", fontSize: "14px", marginBottom: "20px", padding: "8px 14px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px" }}>
+        <a href="/" style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "#7c3aed", textDecoration: "none", fontSize: "14px", marginBottom: "20px", padding: "8px 14px", background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "8px", fontWeight: "500" }}>
           ← Back to Homepage
         </a>
 
-        <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "20px", padding: "40px", backdropFilter: "blur(20px)" }}>
+        <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "20px", padding: "40px", boxShadow: "0 8px 40px rgba(124,58,237,0.08)" }}>
           <div style={{ textAlign: "center", marginBottom: "32px" }}>
             <div style={{ fontSize: "48px", marginBottom: "12px" }}>🔓</div>
-            <h1 style={{ fontSize: "28px", fontWeight: "800", marginBottom: "8px" }}>Password Breach Checker</h1>
-            <p style={{ color: "#a0a0b0", fontSize: "14px" }}>Check if your password was exposed in a data breach</p>
+            <h1 style={{ fontSize: "28px", fontWeight: "800", marginBottom: "8px", color: "#1e293b" }}>Password Breach Checker</h1>
+            <p style={{ color: "#64748b", fontSize: "14px" }}>Check if your password was exposed in a data breach</p>
           </div>
 
-          {/* Input */}
           <div style={{ position: "relative", marginBottom: "16px" }}>
             <input
               type={show ? "text" : "password"}
@@ -121,50 +111,40 @@ export default function PasswordBreach() {
               onChange={(e) => { setPassword(e.target.value); setResult(null); }}
               onKeyDown={(e) => e.key === "Enter" && check()}
               placeholder="Enter password to check..."
-              style={{ width: "100%", padding: "16px 50px 16px 20px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "12px", color: "white", fontSize: "16px", boxSizing: "border-box", outline: "none" }}
+              style={{ width: "100%", padding: "16px 50px 16px 20px", background: "#f8fafc", border: "1.5px solid #e2e8f0", borderRadius: "12px", color: "#1e293b", fontSize: "16px", boxSizing: "border-box", outline: "none" }}
+              onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"}
+              onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"}
             />
-            <button onClick={() => setShow(!show)} style={{ position: "absolute", right: "16px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#a0a0b0", cursor: "pointer", fontSize: "20px" }}>
+            <button onClick={() => setShow(!show)} style={{ position: "absolute", right: "16px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: "20px" }}>
               {show ? "🙈" : "👁️"}
             </button>
           </div>
 
-          <button onClick={check} disabled={loading || !password} style={{ width: "100%", padding: "14px", background: "#7c3aed", color: "white", border: "none", borderRadius: "12px", fontSize: "16px", fontWeight: "600", cursor: "pointer", marginBottom: "24px", opacity: !password ? 0.6 : 1 }}>
+          <button onClick={check} disabled={loading || !password} style={{ width: "100%", padding: "14px", background: "linear-gradient(135deg, #7c3aed, #9f67ff)", color: "white", border: "none", borderRadius: "12px", fontSize: "16px", fontWeight: "700", cursor: "pointer", marginBottom: "24px", opacity: !password ? 0.6 : 1, boxShadow: "0 4px 20px rgba(124,58,237,0.35)" }}>
             {loading ? "🔍 Checking..." : "Check Password"}
           </button>
 
           {error && (
-            <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: "12px", padding: "16px", color: "#ef4444", marginBottom: "16px" }}>
+            <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: "12px", padding: "16px", color: "#ef4444", marginBottom: "16px" }}>
               ❌ {error}
             </div>
           )}
 
           {result && (
-            <div style={{
-              background: result.breached ? "rgba(239,68,68,0.08)" : "rgba(34,197,94,0.08)",
-              border: `1px solid ${result.breached ? "rgba(239,68,68,0.3)" : "rgba(34,197,94,0.3)"}`,
-              borderRadius: "16px",
-              padding: "28px",
-              textAlign: "center",
-            }}>
-              <div style={{ fontSize: "56px", marginBottom: "12px" }}>
-                {result.breached ? "🚨" : "✅"}
-              </div>
-              <div style={{ fontSize: "22px", fontWeight: "800", color: result.breached ? "#ef4444" : "#22c55e", marginBottom: "8px" }}>
+            <div style={{ background: result.breached ? "rgba(239,68,68,0.06)" : "rgba(34,197,94,0.06)", border: `1px solid ${result.breached ? "rgba(239,68,68,0.25)" : "rgba(34,197,94,0.25)"}`, borderRadius: "16px", padding: "28px", textAlign: "center" }}>
+              <div style={{ fontSize: "56px", marginBottom: "12px" }}>{result.breached ? "🚨" : "✅"}</div>
+              <div style={{ fontSize: "22px", fontWeight: "800", color: result.breached ? "#ef4444" : "#16a34a", marginBottom: "8px" }}>
                 {result.breached ? "Password Compromised!" : "Password Not Found"}
               </div>
-              <div style={{ fontSize: "15px", color: "#a0a0b0", lineHeight: "1.6" }}>
+              <div style={{ fontSize: "15px", color: "#64748b", lineHeight: "1.6" }}>
                 {result.breached ? (
-                  <>
-                    This password has been seen <strong style={{ color: "#ef4444" }}>{result.count.toLocaleString()} times</strong> in data breaches.
-                    <br />You should change it immediately!
-                  </>
+                  <>This password has been seen <strong style={{ color: "#ef4444" }}>{result.count.toLocaleString()} times</strong> in data breaches.<br />You should change it immediately!</>
                 ) : (
                   <>This password was not found in any known data breach.<br />However, always use strong unique passwords.</>
                 )}
               </div>
-
               {result.breached && (
-                <div style={{ marginTop: "20px", display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
+                <div style={{ marginTop: "20px" }}>
                   <a href="/tools/password-generator" style={{ padding: "10px 20px", background: "#7c3aed", color: "white", borderRadius: "8px", textDecoration: "none", fontSize: "14px", fontWeight: "600" }}>
                     🔑 Generate Strong Password
                   </a>
@@ -174,19 +154,33 @@ export default function PasswordBreach() {
           )}
         </div>
 
-        {/* How it works */}
-        <div style={{ marginTop: "20px", background: "rgba(34,197,94,0.06)", border: "1px solid rgba(34,197,94,0.15)", borderRadius: "12px", padding: "16px 20px", fontSize: "13px", color: "#a0a0b0", lineHeight: "1.6" }}>
-          🔒 <strong style={{ color: "#fff" }}>How it works (k-anonymity):</strong> Your password is never sent anywhere. We hash it locally, send only the first 5 characters of the hash to HaveIBeenPwned API, and check the results. Your password stays 100% private.
+        <div style={{ marginTop: "16px", background: "rgba(34,197,94,0.06)", border: "1px solid rgba(34,197,94,0.2)", borderRadius: "12px", padding: "16px 20px", fontSize: "13px", color: "#64748b", lineHeight: "1.6" }}>
+          🔒 <strong style={{ color: "#16a34a" }}>How it works (k-anonymity):</strong> Your password is never sent anywhere. We hash it locally, send only the first 5 characters of the hash to HaveIBeenPwned API, and check the results. Your password stays 100% private.
         </div>
 
-        <div style={{ marginTop: "12px", background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "12px", padding: "16px 20px", fontSize: "13px", color: "#a0a0b0", lineHeight: "1.6" }}>
-          📊 <strong style={{ color: "#fff" }}>Data source:</strong> Powered by <strong style={{ color: "#7c3aed" }}>HaveIBeenPwned</strong> — the world's largest password breach database with 10+ billion compromised passwords.
+        <div style={{ marginTop: "12px", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "12px", padding: "16px 20px", fontSize: "13px", color: "#64748b", lineHeight: "1.6" }}>
+          📊 <strong style={{ color: "#7c3aed" }}>Data source:</strong> Powered by <strong style={{ color: "#7c3aed" }}>HaveIBeenPwned</strong> — the world's largest password breach database with 10+ billion compromised passwords.
+        </div>
+
+        {/* FAQ */}
+        <div style={{ marginTop: "40px", marginBottom: "40px" }}>
+          <h2 style={{ fontSize: "22px", fontWeight: "700", color: "#1e293b", marginBottom: "16px" }}>❓ Frequently Asked Questions</h2>
+          {faqs.map((faq, i) => (
+            <div key={i} style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "12px", marginBottom: "10px", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+              <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                style={{ width: "100%", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
+                <span style={{ fontSize: "14px", fontWeight: "600", color: "#1e293b" }}>{faq.q}</span>
+                <span style={{ color: "#7c3aed", fontSize: "18px", fontWeight: "700", flexShrink: 0 }}>{openFaq === i ? "−" : "+"}</span>
+              </button>
+              {openFaq === i && (
+                <div style={{ padding: "0 20px 16px", fontSize: "14px", color: "#64748b", lineHeight: "1.7" }}>{faq.a}</div>
+              )}
+            </div>
+          ))}
         </div>
       </section>
 
-      <footer style={{ textAlign: "center", padding: "40px", borderTop: "1px solid rgba(255,255,255,0.08)", color: "#a0a0b0", fontSize: "14px", marginTop: "40px", position: "relative", zIndex: 1 }}>
-        © 2025 2fa.ac — Free Cybersecurity Tools for Everyone
-      </footer>
+      <Footer />
     </main>
   );
 }

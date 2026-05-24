@@ -1,5 +1,49 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { Navbar, Footer } from "../shared";
+
+function DotsBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+    const DOT_SPACING = 28, DOT_RADIUS = 1.2;
+    const mouse = { x: -999, y: -999 };
+    const onMouseMove = (e: MouseEvent) => { mouse.x = e.clientX; mouse.y = e.clientY; };
+    window.addEventListener("mousemove", onMouseMove);
+    let animId: number;
+    const animate = () => {
+      ctx.clearRect(0, 0, width, height);
+      const cols = Math.ceil(width / DOT_SPACING) + 1;
+      const rows = Math.ceil(height / DOT_SPACING) + 1;
+      for (let col = 0; col < cols; col++) {
+        for (let row = 0; row < rows; row++) {
+          const x = col * DOT_SPACING, y = row * DOT_SPACING;
+          const dx = mouse.x - x, dy = mouse.y - y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 100) {
+            const intensity = 1 - dist / 100;
+            ctx.beginPath(); ctx.arc(x, y, DOT_RADIUS + intensity * 1.2, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(124,58,237,${0.3 + intensity * 0.5})`; ctx.fill();
+          } else {
+            ctx.beginPath(); ctx.arc(x, y, DOT_RADIUS, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(148,163,184,0.25)"; ctx.fill();
+          }
+        }
+      }
+      animId = requestAnimationFrame(animate);
+    };
+    animate();
+    const onResize = () => { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; };
+    window.addEventListener("resize", onResize);
+    return () => { cancelAnimationFrame(animId); window.removeEventListener("mousemove", onMouseMove); window.removeEventListener("resize", onResize); };
+  }, []);
+  return <canvas ref={canvasRef} style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", zIndex: 0, pointerEvents: "none" }} />;
+}
 
 interface SavedKey {
   name: string;
@@ -37,147 +81,47 @@ export default function SavedKeys() {
   };
 
   return (
-    <main style={{
-      minHeight: "100vh",
-      background: "#111827",
-      color: "#ffffff",
-      fontFamily: "Inter, sans-serif",
-      backgroundImage: "radial-gradient(circle, #1f2937 1px, transparent 1px)",
-      backgroundSize: "30px 30px",
-    }}>
+    <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0f9ff 100%)", color: "#1a1a2e", fontFamily: "Inter, sans-serif", position: "relative" }}>
+      <DotsBackground />
+      <Navbar />
 
-      {/* Navbar */}
-      <nav style={{
-        padding: "22px 40px",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        borderBottom: "1px solid rgba(255,255,255,0.08)",
-        backdropFilter: "blur(10px)",
-        position: "sticky",
-        top: 0,
-        zIndex: 100,
-        background: "rgba(17,24,39,0.9)",
-      }}>
-        <a href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
-          <img src="/logo.png" alt="2fa.ac" style={{ height: "30px" }} />
-        </a>
-        <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
-          <a href="/" style={{ color: "#a0a0b0", textDecoration: "none" }}>Generator</a>
-          <a href="/tools" style={{ color: "#a0a0b0", textDecoration: "none" }}>Tools</a>
-          <a href="/saved-keys" style={{
-            background: "rgba(124,58,237,0.2)",
-            border: "1px solid #7c3aed",
-            color: "#7c3aed",
-            textDecoration: "none",
-            padding: "8px 16px",
-            borderRadius: "8px",
-            fontSize: "14px",
-            fontWeight: "600",
-          }}>
-            🔑 2FA History
-          </a>
-        </div>
-      </nav>
-
-      <section style={{ maxWidth: "1000px", margin: "40px auto", padding: "0 20px" }}>
+      <section style={{ maxWidth: "1000px", margin: "40px auto", padding: "0 20px", position: "relative", zIndex: 1 }}>
 
         {/* Header */}
         <div style={{ marginBottom: "24px" }}>
-          <div style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "6px",
-            background: "rgba(34,197,94,0.1)",
-            border: "1px solid rgba(34,197,94,0.3)",
-            borderRadius: "20px",
-            padding: "4px 12px",
-            fontSize: "12px",
-            color: "#22c55e",
-            marginBottom: "16px",
-          }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.3)", borderRadius: "20px", padding: "4px 12px", fontSize: "12px", color: "#16a34a", marginBottom: "16px" }}>
             <span style={{ width: "6px", height: "6px", background: "#22c55e", borderRadius: "50%", display: "inline-block" }}></span>
             LOCAL ONLY • THIS BROWSER & DEVICE
           </div>
-          <h1 style={{ fontSize: "32px", fontWeight: "800", marginBottom: "8px" }}>
-            Saved 2FA Secret Key History
-          </h1>
-          <p style={{ color: "#a0a0b0", fontSize: "14px", lineHeight: "1.6", maxWidth: "600px" }}>
+          <h1 style={{ fontSize: "32px", fontWeight: "800", marginBottom: "8px", color: "#1e293b" }}>Saved 2FA Secret Key History</h1>
+          <p style={{ color: "#64748b", fontSize: "14px", lineHeight: "1.6", maxWidth: "600px" }}>
             All your TOTP secrets are stored locally in this browser. If you ever forget a key, you can recover it from here — unless you clear site data.
           </p>
           <div style={{ display: "flex", gap: "10px", marginTop: "16px", flexWrap: "wrap" }}>
             {["💾 Stored in localStorage", "🚫 No server, no sync", "⚠️ Clearing cache wipes history"].map(tag => (
-              <span key={tag} style={{
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: "20px",
-                padding: "4px 12px",
-                fontSize: "12px",
-                color: "#a0a0b0",
-              }}>{tag}</span>
+              <span key={tag} style={{ background: "#f1f5f9", border: "1px solid #e2e8f0", borderRadius: "20px", padding: "4px 12px", fontSize: "12px", color: "#64748b" }}>{tag}</span>
             ))}
           </div>
         </div>
 
         {/* Main Card */}
-        <div style={{
-          background: "rgba(255,255,255,0.03)",
-          border: "1px solid rgba(255,255,255,0.08)",
-          borderRadius: "20px",
-          overflow: "hidden",
-        }}>
+        <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "20px", overflow: "hidden", boxShadow: "0 8px 40px rgba(124,58,237,0.08)" }}>
+
           {/* Card Header */}
-          <div style={{
-            padding: "20px 24px",
-            borderBottom: "1px solid rgba(255,255,255,0.08)",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "12px",
-          }}>
+          <div style={{ padding: "20px 24px", borderBottom: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
             <div>
-              <h2 style={{ fontSize: "16px", fontWeight: "700", margin: 0 }}>
-                2FA accounts on this browser
-              </h2>
-              <p style={{ fontSize: "13px", color: "#a0a0b0", margin: "4px 0 0" }}>
-                {savedKeys.length} account(s) saved
-              </p>
+              <h2 style={{ fontSize: "16px", fontWeight: "700", margin: 0, color: "#1e293b" }}>2FA accounts on this browser</h2>
+              <p style={{ fontSize: "13px", color: "#64748b", margin: "4px 0 0" }}>{savedKeys.length} account(s) saved</p>
             </div>
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-              <span style={{
-                background: "rgba(34,197,94,0.1)",
-                border: "1px solid rgba(34,197,94,0.3)",
-                color: "#22c55e",
-                borderRadius: "8px",
-                padding: "6px 12px",
-                fontSize: "13px",
-              }}>
+              <span style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.25)", color: "#16a34a", borderRadius: "8px", padding: "6px 12px", fontSize: "13px" }}>
                 🔒 Local-only, per-browser
               </span>
-              <a href="/" style={{
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                color: "white",
-                textDecoration: "none",
-                borderRadius: "8px",
-                padding: "6px 14px",
-                fontSize: "13px",
-              }}>
+              <a href="/" style={{ background: "#f1f5f9", border: "1.5px solid #e2e8f0", color: "#64748b", textDecoration: "none", borderRadius: "8px", padding: "6px 14px", fontSize: "13px", fontWeight: "500" }}>
                 ← Back to Generator
               </a>
               {savedKeys.length > 0 && (
-                <button
-                  onClick={handleClearAll}
-                  style={{
-                    background: "rgba(239,68,68,0.1)",
-                    border: "1px solid rgba(239,68,68,0.3)",
-                    color: "#ef4444",
-                    borderRadius: "8px",
-                    padding: "6px 14px",
-                    fontSize: "13px",
-                    cursor: "pointer",
-                  }}>
+                <button onClick={handleClearAll} style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.3)", color: "#ef4444", borderRadius: "8px", padding: "6px 14px", fontSize: "13px", cursor: "pointer" }}>
                   🗑 Clear all history
                 </button>
               )}
@@ -185,16 +129,7 @@ export default function SavedKeys() {
           </div>
 
           {/* Warning */}
-          <div style={{
-            margin: "16px 24px",
-            background: "rgba(234,179,8,0.08)",
-            border: "1px solid rgba(234,179,8,0.2)",
-            borderRadius: "10px",
-            padding: "12px 16px",
-            fontSize: "13px",
-            color: "#fbbf24",
-            lineHeight: "1.6",
-          }}>
+          <div style={{ margin: "16px 24px", background: "rgba(234,179,8,0.06)", border: "1px solid rgba(234,179,8,0.2)", borderRadius: "10px", padding: "12px 16px", fontSize: "13px", color: "#d97706", lineHeight: "1.6" }}>
             <strong>Important:</strong> These secrets are stored only in this browser's localStorage. If you clear cookies/site data, use incognito mode, or switch devices, this history will not be available. Always store your keys in a secure password manager as well.
           </div>
 
@@ -202,21 +137,11 @@ export default function SavedKeys() {
           {savedKeys.length === 0 ? (
             <div style={{ padding: "60px", textAlign: "center" }}>
               <div style={{ fontSize: "48px", marginBottom: "16px" }}>🔐</div>
-              <h3 style={{ fontSize: "18px", fontWeight: "600", marginBottom: "8px" }}>
-                No saved keys found
-              </h3>
-              <p style={{ color: "#a0a0b0", marginBottom: "20px", fontSize: "14px" }}>
+              <h3 style={{ fontSize: "18px", fontWeight: "600", marginBottom: "8px", color: "#1e293b" }}>No saved keys found</h3>
+              <p style={{ color: "#64748b", marginBottom: "20px", fontSize: "14px" }}>
                 Go to the homepage, enter a secret key, generate a code — it will be saved automatically.
               </p>
-              <a href="/" style={{
-                background: "#7c3aed",
-                color: "white",
-                padding: "12px 24px",
-                borderRadius: "10px",
-                textDecoration: "none",
-                fontWeight: "600",
-                fontSize: "14px",
-              }}>
+              <a href="/" style={{ background: "linear-gradient(135deg, #7c3aed, #9f67ff)", color: "white", padding: "12px 24px", borderRadius: "10px", textDecoration: "none", fontWeight: "600", fontSize: "14px" }}>
                 ← Go to Generator
               </a>
             </div>
@@ -224,72 +149,34 @@ export default function SavedKeys() {
             <div style={{ overflowX: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
-                  <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                  <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
                     {["#", "ACCOUNT", "SECRET KEY", "DATE & TIME", "ACTIONS"].map(h => (
-                      <th key={h} style={{
-                        padding: "12px 24px",
-                        textAlign: "left",
-                        fontSize: "11px",
-                        fontWeight: "600",
-                        color: "#6b7280",
-                        letterSpacing: "1px",
-                      }}>{h}</th>
+                      <th key={h} style={{ padding: "12px 24px", textAlign: "left", fontSize: "11px", fontWeight: "700", color: "#94a3b8", letterSpacing: "1px" }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {savedKeys.map((key, index) => (
-                    <tr key={index} style={{
-                      borderBottom: "1px solid rgba(255,255,255,0.05)",
-                    }}>
-                      <td style={{ padding: "16px 24px", color: "#6b7280", fontSize: "14px" }}>
-                        {index + 1}
+                    <tr key={index} style={{ borderBottom: "1px solid #f8fafc" }}>
+                      <td style={{ padding: "16px 24px", color: "#94a3b8", fontSize: "14px" }}>{index + 1}</td>
+                      <td style={{ padding: "16px 24px" }}>
+                        <div style={{ fontSize: "15px", fontWeight: "600", color: "#1e293b" }}>{key.name}</div>
                       </td>
                       <td style={{ padding: "16px 24px" }}>
-                        <div style={{ fontSize: "15px", fontWeight: "600", color: "#fff" }}>{key.name}</div>
-                      </td>
-                      <td style={{ padding: "16px 24px" }}>
-                        <code style={{
-                          background: "rgba(255,255,255,0.06)",
-                          padding: "4px 10px",
-                          borderRadius: "6px",
-                          fontSize: "13px",
-                          color: "#7c3aed",
-                          fontFamily: "monospace",
-                        }}>
+                        <code style={{ background: "rgba(124,58,237,0.08)", padding: "4px 10px", borderRadius: "6px", fontSize: "13px", color: "#7c3aed", fontFamily: "monospace" }}>
                           {key.secret}
                         </code>
                       </td>
-                      <td style={{ padding: "16px 24px", fontSize: "13px", color: "#a0a0b0" }}>
+                      <td style={{ padding: "16px 24px", fontSize: "13px", color: "#64748b" }}>
                         {key.addedAt}<br />
-                        <span style={{ fontSize: "12px", color: "#6b7280" }}>{key.addedTime}</span>
+                        <span style={{ fontSize: "12px", color: "#94a3b8" }}>{key.addedTime}</span>
                       </td>
                       <td style={{ padding: "16px 24px" }}>
                         <div style={{ display: "flex", gap: "8px" }}>
-                          <button
-                            onClick={() => handleCopy(key.secret, key.name)}
-                            style={{
-                              background: copied === key.name ? "rgba(34,197,94,0.2)" : "rgba(255,255,255,0.06)",
-                              border: "1px solid rgba(255,255,255,0.1)",
-                              color: copied === key.name ? "#22c55e" : "white",
-                              borderRadius: "6px",
-                              padding: "6px 14px",
-                              fontSize: "13px",
-                              cursor: "pointer",
-                            }}>
+                          <button onClick={() => handleCopy(key.secret, key.name)} style={{ background: copied === key.name ? "rgba(34,197,94,0.1)" : "#f1f5f9", border: copied === key.name ? "1px solid rgba(34,197,94,0.3)" : "1.5px solid #e2e8f0", color: copied === key.name ? "#16a34a" : "#64748b", borderRadius: "6px", padding: "6px 14px", fontSize: "13px", cursor: "pointer", fontWeight: "500" }}>
                             {copied === key.name ? "✓ Copied" : "Copy"}
                           </button>
-                          <button
-                            onClick={() => handleDelete(index)}
-                            style={{
-                              background: "rgba(239,68,68,0.1)",
-                              border: "1px solid rgba(239,68,68,0.2)",
-                              color: "#ef4444",
-                              borderRadius: "6px",
-                              padding: "6px 14px",
-                              fontSize: "13px",
-                              cursor: "pointer",
-                            }}>
+                          <button onClick={() => handleDelete(index)} style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", color: "#ef4444", borderRadius: "6px", padding: "6px 14px", fontSize: "13px", cursor: "pointer" }}>
                             Delete
                           </button>
                         </div>
@@ -303,17 +190,7 @@ export default function SavedKeys() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer style={{
-        textAlign: "center",
-        padding: "30px",
-        borderTop: "1px solid rgba(255,255,255,0.08)",
-        color: "#6b7280",
-        fontSize: "13px",
-        marginTop: "40px",
-      }}>
-        © 2025 2fa.ac — History is stored locally in your browser. We never see your secrets.
-      </footer>
+      <Footer />
     </main>
   );
 }
