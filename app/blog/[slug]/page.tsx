@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
+import { Navbar, Footer } from "../../shared";
 
 interface BlogPost {
   id: string;
@@ -23,32 +24,28 @@ function DotsBackground() {
     if (!ctx) return;
     let width = canvas.width = window.innerWidth;
     let height = canvas.height = window.innerHeight;
-    const mouse = { x: width / 2, y: height / 2 };
-    const particles: { x: number; y: number; vx: number; vy: number; size: number; opacity: number; baseX: number; baseY: number }[] = [];
-    for (let i = 0; i < 150; i++) {
-      const x = Math.random() * width;
-      const y = Math.random() * height;
-      particles.push({ x, y, baseX: x, baseY: y, vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3, size: Math.random() * 2 + 0.5, opacity: Math.random() * 0.3 + 0.1 });
-    }
+    const DOT_SPACING = 28, DOT_RADIUS = 1.2;
+    const mouse = { x: -999, y: -999 };
     const onMouseMove = (e: MouseEvent) => { mouse.x = e.clientX; mouse.y = e.clientY; };
     window.addEventListener("mousemove", onMouseMove);
     let animId: number;
     const animate = () => {
       ctx.clearRect(0, 0, width, height);
-      particles.forEach(p => {
-        const dx = mouse.x - p.x; const dy = mouse.y - p.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 150) { const force = (150 - dist) / 150; p.vx += (dx / dist) * force * 0.3; p.vy += (dy / dist) * force * 0.3; }
-        p.vx += (p.baseX - p.x) * 0.003; p.vy += (p.baseY - p.y) * 0.003;
-        p.vx *= 0.95; p.vy *= 0.95; p.x += p.vx; p.y += p.vy;
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(99,102,241,${p.opacity})`; ctx.fill();
-      });
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x; const dy = particles[i].y - particles[j].y;
+      const cols = Math.ceil(width / DOT_SPACING) + 1;
+      const rows = Math.ceil(height / DOT_SPACING) + 1;
+      for (let col = 0; col < cols; col++) {
+        for (let row = 0; row < rows; row++) {
+          const x = col * DOT_SPACING, y = row * DOT_SPACING;
+          const dx = mouse.x - x, dy = mouse.y - y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 100) { ctx.beginPath(); ctx.strokeStyle = `rgba(99,102,241,${0.1 * (1 - dist / 100)})`; ctx.lineWidth = 0.5; ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke(); }
+          if (dist < 100) {
+            const intensity = 1 - dist / 100;
+            ctx.beginPath(); ctx.arc(x, y, DOT_RADIUS + intensity * 1.2, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(124,58,237,${0.3 + intensity * 0.5})`; ctx.fill();
+          } else {
+            ctx.beginPath(); ctx.arc(x, y, DOT_RADIUS, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(148,163,184,0.25)"; ctx.fill();
+          }
         }
       }
       animId = requestAnimationFrame(animate);
@@ -61,11 +58,17 @@ function DotsBackground() {
   return <canvas ref={canvasRef} style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", zIndex: 0, pointerEvents: "none" }} />;
 }
 
-export default function BlogPost() {
+const getCategoryColor = (cat: string) => {
+  const colors: { [key: string]: string } = { Security: "#ef4444", Authentication: "#7c3aed", Password: "#3b82f6", Developer: "#22c55e", Tutorial: "#f59e0b", News: "#06b6d4" };
+  return colors[cat] || "#7c3aed";
+};
+
+export default function BlogPostPage() {
   const params = useParams();
   const [post, setPost] = useState<BlogPost | null>(null);
   const [related, setRelated] = useState<BlogPost[]>([]);
   const [notFound, setNotFound] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem("blog-posts");
@@ -75,29 +78,23 @@ export default function BlogPost() {
       if (found) {
         setPost(found);
         setRelated(posts.filter(p => p.id !== found.id && p.published && p.category === found.category).slice(0, 3));
-      } else {
-        setNotFound(true);
-      }
-    } else {
-      setNotFound(true);
-    }
+      } else setNotFound(true);
+    } else setNotFound(true);
   }, [params.slug]);
 
-  const getCategoryColor = (cat: string) => {
-    const colors: { [key: string]: string } = {
-      Security: "#ef4444", Authentication: "#7c3aed", Password: "#3b82f6",
-      Developer: "#22c55e", Tutorial: "#f59e0b", News: "#06b6d4",
-    };
-    return colors[cat] || "#7c3aed";
+  const handleCopy = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   if (notFound) {
     return (
-      <main style={{ minHeight: "100vh", background: "#f8f9ff", color: "#1a1a2e", fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0f9ff 100%)", color: "#1a1a2e", fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div style={{ textAlign: "center" }}>
           <div style={{ fontSize: "48px", marginBottom: "16px" }}>📝</div>
-          <h1 style={{ fontSize: "24px", marginBottom: "12px" }}>Post not found</h1>
-          <a href="/blog" style={{ color: "#7c3aed", textDecoration: "none" }}>← Back to Blog</a>
+          <h1 style={{ fontSize: "24px", marginBottom: "12px", color: "#1e293b" }}>Post not found</h1>
+          <a href="/blog" style={{ color: "#7c3aed", textDecoration: "none", fontWeight: "500" }}>← Back to Blog</a>
         </div>
       </main>
     );
@@ -105,97 +102,83 @@ export default function BlogPost() {
 
   if (!post) {
     return (
-      <main style={{ minHeight: "100vh", background: "#f8f9ff", fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ textAlign: "center", color: "#6b7280" }}>Loading...</div>
+      <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0f9ff 100%)", fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ textAlign: "center", color: "#64748b" }}>Loading...</div>
       </main>
     );
   }
 
   return (
-    <main style={{ minHeight: "100vh", background: "#f8f9ff", color: "#1a1a2e", fontFamily: "Inter, sans-serif", position: "relative" }}>
+    <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0f9ff 100%)", color: "#1a1a2e", fontFamily: "Inter, sans-serif", position: "relative" }}>
       <DotsBackground />
 
       <style>{`
         .blog-content img { max-width: 100%; border-radius: 12px; margin: 16px 0; display: block; }
-        .blog-content h1 { font-size: 28px; font-weight: 800; color: #1a1a2e; margin: 24px 0 12px; }
-        .blog-content h2 { font-size: 22px; font-weight: 700; color: #1a1a2e; margin: 20px 0 10px; }
-        .blog-content h3 { font-size: 18px; font-weight: 600; color: #374151; margin: 16px 0 8px; }
-        .blog-content p { margin: 12px 0; color: #6b7280; line-height: 1.8; }
-        .blog-content ul, .blog-content ol { margin: 12px 0; padding-left: 24px; color: #6b7280; }
-        .blog-content li { margin: 6px 0; line-height: 1.8; }
-        .blog-content strong { color: #1a1a2e; font-weight: 700; }
-        .blog-content em { color: #6b7280; font-style: italic; }
+        .blog-content h1 { font-size: 28px; font-weight: 800; color: #1e293b; margin: 28px 0 12px; }
+        .blog-content h2 { font-size: 22px; font-weight: 700; color: #1e293b; margin: 24px 0 10px; padding-bottom: 8px; border-bottom: 2px solid rgba(124,58,237,0.15); }
+        .blog-content h3 { font-size: 18px; font-weight: 600; color: #1e293b; margin: 18px 0 8px; }
+        .blog-content h4 { font-size: 16px; font-weight: 600; color: #1e293b; margin: 14px 0 6px; }
+        .blog-content p { margin: 12px 0; color: #64748b; line-height: 1.8; font-size: 15px; }
+        .blog-content ul, .blog-content ol { margin: 12px 0; padding-left: 24px; color: #64748b; }
+        .blog-content li { margin: 6px 0; line-height: 1.8; font-size: 15px; }
+        .blog-content strong { color: #1e293b; font-weight: 700; }
+        .blog-content em { color: #64748b; font-style: italic; }
         .blog-content a { color: #7c3aed; text-decoration: underline; }
-        .blog-content blockquote { border-left: 4px solid #7c3aed; padding-left: 16px; margin: 16px 0; color: #9ca3af; font-style: italic; }
-        .blog-content code { background: rgba(124,58,237,0.1); color: #7c3aed; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
-        .blog-content pre { background: #1a1a2e; color: #e2e8f0; padding: 16px; border-radius: 10px; overflow-x: auto; margin: 16px 0; }
+        .blog-content blockquote { border-left: 4px solid #7c3aed; padding-left: 16px; margin: 20px 0; color: #94a3b8; font-style: italic; background: rgba(124,58,237,0.04); padding: 12px 16px; border-radius: 0 8px 8px 0; }
+        .blog-content code { background: rgba(124,58,237,0.08); color: #7c3aed; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 14px; }
+        .blog-content pre { background: #1e293b; color: #e2e8f0; padding: 20px; border-radius: 12px; overflow-x: auto; margin: 16px 0; }
         .blog-content table { width: 100%; border-collapse: collapse; margin: 16px 0; }
-        .blog-content th, .blog-content td { padding: 10px 14px; border: 1px solid rgba(0,0,0,0.1); text-align: left; }
-        .blog-content th { background: rgba(124,58,237,0.1); color: #7c3aed; font-weight: 600; }
+        .blog-content th, .blog-content td { padding: 10px 14px; border: 1px solid #e2e8f0; text-align: left; font-size: 14px; }
+        .blog-content th { background: rgba(124,58,237,0.06); color: #7c3aed; font-weight: 600; }
+        .blog-content hr { border: none; border-top: 1px solid #e2e8f0; margin: 24px 0; }
       `}</style>
 
-      {/* Navbar */}
-      <nav style={{ padding: "22px 40px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 100, background: "#0a0a1a", borderBottom: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 4px 30px rgba(0,0,0,0.3)" }}>
-        <a href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
-          <img src="/logo.png" alt="2fa.ac" style={{ height: "30px" }} />
-        </a>
-        <div style={{ display: "flex", gap: "20px" }}>
-          <a href="/" style={{ color: "#a0a0b0", textDecoration: "none", fontSize: "14px" }}>Home</a>
-          <a href="/tools" style={{ color: "#a0a0b0", textDecoration: "none", fontSize: "14px" }}>Tools</a>
-          <a href="/blog" style={{ color: "#ffffff", textDecoration: "none", fontSize: "14px", fontWeight: "600" }}>Blog</a>
-        </div>
-      </nav>
+      <Navbar />
 
       <section style={{ maxWidth: "800px", margin: "0 auto", padding: "40px 20px", position: "relative", zIndex: 1 }}>
 
         {/* Back */}
-        <a href="/blog" style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "#6b7280", textDecoration: "none", fontSize: "14px", marginBottom: "24px", padding: "8px 14px", background: "#ffffff", border: "1px solid rgba(0,0,0,0.1)", borderRadius: "8px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+        <a href="/blog" style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "#7c3aed", textDecoration: "none", fontSize: "14px", marginBottom: "28px", padding: "8px 14px", background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "8px", fontWeight: "500" }}>
           ← Back to Blog
         </a>
 
         {/* Post Header */}
-        <div style={{ marginBottom: "24px" }}>
+        <div style={{ marginBottom: "28px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-            <span style={{ fontSize: "12px", padding: "4px 12px", borderRadius: "10px", background: `${getCategoryColor(post.category)}15`, color: getCategoryColor(post.category), fontWeight: "600" }}>
+            <span style={{ fontSize: "12px", padding: "4px 12px", borderRadius: "10px", background: `${getCategoryColor(post.category)}12`, color: getCategoryColor(post.category), fontWeight: "600" }}>
               {post.category}
             </span>
-            <span style={{ fontSize: "13px", color: "#9ca3af" }}>{post.createdAt}</span>
+            <span style={{ fontSize: "13px", color: "#94a3b8" }}>{post.createdAt}</span>
           </div>
-          <h1 style={{ fontSize: "36px", fontWeight: "800", lineHeight: "1.3", marginBottom: "16px", color: "#1a1a2e" }}>
+          <h1 style={{ fontSize: "36px", fontWeight: "800", lineHeight: "1.3", marginBottom: "16px", color: "#1e293b" }}>
             {post.title}
           </h1>
-          <p style={{ fontSize: "16px", color: "#6b7280", lineHeight: "1.6" }}>{post.excerpt}</p>
+          <p style={{ fontSize: "16px", color: "#64748b", lineHeight: "1.7" }}>{post.excerpt}</p>
         </div>
 
         {/* Cover Image */}
         {post.coverImage && (
-          <div style={{ marginBottom: "32px", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 20px rgba(0,0,0,0.1)" }}>
+          <div style={{ marginBottom: "32px", borderRadius: "16px", overflow: "hidden", boxShadow: "0 8px 30px rgba(124,58,237,0.12)" }}>
             <img src={post.coverImage} alt={post.title} style={{ width: "100%", height: "400px", objectFit: "cover", display: "block" }} />
           </div>
         )}
 
-        {/* Divider */}
-        <div style={{ height: "1px", background: "rgba(0,0,0,0.08)", marginBottom: "32px" }} />
-
-        {/* Content */}
-        <div
-          className="blog-content"
-          style={{ fontSize: "15px", lineHeight: "1.8", color: "#6b7280" }}
-          dangerouslySetInnerHTML={{ __html: post.content }}
-        />
-
-        {/* Divider */}
-        <div style={{ height: "1px", background: "rgba(0,0,0,0.08)", margin: "40px 0" }} />
+        {/* Content Card */}
+        <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "20px", padding: "40px", boxShadow: "0 4px 24px rgba(124,58,237,0.06)", marginBottom: "32px" }}>
+          <div className="blog-content" dangerouslySetInnerHTML={{ __html: post.content }} />
+        </div>
 
         {/* Share */}
-        <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "12px", padding: "20px", textAlign: "center", marginBottom: "40px", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
-          <p style={{ fontSize: "14px", color: "#6b7280", marginBottom: "12px" }}>Found this helpful? Share it!</p>
+        <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "16px", padding: "24px", textAlign: "center", marginBottom: "40px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+          <p style={{ fontSize: "14px", color: "#64748b", marginBottom: "14px", fontWeight: "500" }}>Found this helpful? Share it!</p>
           <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-            <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(`https://2fa.ac/blog/${post.slug}`)}`} target="_blank" style={{ padding: "8px 16px", background: "rgba(29,161,242,0.1)", color: "#1da1f2", borderRadius: "8px", textDecoration: "none", fontSize: "13px", fontWeight: "600" }}>
-              𝕏 Twitter
+            <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(`https://2fa.ac/blog/${post.slug}`)}`} target="_blank"
+              style={{ padding: "8px 18px", background: "rgba(29,161,242,0.08)", color: "#1da1f2", borderRadius: "8px", textDecoration: "none", fontSize: "13px", fontWeight: "600", border: "1px solid rgba(29,161,242,0.2)" }}>
+              𝕏 Share on Twitter
             </a>
-            <button onClick={() => navigator.clipboard.writeText(window.location.href)} style={{ padding: "8px 16px", background: "rgba(124,58,237,0.1)", color: "#7c3aed", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "8px", cursor: "pointer", fontSize: "13px", fontWeight: "600" }}>
-              🔗 Copy Link
+            <button onClick={handleCopy}
+              style={{ padding: "8px 18px", background: copied ? "rgba(34,197,94,0.1)" : "rgba(124,58,237,0.08)", color: copied ? "#16a34a" : "#7c3aed", border: `1px solid ${copied ? "rgba(34,197,94,0.3)" : "rgba(124,58,237,0.2)"}`, borderRadius: "8px", cursor: "pointer", fontSize: "13px", fontWeight: "600" }}>
+              {copied ? "✓ Copied!" : "🔗 Copy Link"}
             </button>
           </div>
         </div>
@@ -203,14 +186,17 @@ export default function BlogPost() {
         {/* Related Posts */}
         {related.length > 0 && (
           <div>
-            <h3 style={{ fontSize: "18px", fontWeight: "700", marginBottom: "16px", color: "#1a1a2e" }}>Related Posts</h3>
+            <h3 style={{ fontSize: "20px", fontWeight: "700", marginBottom: "16px", color: "#1e293b" }}>Related Posts</h3>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "16px" }}>
               {related.map(p => (
                 <a key={p.id} href={`/blog/${p.slug}`} style={{ textDecoration: "none" }}>
-                  <div style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: "12px", padding: "16px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
+                  <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "12px", padding: "18px", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", transition: "transform 0.2s" }}
+                    onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)"}
+                    onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)"}
+                  >
                     <span style={{ fontSize: "11px", color: getCategoryColor(p.category), fontWeight: "600" }}>{p.category}</span>
-                    <h4 style={{ fontSize: "14px", fontWeight: "600", color: "#1a1a2e", margin: "8px 0 6px", lineHeight: "1.4" }}>{p.title}</h4>
-                    <p style={{ fontSize: "12px", color: "#9ca3af", margin: 0 }}>{p.createdAt}</p>
+                    <h4 style={{ fontSize: "14px", fontWeight: "600", color: "#1e293b", margin: "8px 0 6px", lineHeight: "1.4" }}>{p.title}</h4>
+                    <p style={{ fontSize: "12px", color: "#94a3b8", margin: 0 }}>{p.createdAt}</p>
                   </div>
                 </a>
               ))}
@@ -219,9 +205,7 @@ export default function BlogPost() {
         )}
       </section>
 
-      <footer style={{ textAlign: "center", padding: "40px", borderTop: "1px solid rgba(0,0,0,0.08)", color: "#9ca3af", fontSize: "14px", marginTop: "40px", position: "relative", zIndex: 1 }}>
-        © 2025 2fa.ac — Free Cybersecurity Tools for Everyone
-      </footer>
+      <Footer />
     </main>
   );
 }

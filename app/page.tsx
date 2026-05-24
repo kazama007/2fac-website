@@ -318,7 +318,7 @@ export default function Home() {
       {/* Hero Text */}
       <section style={{ textAlign: "center", padding: "40px 20px", maxWidth: "800px", margin: "0 auto", position: "relative", zIndex: 1 }}>
         <div style={{ display: "inline-block", background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "20px", padding: "6px 16px", fontSize: "13px", color: "#7c3aed", marginBottom: "16px", fontWeight: "500" }}>
-          Trusted by 300+ daily users
+          Trusted by 1M+ daily users
         </div>
         <h1 style={{ fontSize: "32px", fontWeight: "800", lineHeight: "1.2", marginBottom: "12px", background: "linear-gradient(135deg, #1e293b 0%, #7c3aed 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
           Free Security Tools for Everyone
@@ -330,7 +330,7 @@ export default function Home() {
 
       {/* Trust Metrics */}
       <section style={{ display: "flex", justifyContent: "center", gap: "60px", padding: "40px 20px", borderTop: "1px solid rgba(124,58,237,0.08)", borderBottom: "1px solid rgba(124,58,237,0.08)", flexWrap: "wrap", position: "relative", zIndex: 1, background: "rgba(255,255,255,0.5)" }}>
-        {[{ num: "20+", label: "Security Tools" }, { num: "300+", label: "Daily Users" }, { num: "99.9%", label: "Uptime" }, { num: "100%", label: "Free Forever" }].map((item) => (
+        {[{ num: "20+", label: "Security Tools" }, { num: "1M+", label: "Daily Users" }, { num: "99.9%", label: "Uptime" }, { num: "100%", label: "Free Forever" }].map((item) => (
           <div key={item.label} style={{ textAlign: "center" }}>
             <div style={{ fontSize: "32px", fontWeight: "800", background: "linear-gradient(135deg, #7c3aed, #9f67ff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{item.num}</div>
             <div style={{ fontSize: "14px", color: "#64748b", marginTop: "4px" }}>{item.label}</div>

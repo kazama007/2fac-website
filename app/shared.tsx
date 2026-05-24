@@ -44,6 +44,19 @@ export function Navbar() {
         <img src="/logo2.png" alt="2fa.ac logo" style={{ height: "36px", width: "auto" }} />
       </a>
       <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+
+        {/* Home */}
+        <a href="/" style={{ color: "#64748b", textDecoration: "none", fontSize: "14px", fontWeight: "500", padding: "8px 14px", borderRadius: "8px", transition: "all 0.2s", display: "flex", alignItems: "center", gap: "8px" }}
+          onMouseEnter={e => { e.currentTarget.style.color = "#7c3aed"; e.currentTarget.style.background = "rgba(124,58,237,0.08)"; }}
+          onMouseLeave={e => { e.currentTarget.style.color = "#64748b"; e.currentTarget.style.background = "transparent"; }}
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          Home
+        </a>
+
         {/* Tools Dropdown */}
         <div style={{ position: "relative" }} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
           <a href="#" style={{ color: "#64748b", textDecoration: "none", display: "flex", alignItems: "center", gap: "8px", fontSize: "14px", fontWeight: "500", padding: "8px 14px", borderRadius: "8px", transition: "all 0.2s" }}

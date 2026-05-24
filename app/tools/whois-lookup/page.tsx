@@ -45,45 +45,57 @@ function DotsBackground() {
   return <canvas ref={canvasRef} style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", zIndex: 0, pointerEvents: "none" }} />;
 }
 
+async function sha1(str: string): Promise<string> {
+  const buffer = await crypto.subtle.digest("SHA-1", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase();
+}
+
 const faqs = [
-  { q: "What is WHOIS?", a: "WHOIS is a public database protocol that stores information about domain name registrations. It includes details like the domain owner, registrar, registration date, expiry date, and name servers." },
-  { q: "Why might WHOIS show 'Privacy Protected'?", a: "Many registrars offer WHOIS privacy protection that hides the domain owner's personal information. Instead of showing real contact details, it displays the privacy service's information to prevent spam and protect privacy." },
-  { q: "What does domain expiry mean?", a: "Domain expiry is when the domain registration ends. If not renewed, the domain becomes available for others to register. Domains expiring within 30 days are flagged as 'Expiring Soon' in this tool." },
-  { q: "What are name servers?", a: "Name servers are the DNS servers that control where a domain's traffic is directed. They translate domain names to IP addresses. Changing name servers is how you point a domain to a new hosting provider." },
-  { q: "Can I find out who owns any domain?", a: "WHOIS data is publicly available, but many domain owners use privacy protection services that hide their personal information. You can see the registrar and registration dates, but the owner details may be masked." },
+  { q: "Is my password sent to any server?", a: "No! Your password never leaves your browser. We use k-anonymity: only the first 5 characters of a SHA-1 hash are sent to the HaveIBeenPwned API. Your actual password stays 100% private." },
+  { q: "What is HaveIBeenPwned?", a: "HaveIBeenPwned (HIBP) is the world's largest password breach database, maintained by security researcher Troy Hunt. It contains over 10 billion compromised passwords from real data breaches." },
+  { q: "My password was found in a breach — what should I do?", a: "Change that password immediately on all accounts where you use it. Use our Password Generator to create a strong unique password, and consider enabling 2FA on your accounts." },
+  { q: "My password was not found — does that mean it is safe?", a: "Not necessarily. It means it has not appeared in known public data breaches. You should still use a strong, unique password for every account and enable 2FA wherever possible." },
+  { q: "What is k-anonymity?", a: "K-anonymity is a privacy technique where only a partial hash (first 5 characters) is shared with the API. The server returns all hashes starting with those 5 chars, and we check locally. This ensures your full password hash is never exposed." },
 ];
 
-export default function WHOISLookup() {
-  const [domain, setDomain] = useState("");
+export default function PasswordBreach() {
+  const [password, setPassword] = useState("");
+  const [show, setShow] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const lookup = async () => {
-    if (!domain) return;
+  // Clear autofill after mount
+  useEffect(() => {
+    setMounted(true);
+    setTimeout(() => {
+      if (inputRef.current) inputRef.current.value = "";
+      setPassword("");
+    }, 100);
+  }, []);
+
+  const check = async () => {
+    if (!password) return;
     setLoading(true); setError(""); setResult(null);
     try {
-      const cleanDomain = domain.replace(/^https?:\/\//, "").replace(/\/.*$/, "").trim();
-      const tld = cleanDomain.split(".").pop();
-      const res = await fetch(`https://rdap.org/domain/${cleanDomain}`);
-      const data = await res.json();
-      const registrar = data.entities?.find((e: any) => e.roles?.includes("registrar"))?.vcardArray?.[1]?.find((v: any) => v[0] === "fn")?.[3] || "N/A";
-      const registrant = data.entities?.find((e: any) => e.roles?.includes("registrant"))?.vcardArray?.[1]?.find((v: any) => v[0] === "fn")?.[3] || "Privacy Protected";
-      const created = data.events?.find((e: any) => e.eventAction === "registration")?.eventDate || "N/A";
-      const updated = data.events?.find((e: any) => e.eventAction === "last changed")?.eventDate || "N/A";
-      const expires = data.events?.find((e: any) => e.eventAction === "expiration")?.eventDate || "N/A";
-      const nameservers = data.nameservers?.map((ns: any) => ns.ldhName).join(", ") || "N/A";
-      const status = data.status?.join(", ") || "N/A";
-      setResult({ domain: cleanDomain, registrar, registrant, created: created !== "N/A" ? new Date(created).toLocaleDateString() : "N/A", updated: updated !== "N/A" ? new Date(updated).toLocaleDateString() : "N/A", expires: expires !== "N/A" ? new Date(expires).toLocaleDateString() : "N/A", nameservers, status, tld: `.${tld}` });
-    } catch { setError("Could not fetch WHOIS data. Try again or check the domain name."); }
+      const hash = await sha1(password);
+      const prefix = hash.slice(0, 5);
+      const suffix = hash.slice(5);
+      const res = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`, { headers: { "Add-Padding": "true" } });
+      const text = await res.text();
+      const found = text.split("\n").find(line => line.startsWith(suffix));
+      if (found) {
+        setResult({ breached: true, count: parseInt(found.split(":")[1].trim()) });
+      } else {
+        setResult({ breached: false });
+      }
+    } catch {
+      setError("Failed to check. Please try again.");
+    }
     setLoading(false);
-  };
-
-  const isExpiringSoon = (dateStr: string) => {
-    if (!dateStr || dateStr === "N/A") return false;
-    const diff = new Date(dateStr).getTime() - Date.now();
-    return diff > 0 && diff < 30 * 24 * 60 * 60 * 1000;
   };
 
   return (
@@ -91,77 +103,86 @@ export default function WHOISLookup() {
       <DotsBackground />
       <Navbar />
 
-      <section style={{ maxWidth: "800px", margin: "40px auto", padding: "0 20px", position: "relative", zIndex: 1 }}>
+      <section style={{ maxWidth: "700px", margin: "40px auto", padding: "0 20px", position: "relative", zIndex: 1 }}>
         <a href="/" style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "#7c3aed", textDecoration: "none", fontSize: "14px", marginBottom: "20px", padding: "8px 14px", background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "8px", fontWeight: "500" }}>
           ← Back to Homepage
         </a>
 
         <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "20px", padding: "40px", boxShadow: "0 8px 40px rgba(124,58,237,0.08)" }}>
           <div style={{ textAlign: "center", marginBottom: "32px" }}>
-            <div style={{ fontSize: "48px", marginBottom: "12px" }}>🏢</div>
-            <h1 style={{ fontSize: "28px", fontWeight: "800", marginBottom: "8px", color: "#1e293b" }}>WHOIS Lookup</h1>
-            <p style={{ color: "#64748b", fontSize: "14px" }}>Check domain owner, registration and expiry info</p>
+            <div style={{ fontSize: "48px", marginBottom: "12px" }}>🔓</div>
+            <h1 style={{ fontSize: "28px", fontWeight: "800", marginBottom: "8px", color: "#1e293b" }}>Password Breach Checker</h1>
+            <p style={{ color: "#64748b", fontSize: "14px" }}>Check if your password was exposed in a data breach</p>
           </div>
 
-          <div style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
-            <input type="text" value={domain} onChange={(e) => setDomain(e.target.value)} onKeyDown={(e) => e.key === "Enter" && lookup()}
-              placeholder="Enter domain (e.g. google.com)"
-              style={{ flex: 1, padding: "14px 16px", background: "#f8fafc", border: "1.5px solid #e2e8f0", borderRadius: "12px", color: "#1e293b", fontSize: "15px", outline: "none" }}
+          {/* Hidden dummy fields to trick browser autofill */}
+          <div style={{ display: "none" }}>
+            <input type="text" name="username" />
+            <input type="password" name="fake-password" />
+          </div>
+
+          <div style={{ position: "relative", marginBottom: "16px" }}>
+            <input
+              ref={inputRef}
+              type={show ? "text" : "password"}
+              value={password}
+              onChange={(e) => { setPassword(e.target.value); setResult(null); }}
+              onKeyDown={(e) => e.key === "Enter" && check()}
+              placeholder="Enter password to check..."
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              name="breach-check-field"
+              style={{ width: "100%", padding: "16px 50px 16px 20px", background: "#f8fafc", border: "1.5px solid #e2e8f0", borderRadius: "12px", color: "#1e293b", fontSize: "16px", boxSizing: "border-box", outline: "none" }}
               onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"}
               onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"}
             />
-            <button onClick={lookup} disabled={loading} style={{ padding: "14px 24px", background: "linear-gradient(135deg, #7c3aed, #9f67ff)", color: "white", border: "none", borderRadius: "12px", fontSize: "15px", fontWeight: "700", cursor: "pointer", boxShadow: "0 4px 20px rgba(124,58,237,0.35)" }}>
-              {loading ? "..." : "Lookup"}
+            <button onClick={() => setShow(!show)} style={{ position: "absolute", right: "16px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: "20px" }}>
+              {show ? "🙈" : "👁️"}
             </button>
           </div>
 
-          {error && (
-            <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: "12px", padding: "16px", color: "#ef4444", marginBottom: "16px" }}>❌ {error}</div>
-          )}
+          <button onClick={check} disabled={loading || !password} style={{ width: "100%", padding: "14px", background: "linear-gradient(135deg, #7c3aed, #9f67ff)", color: "white", border: "none", borderRadius: "12px", fontSize: "16px", fontWeight: "700", cursor: "pointer", marginBottom: "24px", opacity: !password ? 0.6 : 1, boxShadow: "0 4px 20px rgba(124,58,237,0.35)" }}>
+            {loading ? "🔍 Checking..." : "Check Password"}
+          </button>
 
-          {loading && (
-            <div style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>
-              <div style={{ fontSize: "32px", marginBottom: "12px" }}>🔍</div>
-              Fetching WHOIS data...
+          {error && (
+            <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: "12px", padding: "16px", color: "#ef4444", marginBottom: "16px" }}>
+              ❌ {error}
             </div>
           )}
 
-          {result && !loading && (
-            <div>
-              <div style={{ background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "16px", padding: "20px", textAlign: "center", marginBottom: "20px" }}>
-                <div style={{ fontSize: "32px", marginBottom: "8px" }}>🌐</div>
-                <div style={{ fontSize: "24px", fontWeight: "800", color: "#7c3aed" }}>{result.domain}</div>
-                {result.tld && <div style={{ fontSize: "13px", color: "#64748b", marginTop: "4px" }}>TLD: {result.tld}</div>}
+          {result && (
+            <div style={{ background: result.breached ? "rgba(239,68,68,0.06)" : "rgba(34,197,94,0.06)", border: `1px solid ${result.breached ? "rgba(239,68,68,0.25)" : "rgba(34,197,94,0.25)"}`, borderRadius: "16px", padding: "28px", textAlign: "center" }}>
+              <div style={{ fontSize: "56px", marginBottom: "12px" }}>{result.breached ? "🚨" : "✅"}</div>
+              <div style={{ fontSize: "22px", fontWeight: "800", color: result.breached ? "#ef4444" : "#16a34a", marginBottom: "8px" }}>
+                {result.breached ? "Password Compromised!" : "Password Not Found"}
               </div>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                {[
-                  { icon: "🏢", label: "Registrar", value: result.registrar },
-                  { icon: "👤", label: "Registrant", value: result.registrant },
-                  { icon: "📅", label: "Created", value: result.created },
-                  { icon: "🔄", label: "Last Updated", value: result.updated },
-                  { icon: "⏰", label: "Expires", value: result.expires, warn: isExpiringSoon(result.expires) },
-                  { icon: "🌐", label: "Name Servers", value: result.nameservers },
-                  { icon: "📋", label: "Status", value: result.status },
-                ].map(item => item.value && item.value !== "N/A" ? (
-                  <div key={item.label} style={{ background: item.warn ? "rgba(245,158,11,0.06)" : "#f8fafc", border: `1.5px solid ${item.warn ? "rgba(245,158,11,0.3)" : "#e2e8f0"}`, borderRadius: "10px", padding: "14px 16px", display: "flex", gap: "12px", alignItems: "flex-start" }}>
-                    <span style={{ fontSize: "18px" }}>{item.icon}</span>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: "11px", color: "#94a3b8", marginBottom: "4px", fontWeight: "600", letterSpacing: "0.5px" }}>{item.label.toUpperCase()}</div>
-                      <div style={{ fontSize: "14px", color: item.warn ? "#d97706" : "#1e293b", wordBreak: "break-all" }}>
-                        {item.value}
-                        {item.warn && <span style={{ marginLeft: "8px", fontSize: "12px", background: "rgba(245,158,11,0.1)", color: "#d97706", padding: "2px 8px", borderRadius: "6px" }}>⚠️ Expiring Soon</span>}
-                      </div>
-                    </div>
-                  </div>
-                ) : null)}
+              <div style={{ fontSize: "15px", color: "#64748b", lineHeight: "1.6" }}>
+                {result.breached ? (
+                  <>This password has been seen <strong style={{ color: "#ef4444" }}>{result.count.toLocaleString()} times</strong> in data breaches.<br />You should change it immediately!</>
+                ) : (
+                  <>This password was not found in any known data breach.<br />However, always use strong unique passwords.</>
+                )}
               </div>
+              {result.breached && (
+                <div style={{ marginTop: "20px" }}>
+                  <a href="/tools/password-generator" style={{ padding: "10px 20px", background: "#7c3aed", color: "white", borderRadius: "8px", textDecoration: "none", fontSize: "14px", fontWeight: "600" }}>
+                    🔑 Generate Strong Password
+                  </a>
+                </div>
+              )}
             </div>
           )}
         </div>
 
-        <div style={{ marginTop: "16px", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "12px", padding: "16px 20px", fontSize: "13px", color: "#64748b", lineHeight: "1.6" }}>
-          ℹ️ <strong style={{ color: "#7c3aed" }}>What is WHOIS?</strong> WHOIS is a protocol that provides information about domain name registrations including owner, registrar, creation date, and expiry date.
+        <div style={{ marginTop: "16px", background: "rgba(34,197,94,0.06)", border: "1px solid rgba(34,197,94,0.2)", borderRadius: "12px", padding: "16px 20px", fontSize: "13px", color: "#64748b", lineHeight: "1.6" }}>
+          🔒 <strong style={{ color: "#16a34a" }}>How it works (k-anonymity):</strong> Your password is never sent anywhere. We hash it locally, send only the first 5 characters of the hash to HaveIBeenPwned API, and check the results. Your password stays 100% private.
+        </div>
+
+        <div style={{ marginTop: "12px", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "12px", padding: "16px 20px", fontSize: "13px", color: "#64748b", lineHeight: "1.6" }}>
+          📊 <strong style={{ color: "#7c3aed" }}>Data source:</strong> Powered by <strong style={{ color: "#7c3aed" }}>HaveIBeenPwned</strong> — the world's largest password breach database with 10+ billion compromised passwords.
         </div>
 
         {/* FAQ */}
