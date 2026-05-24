@@ -171,12 +171,16 @@ export default function Home() {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
-            <a href="#" style={{ color: "#a0a0b0", textDecoration: "none", display: "flex", alignItems: "center", gap: "6px", fontSize: "14px", fontWeight: "500", padding: "8px 14px", borderRadius: "8px" }}
-  onMouseEnter={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
-  onMouseLeave={e => { e.currentTarget.style.color = "#a0a0b0"; e.currentTarget.style.background = "transparent"; }}
->
-  Tools ▾
-</a>
+            <a href="#" style={{ color: "#a0a0b0", textDecoration: "none", display: "flex", alignItems: "center", gap: "8px", fontSize: "14px", fontWeight: "500", padding: "8px 14px", borderRadius: "8px", transition: "all 0.2s" }}
+              onMouseEnter={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
+              onMouseLeave={e => { e.currentTarget.style.color = "#a0a0b0"; e.currentTarget.style.background = "transparent"; }}
+            >
+              {/* Wrench / Utilities icon — same style as screenshot */}
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+              </svg>
+              Tools
+            </a>
 
             {showTools && (
               <div
@@ -217,23 +221,37 @@ export default function Home() {
             )}
           </div>
 
-          <a href="/blog" style={{ color: "#a0a0b0", textDecoration: "none", fontSize: "14px", fontWeight: "500", padding: "8px 14px", borderRadius: "8px", transition: "all 0.2s", display: "flex", alignItems: "center", gap: "6px" }}
-  onMouseEnter={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
-  onMouseLeave={e => { e.currentTarget.style.color = "#a0a0b0"; e.currentTarget.style.background = "transparent"; }}
->
-  Blog
-</a>
-<a href="/about" style={{ color: "#a0a0b0", textDecoration: "none", fontSize: "14px", fontWeight: "500", padding: "8px 14px", borderRadius: "8px", transition: "all 0.2s", display: "flex", alignItems: "center", gap: "6px" }}
-  onMouseEnter={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
-  onMouseLeave={e => { e.currentTarget.style.color = "#a0a0b0"; e.currentTarget.style.background = "transparent"; }}
->
-  About
-</a>
+          {/* Blog link with document icon */}
+          <a href="/blog" style={{ color: "#a0a0b0", textDecoration: "none", fontSize: "14px", fontWeight: "500", padding: "8px 14px", borderRadius: "8px", transition: "all 0.2s", display: "flex", alignItems: "center", gap: "8px" }}
+            onMouseEnter={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
+            onMouseLeave={e => { e.currentTarget.style.color = "#a0a0b0"; e.currentTarget.style.background = "transparent"; }}
+          >
+            {/* Blog / document-edit icon — same as screenshot */}
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+            Blog
+          </a>
 
-{/* Get Started Button */}
-<a href="/tools/password-generator" style={{ background: "#7c3aed", color: "white", textDecoration: "none", padding: "9px 20px", borderRadius: "10px", fontSize: "14px", fontWeight: "600", display: "flex", alignItems: "center", gap: "6px" }}>
-  🚀 Get Started
-</a>
+          {/* About link with fingerprint icon */}
+          <a href="/about" style={{ color: "#a0a0b0", textDecoration: "none", fontSize: "14px", fontWeight: "500", padding: "8px 14px", borderRadius: "8px", transition: "all 0.2s", display: "flex", alignItems: "center", gap: "8px" }}
+            onMouseEnter={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
+            onMouseLeave={e => { e.currentTarget.style.color = "#a0a0b0"; e.currentTarget.style.background = "transparent"; }}
+          >
+            {/* Fingerprint icon — same as screenshot */}
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M2 12C2 6.5 6.5 2 12 2a10 10 0 0 1 8 4"/>
+              <path d="M5 19.5C5.5 18 6 15 6 12c0-1.9.7-3.7 2-5"/>
+              <path d="M17.8 21.8C16 21 14.8 19.3 14 17c-.4-1.1-.6-2.3-.6-3.5 0-2.4-1.8-4.5-4.4-4.5"/>
+              <path d="M10 9.6c1.3-.2 2.7.1 3.8 1 1 .8 1.6 2 1.6 3.3 0 1.4-.1 2.8-.4 4.1"/>
+              <path d="M2 12a10 10 0 0 0 2 6.1"/>
+              <path d="M20 12c0 1.5-.2 3-.6 4.3"/>
+              <path d="M12 5c.9 0 1.8.1 2.6.4"/>
+            </svg>
+            About
+          </a>
+
         </div>
       </nav>
 
