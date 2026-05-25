@@ -5,35 +5,20 @@ import { Navbar, Footer } from "../../shared";
 function DotsBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
-    const DOT_SPACING = 28, DOT_RADIUS = 1.2;
-    const mouse = { x: -999, y: -999 };
+    const canvas = canvasRef.current; if (!canvas) return;
+    const ctx = canvas.getContext("2d"); if (!ctx) return;
+    let width = canvas.width = window.innerWidth, height = canvas.height = window.innerHeight;
+    const DOT_SPACING = 28, DOT_RADIUS = 1.2, mouse = { x: -999, y: -999 };
     const onMouseMove = (e: MouseEvent) => { mouse.x = e.clientX; mouse.y = e.clientY; };
     window.addEventListener("mousemove", onMouseMove);
     let animId: number;
     const animate = () => {
       ctx.clearRect(0, 0, width, height);
-      const cols = Math.ceil(width / DOT_SPACING) + 1;
-      const rows = Math.ceil(height / DOT_SPACING) + 1;
-      for (let col = 0; col < cols; col++) {
-        for (let row = 0; row < rows; row++) {
-          const x = col * DOT_SPACING, y = row * DOT_SPACING;
-          const dx = mouse.x - x, dy = mouse.y - y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 100) {
-            const intensity = 1 - dist / 100;
-            ctx.beginPath(); ctx.arc(x, y, DOT_RADIUS + intensity * 1.2, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(124,58,237,${0.3 + intensity * 0.5})`; ctx.fill();
-          } else {
-            ctx.beginPath(); ctx.arc(x, y, DOT_RADIUS, 0, Math.PI * 2);
-            ctx.fillStyle = "rgba(148,163,184,0.25)"; ctx.fill();
-          }
-        }
+      const cols = Math.ceil(width / DOT_SPACING) + 1, rows = Math.ceil(height / DOT_SPACING) + 1;
+      for (let col = 0; col < cols; col++) for (let row = 0; row < rows; row++) {
+        const x = col * DOT_SPACING, y = row * DOT_SPACING, dx = mouse.x - x, dy = mouse.y - y, dist = Math.sqrt(dx*dx+dy*dy);
+        ctx.beginPath(); ctx.arc(x, y, dist < 100 ? DOT_RADIUS + (1-dist/100)*1.2 : DOT_RADIUS, 0, Math.PI*2);
+        ctx.fillStyle = dist < 100 ? `rgba(124,58,237,${0.3+(1-dist/100)*0.5})` : "rgba(148,163,184,0.25)"; ctx.fill();
       }
       animId = requestAnimationFrame(animate);
     };
@@ -88,13 +73,23 @@ function md5(input: string): string {
   return [a,b,c,d].map(n => { const hex = (n < 0 ? n + 4294967296 : n).toString(16).padStart(8,"0"); return hex.match(/../g)!.map(h => h[1]+h[0]).join(""); }).join("");
 }
 
-const faqs = [
-  { q: "What is a hash function?", a: "A hash function converts any input (text, file, data) into a fixed-length string of characters. The same input always produces the same hash, but it is virtually impossible to reverse the hash back to the original input." },
-  { q: "What is the difference between MD5, SHA-256, and SHA-512?", a: "MD5 produces a 128-bit hash (32 hex characters) and is considered weak for security. SHA-256 produces a 256-bit hash and is widely used. SHA-512 produces a 512-bit hash and offers the highest security among the three." },
-  { q: "Is my data safe to enter here?", a: "Yes! All hashing is done entirely in your browser. Your text or data is never sent to any server. The hashes are generated locally using the Web Crypto API." },
-  { q: "What are hash functions used for?", a: "Hash functions are used for verifying file integrity, storing passwords securely, digital signatures, checksums, data deduplication, and many cryptographic protocols." },
-  { q: "Can a hash be reversed to get the original text?", a: "No. Hash functions are one-way — it is computationally infeasible to reverse a hash to its original input. However, simple or common inputs can be found using rainbow table attacks, which is why salting passwords is important." },
+const relatedTools = [
+  { name: "JWT Decoder", href: "/tools/jwt-decoder" },
+  { name: "Base64 Encoder/Decoder", href: "/tools/base64" },
+  { name: "UUID Generator", href: "/tools/uuid-generator" },
+  { name: "JSON Formatter", href: "/tools/json-formatter" },
+  { name: "Password Generator", href: "/tools/password-generator" },
 ];
+
+const faqs = [
+  { q: "What is a hash function?", a: "A hash function converts any input into a fixed-length string of characters. The same input always produces the same hash, but it is virtually impossible to reverse the hash back to the original input." },
+  { q: "What is the difference between MD5, SHA-256, and SHA-512?", a: "MD5 produces a 128-bit hash and is considered weak for security. SHA-256 produces a 256-bit hash and is widely used. SHA-512 produces a 512-bit hash and offers the highest security." },
+  { q: "Is my data safe to enter here?", a: "Yes! All hashing is done entirely in your browser using the Web Crypto API. Your data is never sent to any server or stored anywhere." },
+  { q: "What are hash functions used for?", a: "Hash functions are used for verifying file integrity, storing passwords securely, digital signatures, checksums, data deduplication, and many cryptographic protocols." },
+  { q: "Can a hash be reversed?", a: "No. Hash functions are one-way. It is computationally infeasible to reverse a hash to its original input. However, simple inputs can be found using rainbow table attacks, which is why salting passwords is important." },
+];
+
+const algoColors: { [k: string]: string } = { "MD5": "#ef4444", "SHA-1": "#f59e0b", "SHA-256": "#7c3aed", "SHA-384": "#3b82f6", "SHA-512": "#22c55e" };
 
 export default function HashGenerator() {
   const [text, setText] = useState("");
@@ -122,83 +117,136 @@ export default function HashGenerator() {
     setTimeout(() => setCopied(""), 2000);
   };
 
-  const algoColors: { [k: string]: string } = { "MD5": "#ef4444", "SHA-1": "#f59e0b", "SHA-256": "#7c3aed", "SHA-384": "#3b82f6", "SHA-512": "#22c55e" };
-
   return (
-    <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0f9ff 100%)", color: "#1a1a2e", fontFamily: "Inter, sans-serif", position: "relative" }}>
+    <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0f9ff 100%)", fontFamily: "Inter, sans-serif", position: "relative" }}>
       <DotsBackground />
       <Navbar />
+      <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "32px 20px 80px", position: "relative", zIndex: 1 }}>
 
-      <section style={{ maxWidth: "800px", margin: "40px auto", padding: "0 20px", position: "relative", zIndex: 1 }}>
-        <a href="/" style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "#7c3aed", textDecoration: "none", fontSize: "14px", marginBottom: "20px", padding: "8px 14px", background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "8px", fontWeight: "500" }}>
-          ← Back to Homepage
-        </a>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#94a3b8", marginBottom: "24px" }}>
+          <a href="/" style={{ color: "#7c3aed", textDecoration: "none" }}>Home</a><span>›</span>
+          <a href="/tools" style={{ color: "#7c3aed", textDecoration: "none" }}>Tools</a><span>›</span>
+          <span style={{ color: "#1e293b", fontWeight: "500" }}>Hash Generator</span>
+        </div>
 
-        <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "20px", padding: "40px", boxShadow: "0 8px 40px rgba(124,58,237,0.08)" }}>
-          <div style={{ textAlign: "center", marginBottom: "32px" }}>
-            <div style={{ fontSize: "48px", marginBottom: "12px" }}>#️⃣</div>
-            <h1 style={{ fontSize: "28px", fontWeight: "800", marginBottom: "8px", color: "#1e293b" }}>Hash Generator</h1>
-            <p style={{ color: "#64748b", fontSize: "14px" }}>Generate MD5, SHA-1, SHA-256, SHA-384, SHA-512 hashes</p>
+        <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "36px" }}>
+          <div style={{ width: "64px", height: "64px", background: "linear-gradient(135deg, #8b5cf6, #a78bfa)", borderRadius: "16px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "32px", flexShrink: 0, boxShadow: "0 8px 24px rgba(139,92,246,0.3)" }}>#️⃣</div>
+          <div>
+            <h1 style={{ fontSize: "32px", fontWeight: "800", color: "#1e293b", margin: "0 0 6px" }}>Hash Generator</h1>
+            <p style={{ color: "#64748b", fontSize: "15px", margin: 0 }}>Generate MD5, SHA-1, SHA-256, SHA-384, and SHA-512 hashes from any text instantly.</p>
           </div>
+        </div>
 
-          <div style={{ marginBottom: "16px" }}>
-            <label style={{ fontSize: "14px", color: "#64748b", display: "block", marginBottom: "8px", fontWeight: "500" }}>Enter text to hash</label>
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Enter any text, password, or data..."
-              rows={4}
-              style={{ width: "100%", padding: "14px 16px", background: "#f8fafc", border: "1.5px solid #e2e8f0", borderRadius: "12px", color: "#1e293b", fontSize: "14px", boxSizing: "border-box", outline: "none", resize: "vertical", fontFamily: "Inter, sans-serif" }}
-              onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"}
-              onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"}
-            />
-          </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "24px", alignItems: "start" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 
-          <button onClick={generate} disabled={loading} style={{ width: "100%", padding: "14px", background: "linear-gradient(135deg, #7c3aed, #9f67ff)", color: "white", border: "none", borderRadius: "12px", fontSize: "16px", fontWeight: "700", cursor: "pointer", marginBottom: "24px", opacity: loading ? 0.7 : 1, boxShadow: "0 4px 20px rgba(124,58,237,0.35)" }}>
-            {loading ? "Generating..." : "Generate Hashes"}
-          </button>
+            <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "20px", padding: "32px", boxShadow: "0 4px 24px rgba(124,58,237,0.06)" }}>
+              <div style={{ marginBottom: "16px" }}>
+                <label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "8px" }}>Enter text to hash</label>
+                <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Enter any text, password, or data..."
+                  rows={4} style={{ width: "100%", padding: "14px 16px", background: "#f8fafc", border: "1.5px solid #e2e8f0", borderRadius: "12px", color: "#1e293b", fontSize: "14px", boxSizing: "border-box", outline: "none", resize: "vertical", fontFamily: "Inter, sans-serif" }}
+                  onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"}
+                  onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"}
+                />
+              </div>
+              <button onClick={generate} disabled={loading} style={{ width: "100%", padding: "14px", background: "linear-gradient(135deg, #7c3aed, #9f67ff)", color: "white", border: "none", borderRadius: "12px", fontSize: "16px", fontWeight: "700", cursor: "pointer", marginBottom: "20px", boxShadow: "0 4px 20px rgba(124,58,237,0.35)", opacity: loading ? 0.7 : 1 }}>
+                {loading ? "Generating..." : "Generate Hashes"}
+              </button>
+              {Object.keys(hashes).length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  {Object.entries(hashes).map(([algo, hash]) => (
+                    <div key={algo} style={{ background: "#f8fafc", border: `1.5px solid ${algoColors[algo]}30`, borderRadius: "12px", padding: "16px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                        <span style={{ fontSize: "13px", fontWeight: "700", color: algoColors[algo] }}>{algo}</span>
+                        <button onClick={() => copy(hash, algo)} style={{ background: copied === algo ? "#22c55e" : "rgba(124,58,237,0.1)", border: copied === algo ? "none" : "1px solid rgba(124,58,237,0.3)", color: copied === algo ? "white" : "#7c3aed", borderRadius: "6px", padding: "4px 12px", cursor: "pointer", fontSize: "12px", fontWeight: "600" }}>
+                          {copied === algo ? "Copied!" : "Copy"}
+                        </button>
+                      </div>
+                      <div style={{ fontFamily: "monospace", fontSize: "12px", color: "#64748b", wordBreak: "break-all" }}>{hash}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div style={{ marginTop: "16px", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "10px", padding: "12px 16px", fontSize: "13px", color: "#64748b" }}>
+                🔒 <strong style={{ color: "#7c3aed" }}>Privacy:</strong> All hashes are generated locally in your browser. Your data is never sent to any server.
+              </div>
+            </div>
 
-          {Object.keys(hashes).length > 0 && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              {Object.entries(hashes).map(([algo, hash]) => (
-                <div key={algo} style={{ background: "#f8fafc", border: `1.5px solid ${algoColors[algo]}30`, borderRadius: "12px", padding: "16px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                    <span style={{ fontSize: "13px", fontWeight: "700", color: algoColors[algo] }}>{algo}</span>
-                    <button onClick={() => copy(hash, algo)} style={{ background: copied === algo ? "#22c55e" : "rgba(124,58,237,0.1)", border: copied === algo ? "none" : "1px solid rgba(124,58,237,0.3)", color: copied === algo ? "white" : "#7c3aed", borderRadius: "6px", padding: "4px 12px", cursor: "pointer", fontSize: "12px", fontWeight: "600" }}>
-                      {copied === algo ? "✓ Copied" : "Copy"}
-                    </button>
+            <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "28px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+              <h2 style={{ fontSize: "18px", fontWeight: "700", color: "#1e293b", marginBottom: "12px" }}>About Hash Generator</h2>
+              <p style={{ fontSize: "14px", color: "#64748b", lineHeight: "1.8", margin: "0 0 10px" }}>Our Hash Generator creates cryptographic hashes from any text input instantly. Supports MD5, SHA-1, SHA-256, SHA-384, and SHA-512 hashing algorithms all in one tool.</p>
+              <p style={{ fontSize: "14px", color: "#64748b", lineHeight: "1.8", margin: 0 }}>Perfect for developers verifying file integrity, hashing passwords, generating checksums, or learning about cryptographic hash functions.</p>
+            </div>
+
+            <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "28px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+              <h2 style={{ fontSize: "18px", fontWeight: "700", color: "#1e293b", marginBottom: "20px" }}>How to Use</h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                {["Enter any text, password, or data in the input field.", "Click Generate Hashes to compute all hash values simultaneously.", "Copy any individual hash using the Copy button next to it.", "Use the appropriate hash algorithm for your specific use case."].map((step, i) => (
+                  <div key={i} style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
+                    <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "linear-gradient(135deg, #7c3aed, #9f67ff)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px", fontWeight: "700", flexShrink: 0 }}>{i + 1}</div>
+                    <p style={{ fontSize: "14px", color: "#64748b", lineHeight: "1.7", margin: 0, paddingTop: "4px" }}>{step}</p>
                   </div>
-                  <div style={{ fontFamily: "monospace", fontSize: "12px", color: "#64748b", wordBreak: "break-all", lineHeight: "1.6" }}>
-                    {hash}
-                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ background: "rgba(34,197,94,0.04)", border: "1px solid rgba(34,197,94,0.2)", borderRadius: "16px", padding: "24px", display: "flex", gap: "16px", alignItems: "flex-start" }}>
+              <div style={{ fontSize: "32px", flexShrink: 0 }}>🛡️</div>
+              <div>
+                <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b", marginBottom: "6px" }}>Privacy & Security</h3>
+                <p style={{ fontSize: "14px", color: "#64748b", lineHeight: "1.7", margin: 0 }}>All hashing is performed locally in your browser using the Web Crypto API. Your text or data is never sent to any server or stored anywhere.</p>
+              </div>
+            </div>
+
+            <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "28px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+              <h2 style={{ fontSize: "18px", fontWeight: "700", color: "#1e293b", marginBottom: "16px" }}>Frequently Asked Questions (FAQ)</h2>
+              {faqs.map((faq, i) => (
+                <div key={i} style={{ borderBottom: i < faqs.length - 1 ? "1px solid #f1f5f9" : "none" }}>
+                  <button onClick={() => setOpenFaq(openFaq === i ? null : i)} style={{ width: "100%", padding: "14px 0", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
+                    <span style={{ fontSize: "14px", fontWeight: "600", color: "#1e293b" }}>{faq.q}</span>
+                    <span style={{ color: "#7c3aed", fontSize: "18px", fontWeight: "700", flexShrink: 0, marginLeft: "12px" }}>{openFaq === i ? "−" : "+"}</span>
+                  </button>
+                  {openFaq === i && <div style={{ padding: "0 0 14px", fontSize: "14px", color: "#64748b", lineHeight: "1.7" }}>{faq.a}</div>}
                 </div>
               ))}
             </div>
-          )}
-        </div>
 
-        <div style={{ marginTop: "16px", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "12px", padding: "16px 20px", fontSize: "13px", color: "#64748b", lineHeight: "1.6" }}>
-          🔒 <strong style={{ color: "#7c3aed" }}>Privacy:</strong> All hashes are generated locally in your browser. Your data is never sent to any server.
-        </div>
-
-        {/* FAQ */}
-        <div style={{ marginTop: "40px", marginBottom: "40px" }}>
-          <h2 style={{ fontSize: "22px", fontWeight: "700", color: "#1e293b", marginBottom: "16px" }}>❓ Frequently Asked Questions</h2>
-          {faqs.map((faq, i) => (
-            <div key={i} style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "12px", marginBottom: "10px", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
-              <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                style={{ width: "100%", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
-                <span style={{ fontSize: "14px", fontWeight: "600", color: "#1e293b" }}>{faq.q}</span>
-                <span style={{ color: "#7c3aed", fontSize: "18px", fontWeight: "700", flexShrink: 0 }}>{openFaq === i ? "−" : "+"}</span>
-              </button>
-              {openFaq === i && (
-                <div style={{ padding: "0 20px 16px", fontSize: "14px", color: "#64748b", lineHeight: "1.7" }}>{faq.a}</div>
-              )}
+            <div style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.08), rgba(159,103,255,0.08))", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "16px", padding: "28px", display: "flex", gap: "20px", alignItems: "center" }}>
+              <div style={{ fontSize: "48px", flexShrink: 0 }}>#️⃣</div>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ fontSize: "17px", fontWeight: "700", color: "#1e293b", marginBottom: "6px" }}>Generate Cryptographic Hashes Instantly</h3>
+                <p style={{ fontSize: "13px", color: "#64748b", margin: "0 0 14px", lineHeight: "1.6" }}>Use our free Hash Generator for MD5, SHA-256, and SHA-512 hashes in seconds.</p>
+                <a href="/tools/jwt-decoder" style={{ display: "inline-block", background: "linear-gradient(135deg, #7c3aed, #9f67ff)", color: "white", textDecoration: "none", padding: "10px 22px", borderRadius: "10px", fontSize: "13px", fontWeight: "600", boxShadow: "0 4px 14px rgba(124,58,237,0.3)" }}>Try JWT Decoder →</a>
+              </div>
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
 
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px", position: "sticky", top: "90px" }}>
+            <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "22px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+              <h3 style={{ fontSize: "15px", fontWeight: "700", color: "#1e293b", marginBottom: "14px" }}>🔧 Related Tools</h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                {relatedTools.map((tool, i) => (
+                  <a key={i} href={tool.href} style={{ fontSize: "13px", color: "#64748b", textDecoration: "none", padding: "8px 12px", borderRadius: "8px", display: "block" }}
+                    onMouseEnter={e => { e.currentTarget.style.background = "rgba(124,58,237,0.06)"; e.currentTarget.style.color = "#7c3aed"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#64748b"; }}>
+                    → {tool.name}
+                  </a>
+                ))}
+              </div>
+              <a href="/tools" style={{ display: "block", textAlign: "center", marginTop: "12px", padding: "8px", background: "#f1f5f9", color: "#7c3aed", textDecoration: "none", borderRadius: "8px", fontSize: "13px", fontWeight: "600" }}>View All Tools →</a>
+            </div>
+            <div style={{ background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.15)", borderRadius: "16px", padding: "20px" }}>
+              <h3 style={{ fontSize: "14px", fontWeight: "700", color: "#7c3aed", marginBottom: "12px" }}>⚡ Quick Info</h3>
+              {[{ label: "Type", value: "Free Tool" }, { label: "Processing", value: "Browser-based" }, { label: "Account Required", value: "No" }, { label: "Data Stored", value: "None" }, { label: "Algorithms", value: "5 supported" }].map((item, i) => (
+                <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: i < 4 ? "1px solid rgba(124,58,237,0.08)" : "none" }}>
+                  <span style={{ fontSize: "12px", color: "#94a3b8" }}>{item.label}</span>
+                  <span style={{ fontSize: "12px", fontWeight: "600", color: "#1e293b" }}>{item.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
       <Footer />
     </main>
   );

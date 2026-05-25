@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef } from "react";
+import { HeaderAd, FooterAd } from "./adsense";
 
 export function Navbar() {
   const [showTools, setShowTools] = useState(false);
@@ -103,7 +104,7 @@ export function Navbar() {
               </div>
               <div style={{ padding: "10px 16px", borderTop: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontSize: "11px", color: "#94a3b8" }}>🔒 All tools run in your browser</span>
-                <a href="/" style={{ fontSize: "11px", color: "#7c3aed", textDecoration: "none", fontWeight: "600" }}>View all →</a>
+                <a href="/tools" style={{ fontSize: "11px", color: "#7c3aed", textDecoration: "none", fontWeight: "600" }}>View all →</a>
               </div>
             </div>
           )}
@@ -137,6 +138,14 @@ export function Navbar() {
       </div>
     </nav>
   );
+}
+
+export function PageHeaderAd() {
+  return <HeaderAd />;
+}
+
+export function PageFooterAd() {
+  return <FooterAd />;
 }
 
 export function Footer() {
