@@ -421,11 +421,11 @@ export default function Home() {
           <div>
             <h4 style={{ fontSize: "11px", fontWeight: "700", color: "#6366f1", letterSpacing: "2px", marginBottom: "20px" }}>CATEGORIES</h4>
             {[
-              { name: "Authentication", href: "/" },
-              { name: "Password Tools", href: "/tools/password-generator" },
-              { name: "Developer Tools", href: "/tools/jwt-decoder" },
-              { name: "Security Tools", href: "/tools/link-checker" },
-              { name: "DNS & Network", href: "/tools/dns-lookup" },
+              { name: "All Tools", href: "/tools" },
+              { name: "2FA & QR", href: "/tools?category=2FA+%26+QR" },
+              { name: "Password", href: "/tools?category=Password" },
+              { name: "Developer", href: "/tools?category=Developer" },
+              { name: "Network", href: "/tools?category=Network" },
               { name: "Blog", href: "/blog" },
             ].map(link => (
               <a key={link.name} href={link.href} style={{ display: "block", color: "#a5b4fc", textDecoration: "none", fontSize: "14px", marginBottom: "12px" }}>{link.name}</a>

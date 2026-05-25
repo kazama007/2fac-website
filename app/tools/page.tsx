@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Navbar, Footer } from "../shared";
 
 function DotsBackground() {
@@ -166,9 +167,24 @@ const tools = [
   },
 ];
 
-export default function ToolsPage() {
+function ToolsPageInner() {
+  const searchParams = useSearchParams();
   const [activeCategory, setActiveCategory] = useState("All");
   const [search, setSearch] = useState("");
+
+  const categoryHeadings: { [k: string]: { title: string; desc: string } } = {
+    "All": { title: "Free Cybersecurity Tools", desc: `${tools.length} free tools — no account required, no data collected` },
+    "2FA & QR": { title: "2FA & QR Code Tools", desc: "Free two-factor authentication and QR code generator tools" },
+    "Password": { title: "Password Security Tools", desc: "Free password generator, strength checker, and breach detection tools" },
+    "Developer": { title: "Developer Security Tools", desc: "Free JWT decoder, hash generator, UUID generator, and more" },
+    "Network": { title: "Network & Domain Tools", desc: "Free DNS lookup, IP lookup, WHOIS, and link checker tools" },
+  };
+  const currentHeading = categoryHeadings[activeCategory] || categoryHeadings["All"];
+
+  useEffect(() => {
+    const cat = searchParams.get("category");
+    if (cat) setActiveCategory(decodeURIComponent(cat));
+  }, [searchParams]);
 
   const filtered = tools.filter(t => {
     const matchCat = activeCategory === "All" || t.category === activeCategory;
@@ -199,10 +215,10 @@ export default function ToolsPage() {
             🔧 All Tools
           </div>
           <h1 style={{ fontSize: "42px", fontWeight: "800", marginBottom: "12px", background: "linear-gradient(135deg, #1e293b 0%, #7c3aed 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-            Free Cybersecurity Tools
+            {currentHeading.title}
           </h1>
           <p style={{ color: "#64748b", fontSize: "16px", maxWidth: "520px", margin: "0 auto" }}>
-            {tools.length} free tools — no account required, no data collected
+            {currentHeading.desc}
           </p>
         </div>
 
@@ -271,14 +287,16 @@ export default function ToolsPage() {
                   <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b", marginBottom: "8px" }}>{tool.name}</h3>
                   <p style={{ fontSize: "13px", color: "#64748b", lineHeight: "1.6", margin: "0 0 16px" }}>{tool.desc}</p>
 
-                  <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                  <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "16px" }}>
                     {tool.tags.map(tag => (
-                      <span key={tag} style={{ fontSize: "11px", padding: "2px 8px", background: "#f1f5f9", color: "#94a3b8", borderRadius: "6px" }}>{tag}</span>
+                      <span key={tag} style={{ fontSize: "11px", padding: "3px 10px", background: "#f1f5f9", color: "#94a3b8", borderRadius: "20px", fontWeight: "500" }}>{tag}</span>
                     ))}
                   </div>
 
-                  <div style={{ marginTop: "16px", color: "#7c3aed", fontSize: "13px", fontWeight: "600", display: "flex", alignItems: "center", gap: "4px" }}>
-                    Open Tool →
+                  <div style={{ marginTop: "16px" }}>
+                    <div style={{ background: `linear-gradient(135deg, ${categoryColors[tool.category] || "#7c3aed"}, ${categoryColors[tool.category] || "#7c3aed"}cc)`, borderRadius: "12px", padding: "12px 20px", textAlign: "center", boxShadow: `0 4px 14px ${categoryColors[tool.category] || "#7c3aed"}40` }}>
+                      <span style={{ fontSize: "14px", fontWeight: "700", color: "white", letterSpacing: "0.2px" }}>Open Tool →</span>
+                    </div>
                   </div>
                 </div>
               </a>
@@ -295,5 +313,13 @@ export default function ToolsPage() {
 
       <Footer />
     </main>
+  );
+}
+
+export default function ToolsPage() {
+  return (
+    <Suspense fallback={null}>
+      <ToolsPageInner />
+    </Suspense>
   );
 }
