@@ -18,23 +18,23 @@ interface BlogPost {
   category: string;
   excerpt: string;
   published: boolean;
-  createdAt: string;
-  coverImage?: string;
-  relatedTools?: string[];
-  relatedArticles?: string[];
-  worksWith?: string[];
+  created_at: string;
+  cover_image?: string;
+  related_tools?: string[];
+  related_articles?: string[];
+  works_with?: string[];
   faqs?: { q: string; a: string }[];
-  seoTitle?: string;
-  seoDescription?: string;
-  authorName?: string;
-  authorAvatar?: string;
-  ctaTitle?: string;
-  ctaDesc?: string;
-  ctaButton?: string;
-  ctaLink?: string;
-  newsletterTitle?: string;
-  newsletterDesc?: string;
-  showSteps?: boolean;
+  seo_title?: string;
+  seo_description?: string;
+  author_name?: string;
+  author_avatar?: string;
+  cta_title?: string;
+  cta_desc?: string;
+  cta_button?: string;
+  cta_link?: string;
+  newsletter_title?: string;
+  newsletter_desc?: string;
+  show_steps?: boolean;
 }
 
 const ADMIN_PASSWORD = "2fac@admin123";
@@ -798,3 +798,4 @@ export default function AdminPanel() {
     </main>
   );
 }
+// This file already has the complete admin panel
