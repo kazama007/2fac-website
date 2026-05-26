@@ -18,6 +18,7 @@ export default function Home() {
   const [generated, setGenerated] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
+
   const [savedKeys, setSavedKeys] = useState<SavedKey[]>([]);
   const [activeCategory, setActiveCategory] = useState("All");
   const [search, setSearch] = useState("");
@@ -43,20 +44,26 @@ export default function Home() {
     }
   }, []);
 
-  useEffect(() => {
-    const timer = setInterval(async () => {
-      const seconds = 30 - (Math.floor(Date.now() / 1000) % 30);
-      setTimeLeft(seconds);
-      if (generated && secret) {
-        try {
-          setCode(await generateTOTP(secret));
-        } catch {
-          setError("Invalid secret key!");
-        }
+  const timerRef = useRef<any>(null);
+
+  const startTimer = (currentSecret: string) => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    setTimeLeft(30);
+    let count = 30;
+    timerRef.current = setInterval(() => {
+      count -= 1;
+      setTimeLeft(count);
+      if (count <= 0) {
+        count = 30;
+        setTimeLeft(30);
+        generateTOTP(currentSecret).then(newCode => setCode(newCode)).catch(() => {});
       }
     }, 1000);
-    return () => clearInterval(timer);
-  }, [generated, secret]);
+  };
+
+  useEffect(() => {
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, []);
 
   const handleGenerate = async () => {
     if (!secret) return;
@@ -65,6 +72,12 @@ export default function Home() {
       setCode(newCode);
       setGenerated(true);
       setError("");
+      startTimer(secret);
+      // Auto copy
+      navigator.clipboard.writeText(newCode).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2500);
+      });
       const now = new Date();
       const alreadyExists = savedKeys.find(k => k.secret === secret);
       if (!alreadyExists) {
@@ -177,6 +190,23 @@ export default function Home() {
     <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0f9ff 100%)", color: "#1a1a2e", fontFamily: "Inter, sans-serif", position: "relative" }}>
       <AnimatedBackground />
 
+      {/* Toast Popup */}
+      {copied && (
+        <div style={{
+          position: "fixed", top: "24px", left: "50%", transform: "translateX(-50%)",
+          background: "linear-gradient(135deg, #7c3aed, #9f67ff)",
+          color: "white", padding: "14px 28px", borderRadius: "50px",
+          fontSize: "15px", fontWeight: "700", zIndex: 9999,
+          boxShadow: "0 8px 32px rgba(124,58,237,0.4)",
+          display: "flex", alignItems: "center", gap: "10px",
+          animation: "slideDown 0.3s ease",
+        }}>
+          <span style={{ fontSize: "20px" }}>✅</span>
+          Code Copied to Clipboard!
+        </div>
+      )}
+      <style>{`@keyframes slideDown { from { opacity: 0; transform: translateX(-50%) translateY(-20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }`}</style>
+
       {/* Navbar */}
       <nav style={{ padding: "0 40px", height: "60px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 100, background: "rgba(255,255,255,0.92)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderBottom: "1px solid rgba(124,58,237,0.1)", boxShadow: "0 2px 20px rgba(0,0,0,0.06)" }}>
 
@@ -184,7 +214,7 @@ export default function Home() {
         <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: "0 0 auto" }}>
           <a href="/"><img src="/logo2.png" alt="2fa.ac logo" style={{ height: "36px", width: "auto" }} /></a>
           <span style={{ fontSize: "13px", color: "#94a3b8", fontWeight: "400", paddingLeft: "12px", borderLeft: "1px solid #e2e8f0", whiteSpace: "nowrap" }}>
-            Free Online Security & Utility Tools
+            Free 2FA Tools Online
           </span>
         </div>
 
