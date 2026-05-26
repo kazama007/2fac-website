@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { supabase } from "./lib/supabase";
 
 interface AdsSettings {
   publisherId: string;
@@ -10,14 +11,29 @@ interface AdsSettings {
   adsEnabled: boolean;
 }
 
+// Global cache so we don't fetch multiple times
+let cachedSettings: AdsSettings | null = null;
+
 function useAdsSettings() {
-  const [settings, setSettings] = useState<AdsSettings | null>(null);
+  const [settings, setSettings] = useState<AdsSettings | null>(cachedSettings);
   const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
     setMounted(true);
-    const saved = localStorage.getItem("ads-settings");
-    if (saved) setSettings(JSON.parse(saved));
+    if (cachedSettings) { setSettings(cachedSettings); return; }
+    // Fetch from Supabase
+    supabase.from("ads_settings").select("*").eq("id", 1).single().then(({ data }) => {
+      if (data) {
+        cachedSettings = data;
+        setSettings(data);
+      } else {
+        // Fallback to localStorage
+        const saved = localStorage.getItem("ads-settings");
+        if (saved) { const parsed = JSON.parse(saved); cachedSettings = parsed; setSettings(parsed); }
+      }
+    });
   }, []);
+
   return { settings, mounted };
 }
 

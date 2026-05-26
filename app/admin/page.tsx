@@ -157,27 +157,62 @@ export default function AdminPanel() {
   const [newFaq, setNewFaq] = useState({ q: "", a: "" });
   const [adsSettings, setAdsSettings] = useState({ publisherId: "", headerAdSlot: "", footerAdSlot: "", sidebarAdSlot: "", inArticleAdSlot: "", adsEnabled: false });
   const [adsSaved, setAdsSaved] = useState(false);
+  const [adsSaving, setAdsSaving] = useState(false);
   const [activeSection, setActiveSection] = useState("basic");
 
   useEffect(() => {
     if (sessionStorage.getItem("admin-logged-in") === "true") setIsLoggedIn(true);
     loadPosts();
-    const ads = localStorage.getItem("ads-settings");
-    if (ads) setAdsSettings(JSON.parse(ads));
+    loadAdsSettings();
   }, []);
 
   const loadPosts = async () => {
-    const { data, error } = await supabase
-      .from("blog_posts")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const { data, error } = await supabase.from("blog_posts").select("*").order("created_at", { ascending: false });
     if (data) setPosts(data);
     if (error) console.error("Load error:", error);
   };
 
-  const savePosts = (newPosts: BlogPost[]) => { setPosts(newPosts); };
-  const handleLogin = () => { if (password === ADMIN_PASSWORD) { setIsLoggedIn(true); sessionStorage.setItem("admin-logged-in", "true"); setLoginError(""); } else setLoginError("Wrong password!"); };
-  const saveAdsSettings = () => { localStorage.setItem("ads-settings", JSON.stringify(adsSettings)); setAdsSaved(true); setTimeout(() => setAdsSaved(false), 2000); };
+  const loadAdsSettings = async () => {
+    const { data } = await supabase.from("ads_settings").select("*").eq("id", 1).single();
+    if (data) {
+      setAdsSettings({
+        publisherId: data.publisher_id || "",
+        headerAdSlot: data.header_ad_slot || "",
+        footerAdSlot: data.footer_ad_slot || "",
+        sidebarAdSlot: data.sidebar_ad_slot || "",
+        inArticleAdSlot: data.in_article_ad_slot || "",
+        adsEnabled: data.ads_enabled || false,
+      });
+    } else {
+      // Fallback localStorage
+      const saved = localStorage.getItem("ads-settings");
+      if (saved) setAdsSettings(JSON.parse(saved));
+    }
+  };
+
+  const saveAdsSettings = async () => {
+    setAdsSaving(true);
+    const { error } = await supabase.from("ads_settings").upsert({
+      id: 1,
+      publisher_id: adsSettings.publisherId,
+      header_ad_slot: adsSettings.headerAdSlot,
+      footer_ad_slot: adsSettings.footerAdSlot,
+      sidebar_ad_slot: adsSettings.sidebarAdSlot,
+      in_article_ad_slot: adsSettings.inArticleAdSlot,
+      ads_enabled: adsSettings.adsEnabled,
+    });
+    setAdsSaving(false);
+    if (error) { alert("Error saving: " + error.message); return; }
+    // Also save to localStorage as backup
+    localStorage.setItem("ads-settings", JSON.stringify(adsSettings));
+    setAdsSaved(true);
+    setTimeout(() => setAdsSaved(false), 2000);
+  };
+
+  const handleLogin = () => {
+    if (password === ADMIN_PASSWORD) { setIsLoggedIn(true); sessionStorage.setItem("admin-logged-in", "true"); setLoginError(""); }
+    else setLoginError("Wrong password!");
+  };
 
   const handleCoverImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]; if (!file) return;
@@ -190,55 +225,17 @@ export default function AdminPanel() {
     } catch { alert("Upload failed."); }
   };
 
-  const toggleTool = (toolName: string) => {
-    setForm(f => ({ ...f, relatedTools: f.relatedTools.includes(toolName) ? f.relatedTools.filter(t => t !== toolName) : [...f.relatedTools, toolName] }));
-  };
-
-  const toggleArticle = (articleTitle: string) => {
-    setForm(f => ({ ...f, relatedArticles: f.relatedArticles.includes(articleTitle) ? f.relatedArticles.filter(a => a !== articleTitle) : [...f.relatedArticles, articleTitle] }));
-  };
-
-  const toggleWorksWith = (app: string) => {
-    setForm(f => ({ ...f, worksWith: f.worksWith.includes(app) ? f.worksWith.filter(w => w !== app) : [...f.worksWith, app] }));
-  };
-
-  const addFaq = () => {
-    if (!newFaq.q || !newFaq.a) return;
-    setForm(f => ({ ...f, faqs: [...f.faqs, { q: newFaq.q, a: newFaq.a }] }));
-    setNewFaq({ q: "", a: "" });
-  };
-
+  const toggleTool = (toolName: string) => setForm(f => ({ ...f, relatedTools: f.relatedTools.includes(toolName) ? f.relatedTools.filter(t => t !== toolName) : [...f.relatedTools, toolName] }));
+  const toggleArticle = (articleTitle: string) => setForm(f => ({ ...f, relatedArticles: f.relatedArticles.includes(articleTitle) ? f.relatedArticles.filter(a => a !== articleTitle) : [...f.relatedArticles, articleTitle] }));
+  const toggleWorksWith = (app: string) => setForm(f => ({ ...f, worksWith: f.worksWith.includes(app) ? f.worksWith.filter(w => w !== app) : [...f.worksWith, app] }));
+  const addFaq = () => { if (!newFaq.q || !newFaq.a) return; setForm(f => ({ ...f, faqs: [...f.faqs, { q: newFaq.q, a: newFaq.a }] })); setNewFaq({ q: "", a: "" }); };
   const removeFaq = (i: number) => setForm(f => ({ ...f, faqs: f.faqs.filter((_, idx) => idx !== i) }));
-
   const readingTime = Math.ceil(form.content.replace(/<[^>]*>/g, "").split(" ").length / 200);
 
   const handlePublish = async () => {
     if (!form.title || !form.content) return;
     const slug = form.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    const newPost = {
-      id: Date.now().toString(),
-      title: form.title, slug, content: form.content,
-      category: form.category,
-      excerpt: form.excerpt || form.content.replace(/<[^>]*>/g, "").slice(0, 150) + "...",
-      published: true,
-      created_at: new Date().toISOString(),
-      cover_image: form.coverImage,
-      related_tools: form.relatedTools,
-      related_articles: form.relatedArticles,
-      works_with: form.worksWith,
-      faqs: form.faqs,
-      seo_title: form.seoTitle || form.title,
-      seo_description: form.seoDescription || form.excerpt,
-      author_name: form.authorName,
-      author_avatar: form.authorAvatar,
-      cta_title: form.ctaTitle,
-      cta_desc: form.ctaDesc,
-      cta_button: form.ctaButton,
-      cta_link: form.ctaLink,
-      newsletter_title: form.newsletterTitle,
-      newsletter_desc: form.newsletterDesc,
-      show_steps: form.showSteps,
-    };
+    const newPost = { id: Date.now().toString(), title: form.title, slug, content: form.content, category: form.category, excerpt: form.excerpt || form.content.replace(/<[^>]*>/g, "").slice(0, 150) + "...", published: true, created_at: new Date().toISOString(), cover_image: form.coverImage, related_tools: form.relatedTools, related_articles: form.relatedArticles, works_with: form.worksWith, faqs: form.faqs, seo_title: form.seoTitle || form.title, seo_description: form.seoDescription || form.excerpt, author_name: form.authorName, author_avatar: form.authorAvatar, cta_title: form.ctaTitle, cta_desc: form.ctaDesc, cta_button: form.ctaButton, cta_link: form.ctaLink, newsletter_title: form.newsletterTitle, newsletter_desc: form.newsletterDesc, show_steps: form.showSteps };
     const { error } = await supabase.from("blog_posts").insert([newPost]);
     if (error) { alert("Error: " + error.message); return; }
     await loadPosts();
@@ -247,52 +244,14 @@ export default function AdminPanel() {
 
   const handleUpdate = async () => {
     if (!editingPost || !form.title || !form.content) return;
-    const { error } = await supabase.from("blog_posts").update({
-      title: form.title, content: form.content, category: form.category,
-      excerpt: form.excerpt || form.content.replace(/<[^>]*>/g, "").slice(0, 150) + "...",
-      cover_image: form.coverImage,
-      related_tools: form.relatedTools,
-      related_articles: form.relatedArticles,
-      works_with: form.worksWith,
-      faqs: form.faqs,
-      seo_title: form.seoTitle,
-      seo_description: form.seoDescription,
-      author_name: form.authorName,
-      author_avatar: form.authorAvatar,
-      cta_title: form.ctaTitle,
-      cta_desc: form.ctaDesc,
-      cta_button: form.ctaButton,
-      cta_link: form.ctaLink,
-      newsletter_title: form.newsletterTitle,
-      newsletter_desc: form.newsletterDesc,
-      show_steps: form.showSteps,
-    }).eq("id", editingPost.id);
+    const { error } = await supabase.from("blog_posts").update({ title: form.title, content: form.content, category: form.category, excerpt: form.excerpt || form.content.replace(/<[^>]*>/g, "").slice(0, 150) + "...", cover_image: form.coverImage, related_tools: form.relatedTools, related_articles: form.relatedArticles, works_with: form.worksWith, faqs: form.faqs, seo_title: form.seoTitle, seo_description: form.seoDescription, author_name: form.authorName, author_avatar: form.authorAvatar, cta_title: form.ctaTitle, cta_desc: form.ctaDesc, cta_button: form.ctaButton, cta_link: form.ctaLink, newsletter_title: form.newsletterTitle, newsletter_desc: form.newsletterDesc, show_steps: form.showSteps }).eq("id", editingPost.id);
     if (error) { alert("Error: " + error.message); return; }
-    await loadPosts();
-    setEditingPost(null); setActiveTab("posts");
+    await loadPosts(); setEditingPost(null); setActiveTab("posts");
   };
 
   const handleEdit = (post: any) => {
     setEditingPost(post);
-    setForm({
-      title: post.title, content: post.content, category: post.category, excerpt: post.excerpt,
-      coverImage: post.cover_image || "",
-      relatedTools: post.related_tools || [],
-      relatedArticles: post.related_articles || [],
-      worksWith: post.works_with || [],
-      faqs: post.faqs || [],
-      seoTitle: post.seo_title || "",
-      seoDescription: post.seo_description || "",
-      authorName: post.author_name || "2FA.AC Team",
-      authorAvatar: post.author_avatar || "",
-      ctaTitle: post.cta_title || "Secure Your Accounts with 2FA",
-      ctaDesc: post.cta_desc || "Enable two-factor authentication and protect your accounts from unauthorized access.",
-      ctaButton: post.cta_button || "Explore 2FA Tools →",
-      ctaLink: post.cta_link || "/tools",
-      newsletterTitle: post.newsletter_title || "Stay Updated",
-      newsletterDesc: post.newsletter_desc || "Get the latest security tips and tools updates in your inbox.",
-      showSteps: post.show_steps || false,
-    });
+    setForm({ title: post.title, content: post.content, category: post.category, excerpt: post.excerpt, coverImage: post.cover_image || "", relatedTools: post.related_tools || [], relatedArticles: post.related_articles || [], worksWith: post.works_with || [], faqs: post.faqs || [], seoTitle: post.seo_title || "", seoDescription: post.seo_description || "", authorName: post.author_name || "2FA.AC Team", authorAvatar: post.author_avatar || "", ctaTitle: post.cta_title || "Secure Your Accounts with 2FA", ctaDesc: post.cta_desc || "Enable two-factor authentication and protect your accounts from unauthorized access.", ctaButton: post.cta_button || "Explore 2FA Tools →", ctaLink: post.cta_link || "/tools", newsletterTitle: post.newsletter_title || "Stay Updated", newsletterDesc: post.newsletter_desc || "Get the latest security tips and tools updates in your inbox.", showSteps: post.show_steps || false });
     setCoverPreview(post.cover_image || ""); setActiveTab("edit"); setActiveSection("basic");
   };
 
@@ -302,6 +261,7 @@ export default function AdminPanel() {
     if (error) { alert("Error: " + error.message); return; }
     await loadPosts();
   };
+
   const togglePublish = async (id: string) => {
     const post = posts.find(p => p.id === id);
     if (!post) return;
@@ -311,9 +271,7 @@ export default function AdminPanel() {
   };
 
   const otherPosts = posts.filter(p => editingPost ? p.id !== editingPost.id : true);
-
   const inputStyle = { width: "100%", padding: "12px 14px", background: "#f8fafc", border: "1.5px solid #e2e8f0", borderRadius: "10px", color: "#1e293b", fontSize: "14px", boxSizing: "border-box" as const, outline: "none" };
-
   const sectionBtn = (key: string, label: string) => (
     <button onClick={() => setActiveSection(key)} style={{ padding: "8px 16px", background: activeSection === key ? "#7c3aed" : "#f1f5f9", color: activeSection === key ? "white" : "#64748b", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "13px", fontWeight: activeSection === key ? "600" : "400" }}>{label}</button>
   );
@@ -325,11 +283,7 @@ export default function AdminPanel() {
           <div style={{ fontSize: "48px", marginBottom: "16px" }}>🔐</div>
           <h1 style={{ fontSize: "24px", fontWeight: "800", color: "#1e293b", marginBottom: "6px" }}>Admin Panel</h1>
           <p style={{ color: "#64748b", fontSize: "14px", marginBottom: "28px" }}>2fa.ac Blog Management</p>
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleLogin()} placeholder="Enter admin password" autoComplete="new-password"
-            style={{ ...inputStyle, marginBottom: "12px" }}
-            onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"}
-            onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"}
-          />
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleLogin()} placeholder="Enter admin password" autoComplete="new-password" style={{ ...inputStyle, marginBottom: "12px" }} onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"} />
           {loginError && <p style={{ color: "#ef4444", fontSize: "13px", marginBottom: "12px" }}>{loginError}</p>}
           <button onClick={handleLogin} style={{ width: "100%", padding: "14px", background: "linear-gradient(135deg, #7c3aed, #9f67ff)", color: "white", border: "none", borderRadius: "10px", fontSize: "16px", fontWeight: "700", cursor: "pointer" }}>Login</button>
         </div>
@@ -394,9 +348,6 @@ export default function AdminPanel() {
                             <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "10px", background: "rgba(124,58,237,0.08)", color: "#7c3aed" }}>{post.category}</span>
                           </div>
                           <div style={{ fontSize: "13px", color: "#94a3b8" }}>{new Date(post.created_at).toLocaleDateString()} • /blog/{post.slug}</div>
-                          <div style={{ fontSize: "12px", color: "#94a3b8", marginTop: "2px" }}>
-                            {post.related_tools?.length ? `🔧 ${post.related_tools.length} tools` : ""} {post.faqs?.length ? `❓ ${post.faqs.length} FAQs` : ""}
-                          </div>
                         </div>
                       </div>
                       <div style={{ display: "flex", gap: "8px" }}>
@@ -416,15 +367,9 @@ export default function AdminPanel() {
           {(activeTab === "new" || activeTab === "edit") && (
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-                <h2 style={{ fontSize: "22px", fontWeight: "700", color: "#1e293b", margin: 0 }}>
-                  {activeTab === "new" ? "✏️ New Blog Post" : "📝 Edit Post"}
-                </h2>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.15)", borderRadius: "10px", padding: "8px 14px", fontSize: "13px", color: "#7c3aed" }}>
-                  ⏱ Reading time: ~{readingTime} min
-                </div>
+                <h2 style={{ fontSize: "22px", fontWeight: "700", color: "#1e293b", margin: 0 }}>{activeTab === "new" ? "✏️ New Blog Post" : "📝 Edit Post"}</h2>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.15)", borderRadius: "10px", padding: "8px 14px", fontSize: "13px", color: "#7c3aed" }}>⏱ Reading time: ~{readingTime} min</div>
               </div>
-
-              {/* Section Tabs */}
               <div style={{ display: "flex", gap: "8px", marginBottom: "24px", flexWrap: "wrap" }}>
                 {sectionBtn("basic", "📄 Basic Info")}
                 {sectionBtn("content", "✍️ Content")}
@@ -438,14 +383,12 @@ export default function AdminPanel() {
                 {sectionBtn("newsletter", "📧 Newsletter")}
               </div>
 
-              {/* BASIC INFO */}
               {activeSection === "basic" && (
                 <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                     <div>
                       <label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>Post Title *</label>
-                      <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Enter post title..."
-                        style={inputStyle} onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"} />
+                      <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Enter post title..." style={inputStyle} onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"} />
                     </div>
                     <div>
                       <label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>Category</label>
@@ -454,13 +397,10 @@ export default function AdminPanel() {
                       </select>
                     </div>
                   </div>
-
                   <div>
-                    <label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>Excerpt / Short Description</label>
-                    <textarea value={form.excerpt} onChange={(e) => setForm({ ...form, excerpt: e.target.value })} placeholder="Short description shown in blog listing..." rows={3}
-                      style={{ ...inputStyle, resize: "vertical" as const, fontFamily: "Inter, sans-serif" }} onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"} />
+                    <label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>Excerpt</label>
+                    <textarea value={form.excerpt} onChange={(e) => setForm({ ...form, excerpt: e.target.value })} placeholder="Short description shown in blog listing..." rows={3} style={{ ...inputStyle, resize: "vertical" as const, fontFamily: "Inter, sans-serif" }} onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"} />
                   </div>
-
                   <div>
                     <label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>Cover Image</label>
                     <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
@@ -479,74 +419,45 @@ export default function AdminPanel() {
                 </div>
               )}
 
-              {/* CONTENT */}
               {activeSection === "content" && (
                 <div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
                     <label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600" }}>Content *</label>
-                    <div style={{ display: "flex", gap: "8px" }}>
-                      <button onClick={() => {
-                        const html = prompt("Paste your HTML content here:");
-                        if (html) setForm({ ...form, content: html });
-                      }} style={{ padding: "6px 14px", background: "rgba(124,58,237,0.08)", border: "1.5px solid rgba(124,58,237,0.3)", color: "#7c3aed", borderRadius: "8px", cursor: "pointer", fontSize: "12px", fontWeight: "600" }}>
-                        📥 Import HTML
-                      </button>
-                      <button onClick={() => {
-                        const raw = window.prompt("Current HTML (copy this):", form.content);
-                      }} style={{ padding: "6px 14px", background: "#f1f5f9", border: "1.5px solid #e2e8f0", color: "#64748b", borderRadius: "8px", cursor: "pointer", fontSize: "12px" }}>
-                        📤 View HTML
-                      </button>
-                    </div>
+                    <button onClick={() => { const html = prompt("Paste your HTML content here:"); if (html) setForm({ ...form, content: html }); }} style={{ padding: "6px 14px", background: "rgba(124,58,237,0.08)", border: "1.5px solid rgba(124,58,237,0.3)", color: "#7c3aed", borderRadius: "8px", cursor: "pointer", fontSize: "12px", fontWeight: "600" }}>📥 Import HTML</button>
                   </div>
                   <TipTapEditor value={form.content} onChange={(val) => setForm({ ...form, content: val })} />
-                  <p style={{ fontSize: "12px", color: "#94a3b8", marginTop: "8px" }}>
-                    💡 Tip: Use <strong>Import HTML</strong> to paste raw HTML content, or type directly in the editor above.
-                  </p>
                 </div>
               )}
 
-              {/* RELATED TOOLS */}
               {activeSection === "tools" && (
                 <div>
                   <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b", marginBottom: "6px" }}>🔧 Related Tools</h3>
-                  <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "16px" }}>Select tools to show in the blog post sidebar. Selected: <strong style={{ color: "#7c3aed" }}>{form.relatedTools.length}</strong></p>
+                  <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "16px" }}>Selected: <strong style={{ color: "#7c3aed" }}>{form.relatedTools.length}</strong></p>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
                     {ALL_TOOLS.map(tool => (
-                      <div key={tool.name} onClick={() => toggleTool(tool.name)}
-                        style={{ display: "flex", alignItems: "center", gap: "10px", padding: "12px 16px", background: form.relatedTools.includes(tool.name) ? "rgba(124,58,237,0.08)" : "#ffffff", border: form.relatedTools.includes(tool.name) ? "1.5px solid #7c3aed" : "1.5px solid #e2e8f0", borderRadius: "10px", cursor: "pointer" }}>
+                      <div key={tool.name} onClick={() => toggleTool(tool.name)} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "12px 16px", background: form.relatedTools.includes(tool.name) ? "rgba(124,58,237,0.08)" : "#ffffff", border: form.relatedTools.includes(tool.name) ? "1.5px solid #7c3aed" : "1.5px solid #e2e8f0", borderRadius: "10px", cursor: "pointer" }}>
                         <div style={{ width: "20px", height: "20px", borderRadius: "4px", background: form.relatedTools.includes(tool.name) ? "#7c3aed" : "transparent", border: form.relatedTools.includes(tool.name) ? "none" : "2px solid #cbd5e1", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                           {form.relatedTools.includes(tool.name) && <span style={{ color: "white", fontSize: "12px" }}>✓</span>}
                         </div>
-                        <span style={{ fontSize: "13px", color: form.relatedTools.includes(tool.name) ? "#7c3aed" : "#64748b", fontWeight: form.relatedTools.includes(tool.name) ? "600" : "400" }}>{tool.name}</span>
+                        <span style={{ fontSize: "13px", color: form.relatedTools.includes(tool.name) ? "#7c3aed" : "#64748b" }}>{tool.name}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* RELATED ARTICLES */}
               {activeSection === "articles" && (
                 <div>
                   <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b", marginBottom: "6px" }}>📝 Related Articles</h3>
-                  <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "16px" }}>Select other blog posts to show as related articles. Selected: <strong style={{ color: "#7c3aed" }}>{form.relatedArticles.length}</strong></p>
-                  {otherPosts.length === 0 ? (
-                    <div style={{ background: "#f8fafc", border: "1.5px solid #e2e8f0", borderRadius: "12px", padding: "32px", textAlign: "center", color: "#94a3b8" }}>
-                      <div style={{ fontSize: "32px", marginBottom: "8px" }}>📭</div>
-                      <p>No other posts yet. Create more blog posts first!</p>
-                    </div>
-                  ) : (
+                  <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "16px" }}>Selected: <strong style={{ color: "#7c3aed" }}>{form.relatedArticles.length}</strong></p>
+                  {otherPosts.length === 0 ? <div style={{ textAlign: "center", padding: "32px", color: "#94a3b8" }}>No other posts yet.</div> : (
                     <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                       {otherPosts.map(post => (
-                        <div key={post.id} onClick={() => toggleArticle(post.title)}
-                          style={{ display: "flex", alignItems: "center", gap: "12px", padding: "14px 16px", background: form.relatedArticles.includes(post.title) ? "rgba(124,58,237,0.08)" : "#ffffff", border: form.relatedArticles.includes(post.title) ? "1.5px solid #7c3aed" : "1.5px solid #e2e8f0", borderRadius: "10px", cursor: "pointer" }}>
+                        <div key={post.id} onClick={() => toggleArticle(post.title)} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "14px 16px", background: form.relatedArticles.includes(post.title) ? "rgba(124,58,237,0.08)" : "#ffffff", border: form.relatedArticles.includes(post.title) ? "1.5px solid #7c3aed" : "1.5px solid #e2e8f0", borderRadius: "10px", cursor: "pointer" }}>
                           <div style={{ width: "20px", height: "20px", borderRadius: "4px", background: form.relatedArticles.includes(post.title) ? "#7c3aed" : "transparent", border: form.relatedArticles.includes(post.title) ? "none" : "2px solid #cbd5e1", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                             {form.relatedArticles.includes(post.title) && <span style={{ color: "white", fontSize: "12px" }}>✓</span>}
                           </div>
-                          {post.cover_image && <img src={post.cover_image} alt="" style={{ width: "50px", height: "36px", objectFit: "cover", borderRadius: "4px" }} />}
-                          <div>
-                            <div style={{ fontSize: "14px", fontWeight: "600", color: form.relatedArticles.includes(post.title) ? "#7c3aed" : "#1e293b" }}>{post.title}</div>
-                            <div style={{ fontSize: "12px", color: "#94a3b8" }}>{post.category} • {new Date(post.created_at).toLocaleDateString()}</div>
-                          </div>
+                          <div><div style={{ fontSize: "14px", fontWeight: "600", color: form.relatedArticles.includes(post.title) ? "#7c3aed" : "#1e293b" }}>{post.title}</div><div style={{ fontSize: "12px", color: "#94a3b8" }}>{post.category}</div></div>
                         </div>
                       ))}
                     </div>
@@ -554,242 +465,154 @@ export default function AdminPanel() {
                 </div>
               )}
 
-              {/* WORKS WITH */}
               {activeSection === "works" && (
                 <div>
                   <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b", marginBottom: "6px" }}>🔗 Works With</h3>
-                  <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "16px" }}>Select apps/tools this post is compatible with. Selected: <strong style={{ color: "#7c3aed" }}>{form.worksWith.length}</strong></p>
+                  <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "16px" }}>Selected: <strong style={{ color: "#7c3aed" }}>{form.worksWith.length}</strong></p>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px" }}>
                     {WORKS_WITH_OPTIONS.map(app => (
-                      <div key={app.name} onClick={() => toggleWorksWith(app.name)}
-                        style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", padding: "16px 12px", background: form.worksWith.includes(app.name) ? "rgba(124,58,237,0.08)" : "#ffffff", border: form.worksWith.includes(app.name) ? "1.5px solid #7c3aed" : "1.5px solid #e2e8f0", borderRadius: "12px", cursor: "pointer", textAlign: "center" }}>
+                      <div key={app.name} onClick={() => toggleWorksWith(app.name)} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", padding: "16px 12px", background: form.worksWith.includes(app.name) ? "rgba(124,58,237,0.08)" : "#ffffff", border: form.worksWith.includes(app.name) ? "1.5px solid #7c3aed" : "1.5px solid #e2e8f0", borderRadius: "12px", cursor: "pointer", textAlign: "center" }}>
                         <div style={{ fontSize: "28px" }}>{app.emoji}</div>
-                        <div style={{ fontSize: "12px", color: form.worksWith.includes(app.name) ? "#7c3aed" : "#64748b", fontWeight: form.worksWith.includes(app.name) ? "600" : "400", lineHeight: "1.3" }}>{app.name}</div>
-                        {form.worksWith.includes(app.name) && <div style={{ background: "#7c3aed", color: "white", borderRadius: "4px", padding: "1px 8px", fontSize: "11px" }}>✓ Selected</div>}
+                        <div style={{ fontSize: "12px", color: form.worksWith.includes(app.name) ? "#7c3aed" : "#64748b" }}>{app.name}</div>
+                        {form.worksWith.includes(app.name) && <div style={{ background: "#7c3aed", color: "white", borderRadius: "4px", padding: "1px 8px", fontSize: "11px" }}>✓</div>}
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* FAQ */}
               {activeSection === "faq" && (
                 <div>
-                  <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b", marginBottom: "6px" }}>❓ Frequently Asked Questions</h3>
-                  <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "16px" }}>Add Q&A pairs to show as FAQ in the blog post. Total: <strong style={{ color: "#7c3aed" }}>{form.faqs.length}</strong></p>
-
+                  <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b", marginBottom: "6px" }}>❓ FAQ</h3>
+                  <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "16px" }}>Total: <strong style={{ color: "#7c3aed" }}>{form.faqs.length}</strong></p>
                   {form.faqs.length > 0 && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "20px" }}>
                       {form.faqs.map((faq, i) => (
                         <div key={i} style={{ background: "#ffffff", border: "1.5px solid #e2e8f0", borderRadius: "10px", padding: "14px 16px" }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
                             <div style={{ flex: 1 }}>
                               <div style={{ fontSize: "14px", fontWeight: "600", color: "#1e293b", marginBottom: "4px" }}>Q: {faq.q}</div>
                               <div style={{ fontSize: "13px", color: "#64748b" }}>A: {faq.a}</div>
                             </div>
-                            <button onClick={() => removeFaq(i)} style={{ background: "rgba(239,68,68,0.08)", border: "none", color: "#ef4444", borderRadius: "6px", padding: "4px 10px", cursor: "pointer", fontSize: "12px", flexShrink: 0 }}>Remove</button>
+                            <button onClick={() => removeFaq(i)} style={{ background: "rgba(239,68,68,0.08)", border: "none", color: "#ef4444", borderRadius: "6px", padding: "4px 10px", cursor: "pointer", fontSize: "12px" }}>Remove</button>
                           </div>
                         </div>
                       ))}
                     </div>
                   )}
-
                   <div style={{ background: "#f8fafc", border: "1.5px solid #e2e8f0", borderRadius: "12px", padding: "20px" }}>
-                    <div style={{ fontSize: "13px", fontWeight: "600", color: "#64748b", marginBottom: "12px" }}>Add New FAQ</div>
-                    <input type="text" value={newFaq.q} onChange={e => setNewFaq({ ...newFaq, q: e.target.value })} placeholder="Question..."
-                      style={{ ...inputStyle, marginBottom: "10px" }} onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"} />
-                    <textarea value={newFaq.a} onChange={e => setNewFaq({ ...newFaq, a: e.target.value })} placeholder="Answer..." rows={3}
-                      style={{ ...inputStyle, resize: "vertical" as const, fontFamily: "Inter, sans-serif", marginBottom: "10px" }} onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"} />
-                    <button onClick={addFaq} disabled={!newFaq.q || !newFaq.a} style={{ padding: "10px 20px", background: !newFaq.q || !newFaq.a ? "#e2e8f0" : "linear-gradient(135deg, #7c3aed, #9f67ff)", color: !newFaq.q || !newFaq.a ? "#94a3b8" : "white", border: "none", borderRadius: "8px", cursor: !newFaq.q || !newFaq.a ? "not-allowed" : "pointer", fontSize: "14px", fontWeight: "600" }}>
-                      + Add FAQ
-                    </button>
+                    <input type="text" value={newFaq.q} onChange={e => setNewFaq({ ...newFaq, q: e.target.value })} placeholder="Question..." style={{ ...inputStyle, marginBottom: "10px" }} onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"} />
+                    <textarea value={newFaq.a} onChange={e => setNewFaq({ ...newFaq, a: e.target.value })} placeholder="Answer..." rows={3} style={{ ...inputStyle, resize: "vertical" as const, fontFamily: "Inter, sans-serif", marginBottom: "10px" }} onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"} />
+                    <button onClick={addFaq} disabled={!newFaq.q || !newFaq.a} style={{ padding: "10px 20px", background: !newFaq.q || !newFaq.a ? "#e2e8f0" : "linear-gradient(135deg, #7c3aed, #9f67ff)", color: !newFaq.q || !newFaq.a ? "#94a3b8" : "white", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "14px", fontWeight: "600" }}>+ Add FAQ</button>
                   </div>
                 </div>
               )}
 
-              {/* SEO */}
               {activeSection === "seo" && (
-                <div>
-                  <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b", marginBottom: "6px" }}>🔍 SEO Settings</h3>
-                  <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "20px" }}>Optimize your post for search engines.</p>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                    <div>
-                      <label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>
-                        SEO Title <span style={{ color: "#94a3b8", fontWeight: "400" }}>({form.seoTitle.length}/60 chars)</span>
-                      </label>
-                      <input type="text" value={form.seoTitle} onChange={(e) => setForm({ ...form, seoTitle: e.target.value })} placeholder={form.title || "SEO optimized title..."}
-                        style={{ ...inputStyle, borderColor: form.seoTitle.length > 60 ? "#ef4444" : "#e2e8f0" }} onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"} />
-                      <div style={{ height: "4px", background: "#e2e8f0", borderRadius: "2px", marginTop: "6px" }}>
-                        <div style={{ height: "100%", width: `${Math.min(form.seoTitle.length / 60 * 100, 100)}%`, background: form.seoTitle.length > 60 ? "#ef4444" : form.seoTitle.length > 50 ? "#f59e0b" : "#22c55e", borderRadius: "2px", transition: "all 0.2s" }} />
-                      </div>
-                    </div>
-                    <div>
-                      <label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>
-                        Meta Description <span style={{ color: "#94a3b8", fontWeight: "400" }}>({form.seoDescription.length}/160 chars)</span>
-                      </label>
-                      <textarea value={form.seoDescription} onChange={(e) => setForm({ ...form, seoDescription: e.target.value })} placeholder={form.excerpt || "SEO meta description..."} rows={3}
-                        style={{ ...inputStyle, resize: "vertical" as const, fontFamily: "Inter, sans-serif", borderColor: form.seoDescription.length > 160 ? "#ef4444" : "#e2e8f0" }} onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"} />
-                      <div style={{ height: "4px", background: "#e2e8f0", borderRadius: "2px", marginTop: "6px" }}>
-                        <div style={{ height: "100%", width: `${Math.min(form.seoDescription.length / 160 * 100, 100)}%`, background: form.seoDescription.length > 160 ? "#ef4444" : form.seoDescription.length > 140 ? "#f59e0b" : "#22c55e", borderRadius: "2px", transition: "all 0.2s" }} />
-                      </div>
-                    </div>
-                    <div style={{ background: "#f8fafc", border: "1.5px solid #e2e8f0", borderRadius: "12px", padding: "16px" }}>
-                      <div style={{ fontSize: "12px", color: "#94a3b8", marginBottom: "10px", fontWeight: "600" }}>GOOGLE PREVIEW</div>
-                      <div style={{ fontSize: "18px", color: "#1a0dab", marginBottom: "4px" }}>{form.seoTitle || form.title || "Post Title"}</div>
-                      <div style={{ fontSize: "13px", color: "#006621", marginBottom: "4px" }}>https://2fa.ac/blog/{form.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}</div>
-                      <div style={{ fontSize: "13px", color: "#545454" }}>{form.seoDescription || form.excerpt || "Meta description will appear here..."}</div>
-                    </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                  <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b" }}>🔍 SEO Settings</h3>
+                  <div>
+                    <label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>SEO Title ({form.seoTitle.length}/60)</label>
+                    <input type="text" value={form.seoTitle} onChange={(e) => setForm({ ...form, seoTitle: e.target.value })} placeholder={form.title || "SEO title..."} style={inputStyle} onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"} />
+                    <div style={{ height: "4px", background: "#e2e8f0", borderRadius: "2px", marginTop: "6px" }}><div style={{ height: "100%", width: `${Math.min(form.seoTitle.length / 60 * 100, 100)}%`, background: form.seoTitle.length > 60 ? "#ef4444" : "#22c55e", borderRadius: "2px" }} /></div>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>Meta Description ({form.seoDescription.length}/160)</label>
+                    <textarea value={form.seoDescription} onChange={(e) => setForm({ ...form, seoDescription: e.target.value })} rows={3} style={{ ...inputStyle, resize: "vertical" as const, fontFamily: "Inter, sans-serif" }} onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"} />
+                    <div style={{ height: "4px", background: "#e2e8f0", borderRadius: "2px", marginTop: "6px" }}><div style={{ height: "100%", width: `${Math.min(form.seoDescription.length / 160 * 100, 100)}%`, background: form.seoDescription.length > 160 ? "#ef4444" : "#22c55e", borderRadius: "2px" }} /></div>
+                  </div>
+                  <div style={{ background: "#f8fafc", border: "1.5px solid #e2e8f0", borderRadius: "12px", padding: "16px" }}>
+                    <div style={{ fontSize: "12px", color: "#94a3b8", marginBottom: "8px", fontWeight: "600" }}>GOOGLE PREVIEW</div>
+                    <div style={{ fontSize: "18px", color: "#1a0dab", marginBottom: "4px" }}>{form.seoTitle || form.title || "Post Title"}</div>
+                    <div style={{ fontSize: "13px", color: "#006621", marginBottom: "4px" }}>https://2fa.ac/blog/{form.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}</div>
+                    <div style={{ fontSize: "13px", color: "#545454" }}>{form.seoDescription || form.excerpt || "Meta description..."}</div>
                   </div>
                 </div>
               )}
 
-              {/* AUTHOR */}
               {activeSection === "author" && (
-                <div>
-                  <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b", marginBottom: "6px" }}>👤 Author Settings</h3>
-                  <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "20px" }}>Customize the author information shown on the blog post.</p>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                    <div>
-                      <label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>Author Name</label>
-                      <input type="text" value={form.authorName} onChange={e => setForm({...form, authorName: e.target.value})} placeholder="2FA.AC Team"
-                        style={inputStyle} onFocus={e => e.currentTarget.style.border="1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border="1.5px solid #e2e8f0"} />
-                    </div>
-                    <div>
-                      <label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>Author Avatar URL (optional)</label>
-                      <input type="text" value={form.authorAvatar} onChange={e => setForm({...form, authorAvatar: e.target.value})} placeholder="https://example.com/avatar.png"
-                        style={inputStyle} onFocus={e => e.currentTarget.style.border="1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border="1.5px solid #e2e8f0"} />
-                    </div>
-                    <div style={{ background: "#f8fafc", border: "1.5px solid #e2e8f0", borderRadius: "12px", padding: "16px" }}>
-                      <p style={{ fontSize: "12px", color: "#94a3b8", marginBottom: "10px" }}>PREVIEW</p>
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        {form.authorAvatar
-                          ? <img src={form.authorAvatar} alt="" style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover" }} />
-                          : <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "linear-gradient(135deg, #7c3aed, #9f67ff)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px", color: "white", fontWeight: "700" }}>2</div>}
-                        <div>
-                          <div style={{ fontSize: "14px", fontWeight: "600", color: "#1e293b" }}>By {form.authorName || "2FA.AC Team"}</div>
-                          <div style={{ fontSize: "12px", color: "#94a3b8" }}>Author</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                  <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b" }}>👤 Author</h3>
+                  <div><label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>Author Name</label><input type="text" value={form.authorName} onChange={e => setForm({...form, authorName: e.target.value})} style={inputStyle} onFocus={e => e.currentTarget.style.border="1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border="1.5px solid #e2e8f0"} /></div>
+                  <div><label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>Avatar URL</label><input type="text" value={form.authorAvatar} onChange={e => setForm({...form, authorAvatar: e.target.value})} placeholder="https://..." style={inputStyle} onFocus={e => e.currentTarget.style.border="1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border="1.5px solid #e2e8f0"} /></div>
                 </div>
               )}
 
-              {/* CTA BANNER */}
               {activeSection === "cta" && (
-                <div>
-                  <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b", marginBottom: "6px" }}>🎯 CTA Banner</h3>
-                  <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "20px" }}>Customize the call-to-action banner shown at the bottom of the blog post.</p>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                    <div>
-                      <label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>CTA Title</label>
-                      <input type="text" value={form.ctaTitle} onChange={e => setForm({...form, ctaTitle: e.target.value})} placeholder="Secure Your Accounts with 2FA"
-                        style={inputStyle} onFocus={e => e.currentTarget.style.border="1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border="1.5px solid #e2e8f0"} />
-                    </div>
-                    <div>
-                      <label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>CTA Description</label>
-                      <textarea value={form.ctaDesc} onChange={e => setForm({...form, ctaDesc: e.target.value})} placeholder="Enable two-factor authentication..." rows={3}
-                        style={{ ...inputStyle, resize: "vertical" as const, fontFamily: "Inter, sans-serif" }} onFocus={e => e.currentTarget.style.border="1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border="1.5px solid #e2e8f0"} />
-                    </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-                      <div>
-                        <label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>Button Text</label>
-                        <input type="text" value={form.ctaButton} onChange={e => setForm({...form, ctaButton: e.target.value})} placeholder="Explore 2FA Tools →"
-                          style={inputStyle} onFocus={e => e.currentTarget.style.border="1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border="1.5px solid #e2e8f0"} />
-                      </div>
-                      <div>
-                        <label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>Button Link</label>
-                        <input type="text" value={form.ctaLink} onChange={e => setForm({...form, ctaLink: e.target.value})} placeholder="/tools"
-                          style={inputStyle} onFocus={e => e.currentTarget.style.border="1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border="1.5px solid #e2e8f0"} />
-                      </div>
-                    </div>
-                    <div style={{ background: "linear-gradient(135deg, #7c3aed, #9f67ff)", borderRadius: "16px", padding: "24px", display: "flex", alignItems: "center", gap: "16px" }}>
-                      <div style={{ fontSize: "40px" }}>🛡️</div>
-                      <div style={{ flex: 1, color: "white" }}>
-                        <div style={{ fontSize: "16px", fontWeight: "700", marginBottom: "4px" }}>{form.ctaTitle || "Secure Your Accounts with 2FA"}</div>
-                        <div style={{ fontSize: "12px", opacity: 0.85, marginBottom: "12px" }}>{form.ctaDesc || "Enable two-factor authentication..."}</div>
-                        <div style={{ background: "white", color: "#7c3aed", display: "inline-block", padding: "8px 18px", borderRadius: "8px", fontSize: "13px", fontWeight: "700" }}>{form.ctaButton || "Explore 2FA Tools →"}</div>
-                      </div>
-                    </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                  <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b" }}>🎯 CTA Banner</h3>
+                  <div><label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>Title</label><input type="text" value={form.ctaTitle} onChange={e => setForm({...form, ctaTitle: e.target.value})} style={inputStyle} onFocus={e => e.currentTarget.style.border="1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border="1.5px solid #e2e8f0"} /></div>
+                  <div><label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>Description</label><textarea value={form.ctaDesc} onChange={e => setForm({...form, ctaDesc: e.target.value})} rows={3} style={{ ...inputStyle, resize: "vertical" as const, fontFamily: "Inter, sans-serif" }} onFocus={e => e.currentTarget.style.border="1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border="1.5px solid #e2e8f0"} /></div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                    <div><label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>Button Text</label><input type="text" value={form.ctaButton} onChange={e => setForm({...form, ctaButton: e.target.value})} style={inputStyle} onFocus={e => e.currentTarget.style.border="1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border="1.5px solid #e2e8f0"} /></div>
+                    <div><label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>Button Link</label><input type="text" value={form.ctaLink} onChange={e => setForm({...form, ctaLink: e.target.value})} style={inputStyle} onFocus={e => e.currentTarget.style.border="1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border="1.5px solid #e2e8f0"} /></div>
                   </div>
                 </div>
               )}
 
-              {/* NEWSLETTER */}
               {activeSection === "newsletter" && (
-                <div>
-                  <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b", marginBottom: "6px" }}>📧 Newsletter Box</h3>
-                  <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "20px" }}>Customize the newsletter subscription box shown in the sidebar.</p>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                    <div>
-                      <label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>Newsletter Title</label>
-                      <input type="text" value={form.newsletterTitle} onChange={e => setForm({...form, newsletterTitle: e.target.value})} placeholder="Stay Updated"
-                        style={inputStyle} onFocus={e => e.currentTarget.style.border="1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border="1.5px solid #e2e8f0"} />
-                    </div>
-                    <div>
-                      <label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>Newsletter Description</label>
-                      <textarea value={form.newsletterDesc} onChange={e => setForm({...form, newsletterDesc: e.target.value})} placeholder="Get the latest security tips..." rows={3}
-                        style={{ ...inputStyle, resize: "vertical" as const, fontFamily: "Inter, sans-serif" }} onFocus={e => e.currentTarget.style.border="1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border="1.5px solid #e2e8f0"} />
-                    </div>
-                    <div style={{ background: "linear-gradient(135deg, #7c3aed, #9f67ff)", borderRadius: "16px", padding: "24px", color: "white" }}>
-                      <div style={{ fontSize: "16px", fontWeight: "700", marginBottom: "6px" }}>{form.newsletterTitle || "Stay Updated"}</div>
-                      <div style={{ fontSize: "13px", opacity: 0.85, marginBottom: "16px" }}>{form.newsletterDesc || "Get the latest security tips..."}</div>
-                      <div style={{ background: "rgba(255,255,255,0.2)", borderRadius: "8px", padding: "10px 14px", fontSize: "13px", color: "rgba(255,255,255,0.7)", marginBottom: "10px" }}>Enter your email...</div>
-                      <div style={{ background: "white", color: "#7c3aed", padding: "10px", borderRadius: "8px", textAlign: "center" as const, fontSize: "13px", fontWeight: "700" }}>Subscribe</div>
-                      <div style={{ fontSize: "11px", opacity: 0.7, marginTop: "8px", textAlign: "center" as const }}>No spam, unsubscribe anytime.</div>
-                    </div>
-                  </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                  <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b" }}>📧 Newsletter</h3>
+                  <div><label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>Title</label><input type="text" value={form.newsletterTitle} onChange={e => setForm({...form, newsletterTitle: e.target.value})} style={inputStyle} onFocus={e => e.currentTarget.style.border="1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border="1.5px solid #e2e8f0"} /></div>
+                  <div><label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>Description</label><textarea value={form.newsletterDesc} onChange={e => setForm({...form, newsletterDesc: e.target.value})} rows={3} style={{ ...inputStyle, resize: "vertical" as const, fontFamily: "Inter, sans-serif" }} onFocus={e => e.currentTarget.style.border="1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border="1.5px solid #e2e8f0"} /></div>
                 </div>
               )}
 
-              {/* Publish Buttons */}
               <div style={{ display: "flex", gap: "12px", marginTop: "28px", paddingTop: "20px", borderTop: "1px solid #e2e8f0" }}>
-                <button onClick={activeTab === "new" ? handlePublish : handleUpdate} disabled={!form.title || !form.content}
-                  style={{ padding: "12px 28px", background: (!form.title || !form.content) ? "#e2e8f0" : "linear-gradient(135deg, #7c3aed, #9f67ff)", color: (!form.title || !form.content) ? "#94a3b8" : "white", border: "none", borderRadius: "10px", fontSize: "15px", fontWeight: "700", cursor: !form.title || !form.content ? "not-allowed" : "pointer", boxShadow: (!form.title || !form.content) ? "none" : "0 4px 20px rgba(124,58,237,0.35)" }}>
+                <button onClick={activeTab === "new" ? handlePublish : handleUpdate} disabled={!form.title || !form.content} style={{ padding: "12px 28px", background: (!form.title || !form.content) ? "#e2e8f0" : "linear-gradient(135deg, #7c3aed, #9f67ff)", color: (!form.title || !form.content) ? "#94a3b8" : "white", border: "none", borderRadius: "10px", fontSize: "15px", fontWeight: "700", cursor: "pointer" }}>
                   {activeTab === "new" ? "🚀 Publish Post" : "💾 Update Post"}
                 </button>
-                <button onClick={() => { setActiveTab("posts"); setForm(emptyForm); setEditingPost(null); setCoverPreview(""); }}
-                  style={{ padding: "12px 20px", background: "#f1f5f9", color: "#64748b", border: "1.5px solid #e2e8f0", borderRadius: "10px", fontSize: "15px", cursor: "pointer" }}>
-                  Cancel
-                </button>
-                <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "16px", fontSize: "13px", color: "#94a3b8" }}>
-                  <span>🔧 {form.relatedTools.length} tools</span>
-                  <span>📝 {form.relatedArticles.length} articles</span>
-                  <span>🔗 {form.worksWith.length} apps</span>
-                  <span>❓ {form.faqs.length} FAQs</span>
-                </div>
+                <button onClick={() => { setActiveTab("posts"); setForm(emptyForm); setEditingPost(null); setCoverPreview(""); }} style={{ padding: "12px 20px", background: "#f1f5f9", color: "#64748b", border: "1.5px solid #e2e8f0", borderRadius: "10px", fontSize: "15px", cursor: "pointer" }}>Cancel</button>
               </div>
             </div>
           )}
 
-          {/* ADS */}
+          {/* ADSENSE SETTINGS */}
           {activeTab === "ads" && (
             <div>
               <h2 style={{ fontSize: "22px", fontWeight: "700", color: "#1e293b", marginBottom: "8px" }}>💰 AdSense Settings</h2>
-              <p style={{ color: "#64748b", fontSize: "14px", marginBottom: "24px" }}>Configure your Google AdSense ad slots.</p>
+              <p style={{ color: "#64748b", fontSize: "14px", marginBottom: "24px" }}>Ye settings Supabase mein save hongi — har device pe same rahegi.</p>
+
+              {/* Enable/Disable toggle */}
               <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "16px", padding: "20px 24px", marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
                   <div style={{ fontSize: "15px", fontWeight: "600", color: "#1e293b" }}>Enable AdSense Ads</div>
-                  <div style={{ fontSize: "13px", color: "#64748b", marginTop: "2px" }}>Turn ads on or off across the entire website</div>
+                  <div style={{ fontSize: "13px", color: "#64748b", marginTop: "2px" }}>Puri website pe ads on/off karo</div>
                 </div>
-                <button onClick={() => setAdsSettings(a => ({ ...a, adsEnabled: !a.adsEnabled }))} style={{ padding: "8px 20px", background: adsSettings.adsEnabled ? "rgba(34,197,94,0.1)" : "#f1f5f9", border: `1.5px solid ${adsSettings.adsEnabled ? "rgba(34,197,94,0.4)" : "#e2e8f0"}`, color: adsSettings.adsEnabled ? "#16a34a" : "#64748b", borderRadius: "10px", cursor: "pointer", fontSize: "14px", fontWeight: "600" }}>
+                <button onClick={() => setAdsSettings(a => ({ ...a, adsEnabled: !a.adsEnabled }))} style={{ padding: "10px 24px", background: adsSettings.adsEnabled ? "rgba(34,197,94,0.1)" : "#f1f5f9", border: `2px solid ${adsSettings.adsEnabled ? "rgba(34,197,94,0.4)" : "#e2e8f0"}`, color: adsSettings.adsEnabled ? "#16a34a" : "#64748b", borderRadius: "12px", cursor: "pointer", fontSize: "15px", fontWeight: "700" }}>
                   {adsSettings.adsEnabled ? "✅ Enabled" : "⭕ Disabled"}
                 </button>
               </div>
+
+              {/* Publisher ID + Slots */}
               <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "16px", padding: "28px" }}>
                 <div style={{ marginBottom: "20px" }}>
                   <label style={{ fontSize: "13px", fontWeight: "600", color: "#64748b", display: "block", marginBottom: "6px" }}>AdSense Publisher ID</label>
                   <input type="text" value={adsSettings.publisherId} onChange={e => setAdsSettings(a => ({ ...a, publisherId: e.target.value }))} placeholder="ca-pub-XXXXXXXXXXXXXXXX" style={{ ...inputStyle, fontFamily: "monospace" }} onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"} />
                 </div>
-                {[{ key: "headerAdSlot", label: "Header Ad Slot" }, { key: "footerAdSlot", label: "Footer Ad Slot" }, { key: "sidebarAdSlot", label: "Sidebar Ad Slot" }, { key: "inArticleAdSlot", label: "In-Article Ad Slot" }].map(slot => (
+
+                {[
+                  { key: "headerAdSlot", label: "Header Ad Slot", desc: "Site ke upar dikhega" },
+                  { key: "footerAdSlot", label: "Footer Ad Slot", desc: "Site ke neeche dikhega" },
+                  { key: "sidebarAdSlot", label: "Sidebar Ad Slot", desc: "Blog post sidebar mein" },
+                  { key: "inArticleAdSlot", label: "In-Article Ad Slot", desc: "Blog post content ke beech mein" },
+                ].map(slot => (
                   <div key={slot.key} style={{ marginBottom: "16px" }}>
-                    <label style={{ fontSize: "13px", fontWeight: "600", color: "#64748b", display: "block", marginBottom: "4px" }}>{slot.label}</label>
+                    <label style={{ fontSize: "13px", fontWeight: "600", color: "#64748b", display: "block", marginBottom: "2px" }}>{slot.label}</label>
+                    <p style={{ fontSize: "11px", color: "#94a3b8", marginBottom: "6px" }}>{slot.desc}</p>
                     <input type="text" value={(adsSettings as any)[slot.key]} onChange={e => setAdsSettings(a => ({ ...a, [slot.key]: e.target.value }))} placeholder="1234567890" style={{ ...inputStyle, fontFamily: "monospace" }} onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"} />
                   </div>
                 ))}
-                <button onClick={saveAdsSettings} style={{ marginTop: "8px", padding: "12px 28px", background: adsSaved ? "linear-gradient(135deg, #22c55e, #16a34a)" : "linear-gradient(135deg, #7c3aed, #9f67ff)", color: "white", border: "none", borderRadius: "10px", fontSize: "15px", fontWeight: "700", cursor: "pointer" }}>
-                  {adsSaved ? "✅ Settings Saved!" : "💾 Save Settings"}
+
+                <button onClick={saveAdsSettings} disabled={adsSaving} style={{ marginTop: "8px", padding: "14px 32px", background: adsSaved ? "linear-gradient(135deg, #22c55e, #16a34a)" : "linear-gradient(135deg, #7c3aed, #9f67ff)", color: "white", border: "none", borderRadius: "10px", fontSize: "15px", fontWeight: "700", cursor: "pointer", opacity: adsSaving ? 0.7 : 1 }}>
+                  {adsSaving ? "⏳ Saving..." : adsSaved ? "✅ Settings Saved!" : "💾 Save to Database"}
                 </button>
+
+                {adsSaved && (
+                  <div style={{ marginTop: "12px", padding: "12px 16px", background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)", borderRadius: "10px", fontSize: "13px", color: "#16a34a" }}>
+                    ✅ Settings Supabase mein save ho gayi! Sare devices pe automatically update ho jayegi.
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -798,4 +621,3 @@ export default function AdminPanel() {
     </main>
   );
 }
-// This file already has the complete admin panel
