@@ -65,11 +65,11 @@ export default function BlogClient({ initialPosts }: { initialPosts: any[] }) {
     <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0f9ff 100%)", color: "#1a1a2e", fontFamily: "Inter, sans-serif", position: "relative" }}>
       <DotsBackground />
       <Navbar />
-      <section style={{ maxWidth: "1000px", margin: "0 auto", padding: "40px 20px", position: "relative", zIndex: 1 }}>
-        <div style={{ textAlign: "center", marginBottom: "40px" }}>
-          <div style={{ display: "inline-block", background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "20px", padding: "6px 16px", fontSize: "13px", color: "#7c3aed", marginBottom: "16px", fontWeight: "500" }}>📝 2fa.ac Blog</div>
-          <h1 style={{ fontSize: "40px", fontWeight: "800", marginBottom: "12px", background: "linear-gradient(135deg, #1e293b 0%, #7c3aed 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Security Tips & Updates</h1>
-          <p style={{ color: "#64748b", fontSize: "16px" }}>Learn about cybersecurity, 2FA, passwords and more</p>
+      <section style={{ maxWidth: "1000px", margin: "0 auto", padding: "clamp(20px, 5vw, 40px) 16px", position: "relative", zIndex: 1 }}>
+        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+          <div style={{ display: "inline-block", background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "20px", padding: "6px 16px", fontSize: "13px", color: "#7c3aed", marginBottom: "12px", fontWeight: "500" }}>📝 2fa.ac Blog</div>
+          <h1 style={{ fontSize: "clamp(26px, 6vw, 40px)", fontWeight: "800", marginBottom: "10px", background: "linear-gradient(135deg, #1e293b 0%, #7c3aed 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Security Tips & Updates</h1>
+          <p style={{ color: "#64748b", fontSize: "clamp(14px, 3vw, 16px)" }}>Learn about cybersecurity, 2FA, passwords and more</p>
         </div>
 
         <div style={{ maxWidth: "500px", margin: "0 auto 24px", position: "relative" }}>
@@ -93,7 +93,7 @@ export default function BlogClient({ initialPosts }: { initialPosts: any[] }) {
             <p>{initialPosts.length === 0 ? "Check back soon!" : "Try different search"}</p>
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "20px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(300px, 100%), 1fr))", gap: "16px" }}>
             {filtered.map(post => (
               <a key={post.id} href={`/blog/${post.slug}`} style={{ textDecoration: "none" }}>
                 <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", overflow: "hidden", cursor: "pointer", boxShadow: "0 4px 20px rgba(124,58,237,0.06)", height: "100%", boxSizing: "border-box", transition: "transform 0.2s" }}
