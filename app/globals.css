@@ -1,23 +1,67 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-*, *::before, *::after {
+* {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-html, body {
-  width: 100%;
-  height: 100%;
-  overflow-x: hidden;
+html {
   scroll-behavior: smooth;
-  -webkit-tap-highlight-color: transparent;
 }
 
 body {
-  font-family: Inter, Arial, Helvetica, sans-serif;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
+
+/* Mobile responsive utilities */
+@media (max-width: 768px) {
+  /* Grid responsive */
+  .grid-2 { grid-template-columns: 1fr !important; }
+  .grid-3 { grid-template-columns: 1fr !important; }
+  .grid-4 { grid-template-columns: 1fr 1fr !important; }
+
+  /* Blog post sidebar hide on mobile */
+  .blog-sidebar { display: none !important; }
+  .blog-content { grid-template-columns: 1fr !important; }
+
+  /* Tools grid */
+  .tools-grid { grid-template-columns: 1fr 1fr !important; }
+
+  /* Padding fixes */
+  .mobile-pad { padding: 16px !important; }
+  .mobile-pad-sm { padding: 12px !important; }
+
+  /* Font size fixes */
+  .mobile-h1 { font-size: 28px !important; }
+  .mobile-h2 { font-size: 22px !important; }
+
+  /* Hide desktop-only elements */
+  .desktop-only { display: none !important; }
+
+  /* Full width on mobile */
+  .mobile-full { width: 100% !important; max-width: 100% !important; }
+
+  /* Flex column on mobile */
+  .mobile-col { flex-direction: column !important; }
+}
+
+@media (max-width: 480px) {
+  .grid-4 { grid-template-columns: 1fr !important; }
+  .tools-grid { grid-template-columns: 1fr !important; }
+}
+
+/* Smooth transitions */
+a { transition: color 0.15s, background 0.15s; }
+button { transition: all 0.15s; }
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Input focus */
+input:focus, textarea:focus, select:focus { outline: none; }
+
+/* Image responsive */
+img { max-width: 100%; height: auto; }
