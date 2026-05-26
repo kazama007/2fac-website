@@ -30,6 +30,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <meta name="theme-color" content="#7c3aed" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {/* Preconnect for faster external requests */}
+        <link rel="preconnect" href="https://ukyalnzbxdokqwmupdcq.supabase.co" />
+        <link rel="preconnect" href="https://api.imgbb.com" />
+        <link rel="dns-prefetch" href="https://ukyalnzbxdokqwmupdcq.supabase.co" />
+        {/* Preload logo */}
+        <link rel="preload" href="/logo2.png" as="image" />
       </head>
       <body suppressHydrationWarning>
         {children}
