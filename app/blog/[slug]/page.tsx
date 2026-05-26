@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Navbar, Footer } from "../../shared";
+import { supabase } from "../../lib/supabase";
 
 interface BlogPost {
   id: string; title: string; slug: string; content: string; category: string; excerpt: string; published: boolean; createdAt: string; coverImage?: string; relatedTools?: string[]; relatedArticles?: string[]; worksWith?: string[]; faqs?: { q: string; a: string }[]; seoTitle?: string; seoDescription?: string; authorName?: string; authorAvatar?: string; ctaTitle?: string; ctaDesc?: string; ctaButton?: string; ctaLink?: string; newsletterTitle?: string; newsletterDesc?: string;
@@ -64,11 +65,50 @@ export default function BlogPostPage() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    const posts: BlogPost[] = JSON.parse(localStorage.getItem("blog-posts") || "[]");
-    setPost(posts.find((p) => p.slug === slug && p.published) || null);
-    setAllPosts(posts.filter((p) => p.published));
-    setLoading(false);
+    if (!slug) return;
+    loadPost();
   }, [slug]);
+
+  const loadPost = async () => {
+    setLoading(true);
+    const { data: postData } = await supabase
+      .from("blog_posts")
+      .select("*")
+      .eq("slug", slug)
+      .eq("published", true)
+      .single();
+
+    const { data: allData } = await supabase
+      .from("blog_posts")
+      .select("*")
+      .eq("published", true)
+      .order("created_at", { ascending: false });
+
+    if (postData) {
+      // Map DB fields to component fields
+      setPost({
+        ...postData,
+        createdAt: postData.created_at,
+        coverImage: postData.cover_image,
+        relatedTools: postData.related_tools,
+        relatedArticles: postData.related_articles,
+        worksWith: postData.works_with,
+        seoTitle: postData.seo_title,
+        seoDescription: postData.seo_description,
+        authorName: postData.author_name,
+        authorAvatar: postData.author_avatar,
+        ctaTitle: postData.cta_title,
+        ctaDesc: postData.cta_desc,
+        ctaButton: postData.cta_button,
+        ctaLink: postData.cta_link,
+        newsletterTitle: postData.newsletter_title,
+        newsletterDesc: postData.newsletter_desc,
+        showSteps: postData.show_steps,
+      });
+    }
+    if (allData) setAllPosts(allData.map(p => ({ ...p, createdAt: p.created_at, coverImage: p.cover_image })));
+    setLoading(false);
+  };
 
   useEffect(() => {
     const fn = () => {

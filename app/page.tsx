@@ -184,7 +184,7 @@ export default function Home() {
         <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: "0 0 auto" }}>
           <a href="/"><img src="/logo2.png" alt="2fa.ac logo" style={{ height: "36px", width: "auto" }} /></a>
           <span style={{ fontSize: "13px", color: "#94a3b8", fontWeight: "400", paddingLeft: "12px", borderLeft: "1px solid #e2e8f0", whiteSpace: "nowrap" }}>
-            Free 2FA Tools Online
+            Free Online Security & Utility Tools
           </span>
         </div>
 

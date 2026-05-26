@@ -1,17 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { Navbar, Footer } from "../shared";
-
-interface BlogPost {
-  id: string;
-  title: string;
-  slug: string;
-  content: string;
-  category: string;
-  excerpt: string;
-  published: boolean;
-  createdAt: string;
-}
+import { supabase } from "../lib/supabase";
 
 function DotsBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -62,14 +52,26 @@ const getCategoryColor = (cat: string) => {
 };
 
 export default function BlogPage() {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [posts, setPosts] = useState<any[]>([]);
   const [activeCategory, setActiveCategory] = useState("All");
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const saved = localStorage.getItem("blog-posts");
-    if (saved) setPosts(JSON.parse(saved).filter((p: BlogPost) => p.published));
+    loadPosts();
   }, []);
+
+  const loadPosts = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("blog_posts")
+      .select("*")
+      .eq("published", true)
+      .order("created_at", { ascending: false });
+    if (data) setPosts(data);
+    if (error) console.error("Error:", error);
+    setLoading(false);
+  };
 
   const categories = ["All", ...Array.from(new Set(posts.map(p => p.category)))];
   const filtered = posts.filter(p => {
@@ -85,7 +87,6 @@ export default function BlogPage() {
 
       <section style={{ maxWidth: "1000px", margin: "0 auto", padding: "40px 20px", position: "relative", zIndex: 1 }}>
 
-        {/* Header */}
         <div style={{ textAlign: "center", marginBottom: "40px" }}>
           <div style={{ display: "inline-block", background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "20px", padding: "6px 16px", fontSize: "13px", color: "#7c3aed", marginBottom: "16px", fontWeight: "500" }}>
             📝 2fa.ac Blog
@@ -98,7 +99,6 @@ export default function BlogPage() {
           </p>
         </div>
 
-        {/* Search */}
         <div style={{ maxWidth: "500px", margin: "0 auto 24px", position: "relative" }}>
           <span style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", fontSize: "16px" }}>🔍</span>
           <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search posts..."
@@ -108,7 +108,6 @@ export default function BlogPage() {
           />
         </div>
 
-        {/* Category Filter */}
         <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginBottom: "40px", flexWrap: "wrap" }}>
           {categories.map(cat => (
             <button key={cat} onClick={() => setActiveCategory(cat)} style={{ padding: "6px 16px", background: activeCategory === cat ? getCategoryColor(cat) : "#ffffff", border: activeCategory === cat ? "none" : "1.5px solid #e2e8f0", borderRadius: "20px", color: activeCategory === cat ? "white" : "#64748b", cursor: "pointer", fontSize: "13px", fontWeight: activeCategory === cat ? "600" : "400", boxShadow: activeCategory === cat ? `0 4px 12px ${getCategoryColor(cat)}40` : "0 1px 4px rgba(0,0,0,0.04)" }}>
@@ -117,8 +116,12 @@ export default function BlogPage() {
           ))}
         </div>
 
-        {/* Posts */}
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div style={{ textAlign: "center", padding: "80px 20px", color: "#64748b" }}>
+            <div style={{ fontSize: "40px", marginBottom: "16px" }}>⏳</div>
+            <p>Loading posts...</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 20px", color: "#64748b" }}>
             <div style={{ fontSize: "48px", marginBottom: "16px" }}>📝</div>
             <h3 style={{ fontSize: "20px", fontWeight: "600", marginBottom: "8px", color: "#1e293b" }}>
@@ -130,19 +133,24 @@ export default function BlogPage() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "20px" }}>
             {filtered.map(post => (
               <a key={post.id} href={`/blog/${post.slug}`} style={{ textDecoration: "none" }}>
-                <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "24px", cursor: "pointer", boxShadow: "0 4px 20px rgba(124,58,237,0.06)", height: "100%", boxSizing: "border-box", transition: "transform 0.2s, box-shadow 0.2s" }}
+                <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", overflow: "hidden", cursor: "pointer", boxShadow: "0 4px 20px rgba(124,58,237,0.06)", height: "100%", boxSizing: "border-box", transition: "transform 0.2s, box-shadow 0.2s" }}
                   onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "0 8px 30px rgba(124,58,237,0.12)"; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "0 4px 20px rgba(124,58,237,0.06)"; }}
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-                    <span style={{ fontSize: "11px", padding: "3px 10px", borderRadius: "10px", background: `${getCategoryColor(post.category)}12`, color: getCategoryColor(post.category), fontWeight: "600" }}>
-                      {post.category}
-                    </span>
-                    <span style={{ fontSize: "12px", color: "#94a3b8" }}>{post.createdAt}</span>
+                  {post.cover_image && <img src={post.cover_image} alt={post.title} style={{ width: "100%", height: "160px", objectFit: "cover" }} />}
+                  <div style={{ padding: "20px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                      <span style={{ fontSize: "11px", padding: "3px 10px", borderRadius: "10px", background: `${getCategoryColor(post.category)}12`, color: getCategoryColor(post.category), fontWeight: "600" }}>
+                        {post.category}
+                      </span>
+                      <span style={{ fontSize: "12px", color: "#94a3b8" }}>
+                        {new Date(post.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                      </span>
+                    </div>
+                    <h2 style={{ fontSize: "18px", fontWeight: "700", color: "#1e293b", marginBottom: "10px", lineHeight: "1.4" }}>{post.title}</h2>
+                    <p style={{ fontSize: "14px", color: "#64748b", lineHeight: "1.6", margin: 0 }}>{post.excerpt}</p>
+                    <div style={{ marginTop: "16px", color: "#7c3aed", fontSize: "14px", fontWeight: "600" }}>Read more →</div>
                   </div>
-                  <h2 style={{ fontSize: "18px", fontWeight: "700", color: "#1e293b", marginBottom: "10px", lineHeight: "1.4" }}>{post.title}</h2>
-                  <p style={{ fontSize: "14px", color: "#64748b", lineHeight: "1.6", margin: 0 }}>{post.excerpt}</p>
-                  <div style={{ marginTop: "16px", color: "#7c3aed", fontSize: "14px", fontWeight: "600" }}>Read more →</div>
                 </div>
               </a>
             ))}

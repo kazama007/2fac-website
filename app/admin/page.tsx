@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { supabase } from "../lib/supabase";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
@@ -160,13 +161,21 @@ export default function AdminPanel() {
 
   useEffect(() => {
     if (sessionStorage.getItem("admin-logged-in") === "true") setIsLoggedIn(true);
-    const saved = localStorage.getItem("blog-posts");
-    if (saved) setPosts(JSON.parse(saved));
+    loadPosts();
     const ads = localStorage.getItem("ads-settings");
     if (ads) setAdsSettings(JSON.parse(ads));
   }, []);
 
-  const savePosts = (newPosts: BlogPost[]) => { setPosts(newPosts); localStorage.setItem("blog-posts", JSON.stringify(newPosts)); };
+  const loadPosts = async () => {
+    const { data, error } = await supabase
+      .from("blog_posts")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (data) setPosts(data);
+    if (error) console.error("Load error:", error);
+  };
+
+  const savePosts = (newPosts: BlogPost[]) => { setPosts(newPosts); };
   const handleLogin = () => { if (password === ADMIN_PASSWORD) { setIsLoggedIn(true); sessionStorage.setItem("admin-logged-in", "true"); setLoginError(""); } else setLoginError("Wrong password!"); };
   const saveAdsSettings = () => { localStorage.setItem("ads-settings", JSON.stringify(adsSettings)); setAdsSaved(true); setTimeout(() => setAdsSaved(false), 2000); };
 
@@ -203,28 +212,103 @@ export default function AdminPanel() {
 
   const readingTime = Math.ceil(form.content.replace(/<[^>]*>/g, "").split(" ").length / 200);
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (!form.title || !form.content) return;
     const slug = form.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    const newPost: BlogPost = { id: Date.now().toString(), title: form.title, slug, content: form.content, category: form.category, excerpt: form.excerpt || form.content.replace(/<[^>]*>/g, "").slice(0, 150) + "...", published: true, createdAt: new Date().toISOString(), coverImage: form.coverImage, relatedTools: form.relatedTools, relatedArticles: form.relatedArticles, worksWith: form.worksWith, faqs: form.faqs, seoTitle: form.seoTitle || form.title, seoDescription: form.seoDescription || form.excerpt, authorName: form.authorName, authorAvatar: form.authorAvatar, ctaTitle: form.ctaTitle, ctaDesc: form.ctaDesc, ctaButton: form.ctaButton, ctaLink: form.ctaLink, newsletterTitle: form.newsletterTitle, newsletterDesc: form.newsletterDesc };
-    savePosts([newPost, ...posts]);
+    const newPost = {
+      id: Date.now().toString(),
+      title: form.title, slug, content: form.content,
+      category: form.category,
+      excerpt: form.excerpt || form.content.replace(/<[^>]*>/g, "").slice(0, 150) + "...",
+      published: true,
+      created_at: new Date().toISOString(),
+      cover_image: form.coverImage,
+      related_tools: form.relatedTools,
+      related_articles: form.relatedArticles,
+      works_with: form.worksWith,
+      faqs: form.faqs,
+      seo_title: form.seoTitle || form.title,
+      seo_description: form.seoDescription || form.excerpt,
+      author_name: form.authorName,
+      author_avatar: form.authorAvatar,
+      cta_title: form.ctaTitle,
+      cta_desc: form.ctaDesc,
+      cta_button: form.ctaButton,
+      cta_link: form.ctaLink,
+      newsletter_title: form.newsletterTitle,
+      newsletter_desc: form.newsletterDesc,
+      show_steps: form.showSteps,
+    };
+    const { error } = await supabase.from("blog_posts").insert([newPost]);
+    if (error) { alert("Error: " + error.message); return; }
+    await loadPosts();
     setForm(emptyForm); setCoverPreview(""); setActiveTab("posts");
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (!editingPost || !form.title || !form.content) return;
-    savePosts(posts.map(p => p.id === editingPost.id ? { ...p, title: form.title, content: form.content, category: form.category, excerpt: form.excerpt || form.content.replace(/<[^>]*>/g, "").slice(0, 150) + "...", coverImage: form.coverImage, relatedTools: form.relatedTools, relatedArticles: form.relatedArticles, worksWith: form.worksWith, faqs: form.faqs, seoTitle: form.seoTitle, seoDescription: form.seoDescription, authorName: form.authorName, authorAvatar: form.authorAvatar, ctaTitle: form.ctaTitle, ctaDesc: form.ctaDesc, ctaButton: form.ctaButton, ctaLink: form.ctaLink, newsletterTitle: form.newsletterTitle, newsletterDesc: form.newsletterDesc } : p));
+    const { error } = await supabase.from("blog_posts").update({
+      title: form.title, content: form.content, category: form.category,
+      excerpt: form.excerpt || form.content.replace(/<[^>]*>/g, "").slice(0, 150) + "...",
+      cover_image: form.coverImage,
+      related_tools: form.relatedTools,
+      related_articles: form.relatedArticles,
+      works_with: form.worksWith,
+      faqs: form.faqs,
+      seo_title: form.seoTitle,
+      seo_description: form.seoDescription,
+      author_name: form.authorName,
+      author_avatar: form.authorAvatar,
+      cta_title: form.ctaTitle,
+      cta_desc: form.ctaDesc,
+      cta_button: form.ctaButton,
+      cta_link: form.ctaLink,
+      newsletter_title: form.newsletterTitle,
+      newsletter_desc: form.newsletterDesc,
+      show_steps: form.showSteps,
+    }).eq("id", editingPost.id);
+    if (error) { alert("Error: " + error.message); return; }
+    await loadPosts();
     setEditingPost(null); setActiveTab("posts");
   };
 
-  const handleEdit = (post: BlogPost) => {
+  const handleEdit = (post: any) => {
     setEditingPost(post);
-    setForm({ title: post.title, content: post.content, category: post.category, excerpt: post.excerpt, coverImage: post.coverImage || "", relatedTools: post.relatedTools || [], relatedArticles: post.relatedArticles || [], worksWith: post.worksWith || [], faqs: post.faqs || [], seoTitle: post.seoTitle || "", seoDescription: post.seoDescription || "", authorName: post.authorName || "2FA.AC Team", authorAvatar: post.authorAvatar || "", ctaTitle: post.ctaTitle || "Secure Your Accounts with 2FA", ctaDesc: post.ctaDesc || "Enable two-factor authentication and protect your accounts from unauthorized access.", ctaButton: post.ctaButton || "Explore 2FA Tools →", ctaLink: post.ctaLink || "/tools", newsletterTitle: post.newsletterTitle || "Stay Updated", newsletterDesc: post.newsletterDesc || "Get the latest security tips and tools updates in your inbox.", showSteps: post.showSteps || false });
-    setCoverPreview(post.coverImage || ""); setActiveTab("edit"); setActiveSection("basic");
+    setForm({
+      title: post.title, content: post.content, category: post.category, excerpt: post.excerpt,
+      coverImage: post.cover_image || "",
+      relatedTools: post.related_tools || [],
+      relatedArticles: post.related_articles || [],
+      worksWith: post.works_with || [],
+      faqs: post.faqs || [],
+      seoTitle: post.seo_title || "",
+      seoDescription: post.seo_description || "",
+      authorName: post.author_name || "2FA.AC Team",
+      authorAvatar: post.author_avatar || "",
+      ctaTitle: post.cta_title || "Secure Your Accounts with 2FA",
+      ctaDesc: post.cta_desc || "Enable two-factor authentication and protect your accounts from unauthorized access.",
+      ctaButton: post.cta_button || "Explore 2FA Tools →",
+      ctaLink: post.cta_link || "/tools",
+      newsletterTitle: post.newsletter_title || "Stay Updated",
+      newsletterDesc: post.newsletter_desc || "Get the latest security tips and tools updates in your inbox.",
+      showSteps: post.show_steps || false,
+    });
+    setCoverPreview(post.cover_image || ""); setActiveTab("edit"); setActiveSection("basic");
   };
 
-  const handleDelete = (id: string) => { if (confirm("Delete this post?")) savePosts(posts.filter(p => p.id !== id)); };
-  const togglePublish = (id: string) => savePosts(posts.map(p => p.id === id ? { ...p, published: !p.published } : p));
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this post?")) return;
+    const { error } = await supabase.from("blog_posts").delete().eq("id", id);
+    if (error) { alert("Error: " + error.message); return; }
+    await loadPosts();
+  };
+  const togglePublish = async (id: string) => {
+    const post = posts.find(p => p.id === id);
+    if (!post) return;
+    const { error } = await supabase.from("blog_posts").update({ published: !post.published }).eq("id", id);
+    if (error) { alert("Error: " + error.message); return; }
+    await loadPosts();
+  };
 
   const otherPosts = posts.filter(p => editingPost ? p.id !== editingPost.id : true);
 
@@ -302,16 +386,16 @@ export default function AdminPanel() {
                   {posts.map(post => (
                     <div key={post.id} style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "12px", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "14px", flex: 1 }}>
-                        {post.coverImage && <img src={post.coverImage} alt="" style={{ width: "60px", height: "45px", objectFit: "cover", borderRadius: "6px" }} />}
+                        {post.cover_image && <img src={post.cover_image} alt="" style={{ width: "60px", height: "45px", objectFit: "cover", borderRadius: "6px" }} />}
                         <div>
                           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px", flexWrap: "wrap" }}>
                             <span style={{ fontSize: "15px", fontWeight: "600", color: "#1e293b" }}>{post.title}</span>
                             <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "10px", background: post.published ? "rgba(34,197,94,0.1)" : "rgba(245,158,11,0.1)", color: post.published ? "#16a34a" : "#d97706" }}>{post.published ? "Published" : "Draft"}</span>
                             <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "10px", background: "rgba(124,58,237,0.08)", color: "#7c3aed" }}>{post.category}</span>
                           </div>
-                          <div style={{ fontSize: "13px", color: "#94a3b8" }}>{new Date(post.createdAt).toLocaleDateString()} • /blog/{post.slug}</div>
+                          <div style={{ fontSize: "13px", color: "#94a3b8" }}>{new Date(post.created_at).toLocaleDateString()} • /blog/{post.slug}</div>
                           <div style={{ fontSize: "12px", color: "#94a3b8", marginTop: "2px" }}>
-                            {post.relatedTools?.length ? `🔧 ${post.relatedTools.length} tools` : ""} {post.faqs?.length ? `❓ ${post.faqs.length} FAQs` : ""}
+                            {post.related_tools?.length ? `🔧 ${post.related_tools.length} tools` : ""} {post.faqs?.length ? `❓ ${post.faqs.length} FAQs` : ""}
                           </div>
                         </div>
                       </div>
@@ -458,10 +542,10 @@ export default function AdminPanel() {
                           <div style={{ width: "20px", height: "20px", borderRadius: "4px", background: form.relatedArticles.includes(post.title) ? "#7c3aed" : "transparent", border: form.relatedArticles.includes(post.title) ? "none" : "2px solid #cbd5e1", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                             {form.relatedArticles.includes(post.title) && <span style={{ color: "white", fontSize: "12px" }}>✓</span>}
                           </div>
-                          {post.coverImage && <img src={post.coverImage} alt="" style={{ width: "50px", height: "36px", objectFit: "cover", borderRadius: "4px" }} />}
+                          {post.cover_image && <img src={post.cover_image} alt="" style={{ width: "50px", height: "36px", objectFit: "cover", borderRadius: "4px" }} />}
                           <div>
                             <div style={{ fontSize: "14px", fontWeight: "600", color: form.relatedArticles.includes(post.title) ? "#7c3aed" : "#1e293b" }}>{post.title}</div>
-                            <div style={{ fontSize: "12px", color: "#94a3b8" }}>{post.category} • {new Date(post.createdAt).toLocaleDateString()}</div>
+                            <div style={{ fontSize: "12px", color: "#94a3b8" }}>{post.category} • {new Date(post.created_at).toLocaleDateString()}</div>
                           </div>
                         </div>
                       ))}
@@ -714,4 +798,3 @@ export default function AdminPanel() {
     </main>
   );
 }
-// This file already has the complete admin panel
