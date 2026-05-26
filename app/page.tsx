@@ -23,6 +23,8 @@ export default function Home() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [search, setSearch] = useState("");
   const [darkMode, setDarkMode] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const timeoutRef = useRef<any>(null);
 
   const toggleDark = () => {
@@ -42,6 +44,10 @@ export default function Home() {
       setDarkMode(true);
       document.documentElement.style.filter = "invert(1) hue-rotate(180deg)";
     }
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   const timerRef = useRef<any>(null);
@@ -208,102 +214,108 @@ export default function Home() {
       <style>{`@keyframes slideDown { from { opacity: 0; transform: translateX(-50%) translateY(-20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }`}</style>
 
       {/* Navbar */}
-      <nav style={{ padding: "0 40px", height: "60px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 100, background: "rgba(255,255,255,0.92)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderBottom: "1px solid rgba(124,58,237,0.1)", boxShadow: "0 2px 20px rgba(0,0,0,0.06)" }}>
+      <nav style={{ padding: "0 20px", height: "60px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 100, background: "rgba(255,255,255,0.92)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderBottom: "1px solid rgba(124,58,237,0.1)", boxShadow: "0 2px 20px rgba(0,0,0,0.06)" }}>
 
         {/* LEFT: Logo + tagline */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: "0 0 auto" }}>
-          <a href="/"><img src="/logo2.png" alt="2fa.ac logo" style={{ height: "36px", width: "auto" }} /></a>
-          <span style={{ fontSize: "13px", color: "#94a3b8", fontWeight: "400", paddingLeft: "12px", borderLeft: "1px solid #e2e8f0", whiteSpace: "nowrap" }}>
-            Free 2FA Tools Online
-          </span>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: "0 0 auto" }}>
+          <a href="/"><img src="/logo2.png" alt="2fa.ac logo" style={{ height: "32px", width: "auto" }} /></a>
+          {!isMobile && (
+            <span style={{ fontSize: "12px", color: "#94a3b8", paddingLeft: "10px", borderLeft: "1px solid #e2e8f0", whiteSpace: "nowrap" }}>
+              Free 2FA Tools Online
+            </span>
+          )}
         </div>
 
-        {/* CENTER: Nav links — absolutely centered */}
-        <div style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", display: "flex", alignItems: "center", gap: "4px" }}>
-
-          {/* Tools Dropdown */}
-          <div style={{ position: "relative" }} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-            <a href="#" style={{ color: "#64748b", textDecoration: "none", display: "flex", alignItems: "center", gap: "4px", fontSize: "14px", fontWeight: "500", padding: "6px 14px", borderRadius: "8px", transition: "all 0.2s", whiteSpace: "nowrap" }}
-              onMouseEnter={e => { e.currentTarget.style.color = "#7c3aed"; e.currentTarget.style.background = "rgba(124,58,237,0.08)"; }}
-              onMouseLeave={e => { e.currentTarget.style.color = "#64748b"; e.currentTarget.style.background = "transparent"; }}>
-              Tools
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="6 9 12 15 18 9"/>
-              </svg>
-            </a>
-
-            {showTools && (
-              <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} style={{
-                position: "fixed", top: "64px", left: "50%", transform: "translateX(-50%)",
-                background: "rgba(255,255,255,0.98)", border: "1px solid rgba(124,58,237,0.12)",
-                borderRadius: "20px", padding: "8px", width: "min(900px, calc(100vw - 40px))",
-                zIndex: 9999, boxShadow: "0 24px 60px rgba(124,58,237,0.12), 0 8px 24px rgba(0,0,0,0.08)",
-              }}>
-                <div style={{ padding: "12px 16px 10px", borderBottom: "1px solid #f1f5f9", marginBottom: "8px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <span style={{ fontSize: "11px", color: "#94a3b8", letterSpacing: "2px", fontWeight: "600" }}>ALL TOOLS</span>
-                  <span style={{ fontSize: "11px", color: "#cbd5e1" }}>13 tools available</span>
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "4px", padding: "0 4px 8px" }}>
-                  {categories.map(category => (
-                    <div key={category.name} style={{ borderRadius: "14px", padding: "14px 12px", background: `${category.color}06`, border: `1px solid ${category.color}15` }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px", paddingBottom: "8px", borderBottom: `1px solid ${category.color}20` }}>
-                        <span style={{ fontSize: "14px" }}>{category.icon}</span>
-                        <div>
-                          <div style={{ fontSize: "10px", fontWeight: "700", color: category.color, letterSpacing: "0.8px" }}>{category.name.toUpperCase()}</div>
-                          <div style={{ fontSize: "10px", color: "#94a3b8" }}>{category.tools.length} tools</div>
+        {/* CENTER: Desktop Nav only */}
+        {!isMobile && (
+          <div style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", display: "flex", alignItems: "center", gap: "2px" }}>
+            <div style={{ position: "relative" }} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+              <a href="#" style={{ color: "#64748b", textDecoration: "none", display: "flex", alignItems: "center", gap: "4px", fontSize: "13.5px", fontWeight: "500", padding: "6px 12px", borderRadius: "8px" }}
+                onMouseEnter={e => { e.currentTarget.style.color = "#7c3aed"; e.currentTarget.style.background = "rgba(124,58,237,0.08)"; }}
+                onMouseLeave={e => { e.currentTarget.style.color = "#64748b"; e.currentTarget.style.background = "transparent"; }}>
+                Tools <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </a>
+              {showTools && (
+                <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} style={{ position: "fixed", top: "64px", left: "50%", transform: "translateX(-50%)", background: "rgba(255,255,255,0.98)", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "20px", padding: "8px", width: "min(900px, calc(100vw - 40px))", zIndex: 9999, boxShadow: "0 24px 60px rgba(124,58,237,0.12)" }}>
+                  <div style={{ padding: "12px 16px 10px", borderBottom: "1px solid #f1f5f9", marginBottom: "8px", display: "flex", justifyContent: "space-between" }}>
+                    <span style={{ fontSize: "11px", color: "#94a3b8", letterSpacing: "2px", fontWeight: "600" }}>ALL TOOLS</span>
+                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>14 tools available</span>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "4px", padding: "0 4px 8px" }}>
+                    {categories.map(category => (
+                      <div key={category.name} style={{ borderRadius: "14px", padding: "14px 12px", background: `${category.color}06`, border: `1px solid ${category.color}15` }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px", paddingBottom: "8px", borderBottom: `1px solid ${category.color}20` }}>
+                          <span style={{ fontSize: "14px" }}>{category.icon}</span>
+                          <div>
+                            <div style={{ fontSize: "10px", fontWeight: "700", color: category.color }}>{category.name.toUpperCase()}</div>
+                            <div style={{ fontSize: "10px", color: "#94a3b8" }}>{category.tools.length} tools</div>
+                          </div>
                         </div>
+                        {category.tools.map(tool => (
+                          <a key={tool.name} href={tool.href} style={{ display: "block", padding: "6px 8px", color: "#1e293b", textDecoration: "none", borderRadius: "8px", marginBottom: "2px", fontSize: "12px", fontWeight: "500" }}
+                            onMouseEnter={e => { e.currentTarget.style.background = `${category.color}10`; e.currentTarget.style.color = category.color; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#1e293b"; }}>
+                            {tool.icon} {tool.name}
+                            <div style={{ fontSize: "10px", color: "#94a3b8", marginTop: "1px" }}>{tool.desc}</div>
+                          </a>
+                        ))}
                       </div>
-                      {category.tools.map(tool => (
-                        <a key={tool.name} href={tool.href} style={{ display: "block", padding: "6px 8px", color: "#1e293b", textDecoration: "none", borderRadius: "8px", marginBottom: "2px", fontSize: "12px", fontWeight: "500", transition: "all 0.15s" }}
-                          onMouseEnter={e => { e.currentTarget.style.background = `${category.color}10`; e.currentTarget.style.color = category.color; }}
-                          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#1e293b"; }}>
-                          {tool.icon} {tool.name}
-                          <div style={{ fontSize: "10px", color: "#94a3b8", marginTop: "1px", fontWeight: "400" }}>{tool.desc}</div>
-                        </a>
-                      ))}
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                  <div style={{ padding: "10px 16px", borderTop: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between" }}>
+                    <span style={{ fontSize: "11px", color: "#94a3b8" }}>🔒 All tools run in your browser</span>
+                    <a href="/tools" style={{ fontSize: "11px", color: "#7c3aed", textDecoration: "none", fontWeight: "600" }}>View all →</a>
+                  </div>
                 </div>
-                <div style={{ padding: "10px 16px", borderTop: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ fontSize: "11px", color: "#94a3b8" }}>🔒 All tools run in your browser</span>
-                  <a href="/tools" style={{ fontSize: "11px", color: "#7c3aed", textDecoration: "none", fontWeight: "600" }}>View all →</a>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
+            {["Blog", "About", "Contact"].map(item => (
+              <a key={item} href={`/${item.toLowerCase()}`} style={{ color: "#64748b", textDecoration: "none", fontSize: "13.5px", fontWeight: "500", padding: "6px 12px", borderRadius: "8px" }}
+                onMouseEnter={e => { e.currentTarget.style.color = "#7c3aed"; e.currentTarget.style.background = "rgba(124,58,237,0.08)"; }}
+                onMouseLeave={e => { e.currentTarget.style.color = "#64748b"; e.currentTarget.style.background = "transparent"; }}>
+                {item}
+              </a>
+            ))}
           </div>
+        )}
 
-          {/* Blog */}
-          <a href="/blog" style={{ color: "#64748b", textDecoration: "none", fontSize: "14px", fontWeight: "500", padding: "6px 14px", borderRadius: "8px", transition: "all 0.2s", whiteSpace: "nowrap" }}
-            onMouseEnter={e => { e.currentTarget.style.color = "#7c3aed"; e.currentTarget.style.background = "rgba(124,58,237,0.08)"; }}
-            onMouseLeave={e => { e.currentTarget.style.color = "#64748b"; e.currentTarget.style.background = "transparent"; }}>
-            Blog
-          </a>
-
-          {/* About */}
-          <a href="/about" style={{ color: "#64748b", textDecoration: "none", fontSize: "14px", fontWeight: "500", padding: "6px 14px", borderRadius: "8px", transition: "all 0.2s", whiteSpace: "nowrap" }}
-            onMouseEnter={e => { e.currentTarget.style.color = "#7c3aed"; e.currentTarget.style.background = "rgba(124,58,237,0.08)"; }}
-            onMouseLeave={e => { e.currentTarget.style.color = "#64748b"; e.currentTarget.style.background = "transparent"; }}>
-            About
-          </a>
-
-          {/* Contact */}
-          <a href="/contact" style={{ color: "#64748b", textDecoration: "none", fontSize: "14px", fontWeight: "500", padding: "6px 14px", borderRadius: "8px", transition: "all 0.2s", whiteSpace: "nowrap" }}
-            onMouseEnter={e => { e.currentTarget.style.color = "#7c3aed"; e.currentTarget.style.background = "rgba(124,58,237,0.08)"; }}
-            onMouseLeave={e => { e.currentTarget.style.color = "#64748b"; e.currentTarget.style.background = "transparent"; }}>
-            Contact
-          </a>
-        </div>
-
-        {/* RIGHT: Dark mode toggle only */}
-        <div style={{ display: "flex", alignItems: "center", flex: "0 0 auto" }}>
-          <button onClick={toggleDark} title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-            style={{ width: "38px", height: "38px", borderRadius: "10px", background: "rgba(124,58,237,0.08)", border: "1.5px solid rgba(124,58,237,0.2)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px", transition: "all 0.2s" }}
-            onMouseEnter={e => { e.currentTarget.style.background = "rgba(124,58,237,0.15)"; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "rgba(124,58,237,0.08)"; }}>
+        {/* RIGHT */}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", flex: "0 0 auto" }}>
+          <button onClick={toggleDark} style={{ width: "36px", height: "36px", borderRadius: "9px", background: "rgba(124,58,237,0.08)", border: "1.5px solid rgba(124,58,237,0.2)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px" }}>
             {darkMode ? "☀️" : "🌙"}
           </button>
+          {isMobile && (
+            <button onClick={() => setShowMobileMenu(!showMobileMenu)} style={{ width: "36px", height: "36px", borderRadius: "9px", background: "rgba(124,58,237,0.08)", border: "1.5px solid rgba(124,58,237,0.2)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {showMobileMenu
+                ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+              }
+            </button>
+          )}
         </div>
       </nav>
+
+      {/* Mobile Menu */}
+      {isMobile && showMobileMenu && (
+        <div style={{ position: "fixed", top: "60px", left: 0, right: 0, bottom: 0, background: "#fff", zIndex: 99, overflowY: "auto", padding: "16px" }}>
+          <div style={{ marginBottom: "20px" }}>
+            {[{ name: "🏠 Home", href: "/" }, { name: "📝 Blog", href: "/blog" }, { name: "ℹ️ About", href: "/about" }, { name: "📩 Contact", href: "/contact" }].map(item => (
+              <a key={item.name} href={item.href} onClick={() => setShowMobileMenu(false)} style={{ display: "flex", alignItems: "center", padding: "14px 16px", borderRadius: "12px", textDecoration: "none", color: "#1e293b", fontSize: "15px", fontWeight: "600", marginBottom: "6px", background: "rgba(124,58,237,0.04)", border: "1px solid rgba(124,58,237,0.1)" }}>
+                {item.name}
+              </a>
+            ))}
+          </div>
+          <div style={{ fontSize: "11px", color: "#94a3b8", fontWeight: "700", letterSpacing: "1.5px", marginBottom: "10px" }}>🔧 ALL TOOLS</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+            {categories.flatMap(c => c.tools).map(tool => (
+              <a key={tool.name} href={tool.href} onClick={() => setShowMobileMenu(false)} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px", borderRadius: "12px", textDecoration: "none", color: "#1e293b", fontSize: "13px", fontWeight: "500", background: "#f8fafc", border: "1px solid #e2e8f0" }}>
+                <span style={{ fontSize: "18px" }}>{tool.icon}</span>
+                <span style={{ lineHeight: "1.3" }}>{tool.name}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 2FA Tool */}
       <section style={{ maxWidth: "1200px", margin: "40px auto 20px", padding: "0 20px", position: "relative", zIndex: 1 }}>
