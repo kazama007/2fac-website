@@ -375,12 +375,10 @@ export default function AdminPanel() {
                 {sectionBtn("content", "✍️ Content")}
                 {sectionBtn("tools", "🔧 Related Tools")}
                 {sectionBtn("articles", "📝 Related Articles")}
-                {sectionBtn("works", "🔗 Works With")}
                 {sectionBtn("faq", "❓ FAQ")}
                 {sectionBtn("seo", "🔍 SEO")}
                 {sectionBtn("author", "👤 Author")}
                 {sectionBtn("cta", "🎯 CTA Banner")}
-                {sectionBtn("newsletter", "📧 Newsletter")}
               </div>
 
               {activeSection === "basic" && (
@@ -465,21 +463,6 @@ export default function AdminPanel() {
                 </div>
               )}
 
-              {activeSection === "works" && (
-                <div>
-                  <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b", marginBottom: "6px" }}>🔗 Works With</h3>
-                  <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "16px" }}>Selected: <strong style={{ color: "#7c3aed" }}>{form.worksWith.length}</strong></p>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px" }}>
-                    {WORKS_WITH_OPTIONS.map(app => (
-                      <div key={app.name} onClick={() => toggleWorksWith(app.name)} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", padding: "16px 12px", background: form.worksWith.includes(app.name) ? "rgba(124,58,237,0.08)" : "#ffffff", border: form.worksWith.includes(app.name) ? "1.5px solid #7c3aed" : "1.5px solid #e2e8f0", borderRadius: "12px", cursor: "pointer", textAlign: "center" }}>
-                        <div style={{ fontSize: "28px" }}>{app.emoji}</div>
-                        <div style={{ fontSize: "12px", color: form.worksWith.includes(app.name) ? "#7c3aed" : "#64748b" }}>{app.name}</div>
-                        {form.worksWith.includes(app.name) && <div style={{ background: "#7c3aed", color: "white", borderRadius: "4px", padding: "1px 8px", fontSize: "11px" }}>✓</div>}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {activeSection === "faq" && (
                 <div>
@@ -550,13 +533,6 @@ export default function AdminPanel() {
                 </div>
               )}
 
-              {activeSection === "newsletter" && (
-                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                  <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b" }}>📧 Newsletter</h3>
-                  <div><label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>Title</label><input type="text" value={form.newsletterTitle} onChange={e => setForm({...form, newsletterTitle: e.target.value})} style={inputStyle} onFocus={e => e.currentTarget.style.border="1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border="1.5px solid #e2e8f0"} /></div>
-                  <div><label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "6px" }}>Description</label><textarea value={form.newsletterDesc} onChange={e => setForm({...form, newsletterDesc: e.target.value})} rows={3} style={{ ...inputStyle, resize: "vertical" as const, fontFamily: "Inter, sans-serif" }} onFocus={e => e.currentTarget.style.border="1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border="1.5px solid #e2e8f0"} /></div>
-                </div>
-              )}
 
               <div style={{ display: "flex", gap: "12px", marginTop: "28px", paddingTop: "20px", borderTop: "1px solid #e2e8f0" }}>
                 <button onClick={activeTab === "new" ? handlePublish : handleUpdate} disabled={!form.title || !form.content} style={{ padding: "12px 28px", background: (!form.title || !form.content) ? "#e2e8f0" : "linear-gradient(135deg, #7c3aed, #9f67ff)", color: (!form.title || !form.content) ? "#94a3b8" : "white", border: "none", borderRadius: "10px", fontSize: "15px", fontWeight: "700", cursor: "pointer" }}>
