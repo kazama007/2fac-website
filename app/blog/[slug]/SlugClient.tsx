@@ -46,6 +46,16 @@ function addIds(html: string) {
 }
 
 export default function SlugClient({ post, allPosts, slug }: { post: any; allPosts: any[]; slug: string }) {
+  const [isMobile, setIsMobile] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    setMounted(true);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
   const [emailError, setEmailError] = useState("");
@@ -93,21 +103,21 @@ export default function SlugClient({ post, allPosts, slug }: { post: any; allPos
   return (
     <main style={{ minHeight: "100vh", background: "linear-gradient(135deg,#f0f4ff 0%,#faf5ff 50%,#f0f9ff 100%)", fontFamily: "Inter,sans-serif" }}>
       <Navbar />
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "32px 20px 80px" }}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px 16px 60px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#94a3b8", marginBottom: "28px" }}>
           <a href="/" style={{ color: "#7c3aed", textDecoration: "none" }}>Home</a><span>›</span>
           <a href="/blog" style={{ color: "#7c3aed", textDecoration: "none" }}>Blog</a><span>›</span>
           <span style={{ color: "#1e293b" }}>{post.title.slice(0, 40)}</span>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: "40px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: mounted && isMobile ? "1fr" : "1fr 300px", gap: "40px" }}>
           <article>
             <div style={{ marginBottom: "14px" }}>
               <span style={{ background: "rgba(124,58,237,0.1)", color: "#7c3aed", fontSize: "11px", padding: "4px 12px", borderRadius: "6px", fontWeight: "700", textTransform: "uppercase" as const }}>{post.category}</span>
             </div>
-            <h1 style={{ fontSize: "32px", fontWeight: "800", color: "#1e293b", lineHeight: "1.25", marginBottom: "14px" }}>{post.title}</h1>
+            <h1 style={{ fontSize: "clamp(22px, 5vw, 32px)", fontWeight: "800", color: "#1e293b", lineHeight: "1.25", marginBottom: "14px" }}>{post.title}</h1>
             {post.excerpt && <p style={{ fontSize: "16px", color: "#64748b", lineHeight: "1.7", marginBottom: "18px" }}>{post.excerpt}</p>}
             <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "12px", marginBottom: "24px", paddingBottom: "20px", borderBottom: "1px solid #e2e8f0" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "16px", fontSize: "13px", color: "#64748b" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: "#64748b", flexWrap: "wrap" }}>
                 <span>👤 By {post.authorName || "2FA.AC Team"}</span>
                 <span>🕐 {new Date(post.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</span>
                 <span>⏱ {readTime} min read</span>
@@ -122,7 +132,7 @@ export default function SlugClient({ post, allPosts, slug }: { post: any; allPos
             {headings.length > 0 && (
               <div style={{ background: "#fff", border: "1px solid rgba(124,58,237,0.15)", borderRadius: "14px", padding: "20px 24px", marginBottom: "28px" }}>
                 <div style={{ fontSize: "14px", fontWeight: "700", color: "#1e293b", marginBottom: "14px" }}>📋 In this article</div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "6px 16px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: mounted && isMobile ? "1fr" : "1fr 1fr 1fr", gap: "6px 16px" }}>
                   {headings.map((h,i) => <a key={i} href={`#${h.id}`} style={{ fontSize: "13px", color: "#7c3aed", textDecoration: "none", display: "flex", gap: "6px" }}><span style={{ color: "#94a3b8" }}>{i+1}.</span><span>{h.text}</span></a>)}
                 </div>
               </div>
@@ -159,7 +169,7 @@ export default function SlugClient({ post, allPosts, slug }: { post: any; allPos
               </div>
             </div>
           </article>
-          <aside style={{ display:"flex",flexDirection:"column",gap:"20px",position:"sticky",top:"90px",alignSelf:"start" }}>
+          <aside style={{ display:"flex",flexDirection:"column",gap:"20px",position: mounted && isMobile ? "static" : "sticky",top:"90px",alignSelf:"start" }}>
             {headings.length > 0 && (
               <div style={{ background:"#fff",border:"1px solid rgba(124,58,237,0.1)",borderRadius:"16px",padding:"20px" }}>
                 <h3 style={{ fontSize:"14px",fontWeight:"700",color:"#1e293b",marginBottom:"14px" }}>On this page</h3>
@@ -177,16 +187,7 @@ export default function SlugClient({ post, allPosts, slug }: { post: any; allPos
                 </a>)}
               </div>
             )}
-            <div style={{ background:"linear-gradient(135deg,#7c3aed,#9f67ff)",borderRadius:"16px",padding:"24px",color:"white" }}>
-              <h3 style={{ fontSize:"16px",fontWeight:"700",marginBottom:"8px" }}>{post.newsletterTitle||"Stay Updated"}</h3>
-              <p style={{ fontSize:"13px",opacity:0.85,marginBottom:"16px" }}>{post.newsletterDesc||"Get the latest security tips in your inbox."}</p>
-              {subscribed?<div style={{ background:"rgba(255,255,255,0.2)",borderRadius:"10px",padding:"16px",textAlign:"center" as const }}><div style={{ fontSize:"28px" }}>🎉</div><p style={{ fontWeight:"700",margin:"6px 0 0" }}>Subscribed!</p></div>:<>
-                <input type="email" value={email} onChange={e=>{setEmail(e.target.value);setEmailError("");}} onKeyDown={e=>e.key==="Enter"&&handleSubscribe()} placeholder="Enter your email" style={{ width:"100%",padding:"10px 14px",borderRadius:"8px",border:emailError?"2px solid #fca5a5":"none",fontSize:"13px",marginBottom:"8px",boxSizing:"border-box" as const,outline:"none" }}/>
-                {emailError&&<p style={{ fontSize:"11px",color:"#fca5a5",margin:"0 0 8px" }}>{emailError}</p>}
-                <button onClick={handleSubscribe} style={{ width:"100%",padding:"10px",background:"white",color:"#7c3aed",border:"none",borderRadius:"8px",fontSize:"13px",fontWeight:"700",cursor:"pointer" }}>Subscribe</button>
-                <p style={{ fontSize:"11px",opacity:0.7,marginTop:"8px",textAlign:"center" as const }}>No spam, unsubscribe anytime.</p>
-              </>}
-            </div>
+
             <div style={{ background:"#fff",border:"1px solid rgba(124,58,237,0.1)",borderRadius:"16px",padding:"20px" }}>
               <h3 style={{ fontSize:"14px",fontWeight:"700",color:"#1e293b",marginBottom:"14px" }}>🔧 Related Tools</h3>
               {tools.map((t,i) => <a key={i} href={t.href} style={{ fontSize:"13px",color:"#64748b",textDecoration:"none",padding:"9px 10px",borderRadius:"8px",display:"flex",justifyContent:"space-between",borderBottom:i<tools.length-1?"1px solid #f8fafc":"none" }} onMouseEnter={e=>{e.currentTarget.style.background="rgba(124,58,237,0.06)";e.currentTarget.style.color="#7c3aed";}} onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.color="#64748b";}}><span>→ {t.name}</span><span style={{ opacity:0.4 }}>›</span></a>)}

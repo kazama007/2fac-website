@@ -82,11 +82,11 @@ export default function AboutPage() {
       <Navbar />
 
       {/* Hero */}
-      <section style={{ maxWidth: "800px", margin: "0 auto", padding: "60px 20px 40px", textAlign: "center", position: "relative", zIndex: 1 }}>
+      <section style={{ maxWidth: "800px", margin: "0 auto", padding: "32px 16px 24px", textAlign: "center", position: "relative", zIndex: 1 }}>
         <div style={{ display: "inline-block", background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "20px", padding: "6px 16px", fontSize: "13px", color: "#7c3aed", marginBottom: "20px", fontWeight: "500" }}>
           About 2FA.AC
         </div>
-        <h1 style={{ fontSize: "42px", fontWeight: "800", lineHeight: "1.2", marginBottom: "16px", background: "linear-gradient(135deg, #1e293b 0%, #7c3aed 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+        <h1 style={{ fontSize: "clamp(26px, 6vw, 42px)", fontWeight: "800", lineHeight: "1.2", marginBottom: "16px", background: "linear-gradient(135deg, #1e293b 0%, #7c3aed 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
           Free Security Tools for Everyone
         </h1>
         <p style={{ fontSize: "16px", color: "#64748b", lineHeight: "1.8", maxWidth: "600px", margin: "0 auto" }}>
@@ -96,7 +96,7 @@ export default function AboutPage() {
 
       {/* Stats */}
       <section style={{ maxWidth: "900px", margin: "0 auto 60px", padding: "0 20px", position: "relative", zIndex: 1 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "16px" }}>
           {stats.map(s => (
             <div key={s.label} style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "16px", padding: "28px 20px", textAlign: "center", boxShadow: "0 4px 20px rgba(124,58,237,0.06)" }}>
               <div style={{ fontSize: "32px", fontWeight: "800", background: "linear-gradient(135deg, #7c3aed, #9f67ff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{s.num}</div>
@@ -108,7 +108,7 @@ export default function AboutPage() {
 
       {/* Mission */}
       <section style={{ maxWidth: "900px", margin: "0 auto 60px", padding: "0 20px", position: "relative", zIndex: 1 }}>
-        <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "20px", padding: "48px", boxShadow: "0 8px 40px rgba(124,58,237,0.08)" }}>
+        <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "20px", padding: "clamp(20px, 5vw, 48px)", boxShadow: "0 8px 40px rgba(124,58,237,0.08)" }}>
           <h2 style={{ fontSize: "28px", fontWeight: "700", color: "#1e293b", marginBottom: "16px" }}>Our Mission</h2>
           <p style={{ fontSize: "15px", color: "#64748b", lineHeight: "1.8", marginBottom: "16px" }}>
             Cybersecurity tools are often expensive, complicated, or require creating accounts. We believe that is wrong. Basic security tools should be free, easy to use, and accessible to everyone — from developers to everyday users.
@@ -122,7 +122,7 @@ export default function AboutPage() {
       {/* Values */}
       <section style={{ maxWidth: "900px", margin: "0 auto 60px", padding: "0 20px", position: "relative", zIndex: 1 }}>
         <h2 style={{ fontSize: "28px", fontWeight: "700", color: "#1e293b", marginBottom: "24px", textAlign: "center" }}>Our Values</h2>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "16px" }}>
           {values.map(v => (
             <div key={v.title} style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "16px", padding: "28px", boxShadow: "0 4px 20px rgba(124,58,237,0.06)" }}>
               <div style={{ fontSize: "32px", marginBottom: "12px" }}>{v.icon}</div>
@@ -137,7 +137,7 @@ export default function AboutPage() {
       <section style={{ maxWidth: "900px", margin: "0 auto 60px", padding: "0 20px", position: "relative", zIndex: 1 }}>
         <h2 style={{ fontSize: "28px", fontWeight: "700", color: "#1e293b", marginBottom: "8px", textAlign: "center" }}>All Our Tools</h2>
         <p style={{ textAlign: "center", color: "#64748b", marginBottom: "28px", fontSize: "14px" }}>13 free tools — no account required</p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "12px" }}>
           {tools.map(t => (
             <div key={t.name} style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "12px", padding: "18px", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", display: "flex", alignItems: "flex-start", gap: "12px" }}>
               <span style={{ fontSize: "24px", flexShrink: 0 }}>{t.icon}</span>
@@ -152,7 +152,7 @@ export default function AboutPage() {
 
       {/* Contact CTA */}
       <section style={{ maxWidth: "700px", margin: "0 auto 80px", padding: "0 20px", position: "relative", zIndex: 1, textAlign: "center" }}>
-        <div style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.08), rgba(159,103,255,0.08))", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "20px", padding: "48px" }}>
+        <div style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.08), rgba(159,103,255,0.08))", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "20px", padding: "clamp(20px, 5vw, 48px)" }}>
           <h2 style={{ fontSize: "24px", fontWeight: "700", color: "#1e293b", marginBottom: "12px" }}>Have Questions or Feedback?</h2>
           <p style={{ color: "#64748b", fontSize: "14px", marginBottom: "24px", lineHeight: "1.7" }}>
             We would love to hear from you. Whether it is a bug report, feature request, or just a hello — reach out anytime.

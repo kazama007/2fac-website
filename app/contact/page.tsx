@@ -79,14 +79,14 @@ export default function ContactPage() {
       <DotsBackground />
       <Navbar />
 
-      <section style={{ maxWidth: "900px", margin: "0 auto", padding: "60px 20px 80px", position: "relative", zIndex: 1 }}>
+      <section style={{ maxWidth: "900px", margin: "0 auto", padding: "24px 16px 60px", position: "relative", zIndex: 1 }}>
 
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: "48px" }}>
           <div style={{ display: "inline-block", background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "20px", padding: "6px 16px", fontSize: "13px", color: "#7c3aed", marginBottom: "16px", fontWeight: "500" }}>
             📬 Get in Touch
           </div>
-          <h1 style={{ fontSize: "40px", fontWeight: "800", marginBottom: "12px", background: "linear-gradient(135deg, #1e293b 0%, #7c3aed 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+          <h1 style={{ fontSize: "clamp(26px, 6vw, 40px)", fontWeight: "800", marginBottom: "12px", background: "linear-gradient(135deg, #1e293b 0%, #7c3aed 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
             Contact Us
           </h1>
           <p style={{ color: "#64748b", fontSize: "15px", maxWidth: "500px", margin: "0 auto", lineHeight: "1.7" }}>
@@ -94,7 +94,7 @@ export default function ContactPage() {
           </p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.6fr", gap: "24px", alignItems: "start" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px", alignItems: "start" }}>
 
           {/* Left — Contact Info */}
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -133,7 +133,7 @@ export default function ContactPage() {
           </div>
 
           {/* Right — Contact Form */}
-          <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "20px", padding: "36px", boxShadow: "0 8px 40px rgba(124,58,237,0.08)" }}>
+          <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "20px", padding: "clamp(20px, 4vw, 36px)", boxShadow: "0 8px 40px rgba(124,58,237,0.08)" }}>
 
             {submitted ? (
               <div style={{ textAlign: "center", padding: "40px 20px" }}>
