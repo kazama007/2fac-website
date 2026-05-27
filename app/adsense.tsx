@@ -71,6 +71,17 @@ export function FooterAd() {
   return <AdUnit slot={settings.footerAdSlot} style={{ padding: "16px 0" }} />;
 }
 
+export function SidebarAd() {
+  const { settings, mounted } = useAdsSettings();
+  if (!mounted || !settings?.adsEnabled || !settings?.publisherId || !settings?.sidebarAdSlot) return null;
+  return (
+    <div style={{ background: "#f8fafc", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "12px", padding: "12px", textAlign: "center" }}>
+      <div style={{ fontSize: "10px", color: "#94a3b8", marginBottom: "8px", letterSpacing: "1px" }}>ADVERTISEMENT</div>
+      <AdUnit slot={settings.sidebarAdSlot} />
+    </div>
+  );
+}
+
 export function InArticleAd() {
   const { settings, mounted } = useAdsSettings();
   if (!mounted || !settings?.adsEnabled || !settings?.publisherId || !settings?.inArticleAdSlot) return null;

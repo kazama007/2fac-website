@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Navbar, Footer } from "../../shared";
-import { HeaderAd, FooterAd, InArticleAd } from "../../adsense";
+import { HeaderAd, FooterAd, InArticleAd, SidebarAd } from "../../adsense";
 
 const ALL_TOOLS = [
   { name: "TOTP 2FA Generator", href: "/" },
@@ -140,6 +140,7 @@ export default function SlugClient({ post, allPosts, slug }: { post: any; allPos
               </div>
             )}
             <div dangerouslySetInnerHTML={{ __html: html }} style={{ lineHeight: "1.8", color: "#374151" }} />
+            <InArticleAd />
             {post.worksWith && post.worksWith.length > 0 && (
               <div style={{ background: "rgba(124,58,237,0.04)", border: "1px solid rgba(124,58,237,0.15)", borderRadius: "16px", padding: "24px", margin: "32px 0" }}>
                 <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b", marginBottom: "16px" }}>🔗 Works With</h3>
@@ -172,6 +173,7 @@ export default function SlugClient({ post, allPosts, slug }: { post: any; allPos
             </div>
           </article>
           <aside style={{ display:"flex",flexDirection:"column",gap:"20px",position: mounted && isMobile ? "static" : "sticky",top:"90px",alignSelf:"start" }}>
+            <SidebarAd />
             {headings.length > 0 && (
               <div style={{ background:"#fff",border:"1px solid rgba(124,58,237,0.1)",borderRadius:"16px",padding:"20px" }}>
                 <h3 style={{ fontSize:"14px",fontWeight:"700",color:"#1e293b",marginBottom:"14px" }}>On this page</h3>
