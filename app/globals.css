@@ -13,35 +13,39 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Fix CLS - images always have dimensions */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Font display swap to prevent render blocking */
+@font-face {
+  font-family: 'Inter';
+  font-display: swap;
+}
+
+/* Prevent layout shift from ads */
+.adsbygoogle {
+  display: block;
+  min-height: 90px;
+}
+
 /* Mobile responsive utilities */
 @media (max-width: 768px) {
-  /* Grid responsive */
   .grid-2 { grid-template-columns: 1fr !important; }
   .grid-3 { grid-template-columns: 1fr !important; }
   .grid-4 { grid-template-columns: 1fr 1fr !important; }
-
-  /* Blog post sidebar hide on mobile */
   .blog-sidebar { display: none !important; }
   .blog-content { grid-template-columns: 1fr !important; }
-
-  /* Tools grid */
   .tools-grid { grid-template-columns: 1fr 1fr !important; }
-
-  /* Padding fixes */
   .mobile-pad { padding: 16px !important; }
   .mobile-pad-sm { padding: 12px !important; }
-
-  /* Font size fixes */
   .mobile-h1 { font-size: 28px !important; }
   .mobile-h2 { font-size: 22px !important; }
-
-  /* Hide desktop-only elements */
   .desktop-only { display: none !important; }
-
-  /* Full width on mobile */
   .mobile-full { width: 100% !important; max-width: 100% !important; }
-
-  /* Flex column on mobile */
   .mobile-col { flex-direction: column !important; }
 }
 
@@ -62,6 +66,3 @@ button { transition: all 0.15s; }
 
 /* Input focus */
 input:focus, textarea:focus, select:focus { outline: none; }
-
-/* Image responsive */
-img { max-width: 100%; height: auto; }

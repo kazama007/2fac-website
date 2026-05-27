@@ -219,7 +219,7 @@ export default function Home() {
 
         {/* LEFT: Logo + tagline */}
         <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: "0 0 auto" }}>
-          <a href="/"><img src="/logo2.png" alt="2fa.ac logo" style={{ height: "32px", width: "auto" }} /></a>
+          <a href="/"><img src="/logo2.png" alt="2fa.ac logo" width="120" height="32" style={{ height: "32px", width: "auto" }} /></a>
           {!isMobile && (
             <span style={{ fontSize: "12px", color: "#94a3b8", paddingLeft: "10px", borderLeft: "1px solid #e2e8f0", whiteSpace: "nowrap" }}>
               Free 2FA Tools Online
@@ -453,7 +453,7 @@ export default function Home() {
       <footer style={{ background: "#1e1b4b", borderTop: "1px solid rgba(255,255,255,0.08)", position: "relative", zIndex: 1 }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "40px 20px 30px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "28px" }}>
           <div>
-            <img src="/logo1.png" alt="2fa.ac" style={{ height: "32px", marginBottom: "16px" }} />
+            <img src="/logo1.png" alt="2fa.ac" width="120" height="32" style={{ height: "32px", marginBottom: "16px" }} />
             <p style={{ fontSize: "14px", color: "#a5b4fc", lineHeight: "1.7", maxWidth: "260px" }}>
               Free cybersecurity tools — 2FA, passwords, JWT, DNS and more. Browser-only, zero signup required.
             </p>
