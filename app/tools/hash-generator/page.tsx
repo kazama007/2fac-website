@@ -84,6 +84,14 @@ const faqs = [
 ];
 
 export default function HashGenerator() {
+  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth <= 768 : true);
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const [text, setText] = useState("");
   const [hashes, setHashes] = useState<{[k:string]:string}>({});
   const [copied, setCopied] = useState("");
@@ -127,7 +135,7 @@ export default function HashGenerator() {
             <div key={i} style={{display:"flex",alignItems:"center",gap:"6px",background:"#fff",border:"1px solid #e2e8f0",borderRadius:"8px",padding:"6px 12px",fontSize:"12px",color:"#64748b",fontWeight:"500"}}><span>{b.icon}</span>{b.label}</div>
           ))}
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 300px",gap:"24px",alignItems:"start"}}>
+        <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 300px",gap:"24px",alignItems:"start"}}>
           <div style={{display:"flex",flexDirection:"column",gap:"20px"}}>
             <div style={{background:"#ffffff",border:"1px solid rgba(124,58,237,0.12)",borderRadius:"20px",padding:"32px",boxShadow:"0 4px 24px rgba(124,58,237,0.06)"}}>
               <textarea value={text} onChange={e=>setText(e.target.value)} placeholder="Enter any text, password, or data..." rows={4}
@@ -203,7 +211,7 @@ export default function HashGenerator() {
             </div>
           </div>
 
-          <div style={{display:"flex",flexDirection:"column",gap:"16px",position:"sticky",top:"90px"}}>
+          <div style={{display:"flex",flexDirection:"column",gap:"16px",position:isMobile?"static":"sticky",top:"90px"}}>
             <div style={{background:"#ffffff",border:"1px solid rgba(124,58,237,0.1)",borderRadius:"16px",padding:"20px",boxShadow:"0 2px 12px rgba(0,0,0,0.04)"}}>
               <h3 style={{fontSize:"14px",fontWeight:"700",color:"#1e293b",marginBottom:"12px"}}>🔧 Related Tools</h3>
               {[{name:"JWT Decoder",href:"/tools/jwt-decoder"},{name:"Base64 Encoder/Decoder",href:"/tools/base64"},{name:"UUID Generator",href:"/tools/uuid-generator"},{name:"JSON Formatter",href:"/tools/json-formatter"},{name:"Password Generator",href:"/tools/password-generator"}].map((tool,i,arr)=>(

@@ -62,6 +62,15 @@ const worksWith = [
 
 export default function QRGenerator() {
   const [text, setText] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const [qrUrl, setQrUrl] = useState("");
   const [type, setType] = useState("2fa");
   const [size, setSize] = useState(256);
@@ -85,7 +94,7 @@ export default function QRGenerator() {
     <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0f9ff 100%)", fontFamily: "Inter, sans-serif", position: "relative" }}>
       <DotsBackground />
       <Navbar />
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "32px 20px 80px", position: "relative", zIndex: 1 }}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px 16px 60px", position: "relative", zIndex: 1 }}>
 
         {/* Breadcrumbs */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#94a3b8", marginBottom: "20px" }}>
@@ -117,7 +126,7 @@ export default function QRGenerator() {
           ))}
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: "24px", alignItems: "start" }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 300px", gap: "24px", alignItems: "start" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 
             {/* Tool Card */}
@@ -178,7 +187,7 @@ export default function QRGenerator() {
             </div>
 
             {/* About + Benefits - 2 column */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
               <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "24px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
                 <h2 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b", marginBottom: "12px" }}>About QR Code Generator</h2>
                 <p style={{ fontSize: "13px", color: "#64748b", lineHeight: "1.8", margin: "0 0 10px" }}>Our free QR Code Generator lets you create QR codes instantly for 2FA authentication setup, website URLs, or any custom text. No signup required and completely private.</p>
@@ -250,7 +259,7 @@ export default function QRGenerator() {
           </div>
 
           {/* SIDEBAR */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px", position: "sticky", top: "90px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px", position: isMobile ? "static" : "sticky", top: "90px" }}>
 
             {/* Related Tools */}
             <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "20px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
@@ -288,7 +297,7 @@ export default function QRGenerator() {
             <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "20px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
               <h3 style={{ fontSize: "14px", fontWeight: "700", color: "#1e293b", marginBottom: "6px" }}>🔗 Works With</h3>
               <p style={{ fontSize: "12px", color: "#94a3b8", marginBottom: "14px" }}>Our QR codes work seamlessly with:</p>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "8px", marginBottom: "10px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(80px, 1fr))", gap: "8px", marginBottom: "10px" }}>
                 {worksWith.map((app, i) => (
                   <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
                     <div style={{ width: "40px", height: "40px", borderRadius: "10px", background: "rgba(124,58,237,0.08)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px" }}>{app.emoji}</div>

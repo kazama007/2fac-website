@@ -440,7 +440,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer style={{ background: "#1e1b4b", borderTop: "1px solid rgba(255,255,255,0.08)", position: "relative", zIndex: 1 }}>
-        <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "60px 40px 40px", display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: "40px" }}>
+        <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "40px 20px 30px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "28px" }}>
           <div>
             <img src="/logo1.png" alt="2fa.ac" style={{ height: "32px", marginBottom: "16px" }} />
             <p style={{ fontSize: "14px", color: "#a5b4fc", lineHeight: "1.7", maxWidth: "260px" }}>
@@ -486,9 +486,8 @@ export default function Home() {
             ))}
           </div>
         </div>
-        <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", padding: "20px 40px", display: "flex", justifyContent: "space-between", alignItems: "center", maxWidth: "1100px", margin: "0 auto" }}>
-          <span style={{ fontSize: "13px", color: "#6366f1" }}>© 2025 2fa.ac — Free Cybersecurity Tools for Everyone</span>
-          <span style={{ fontSize: "13px", color: "#6366f1" }}>Built with ❤️ for Security</span>
+        <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", padding: "16px 20px", textAlign: "center" }}>
+          <span style={{ fontSize: "12px", color: "#6366f1" }}>© 2025 2fa.ac — Free Cybersecurity Tools for Everyone</span>
         </div>
       </footer>
     </main>

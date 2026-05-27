@@ -44,6 +44,14 @@ const faqs = [
 ];
 
 export default function PasswordBreach() {
+  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth <= 768 : true);
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [result, setResult] = useState<any>(null);
@@ -79,7 +87,7 @@ export default function PasswordBreach() {
     <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0f9ff 100%)", fontFamily: "Inter, sans-serif", position: "relative" }}>
       <DotsBackground />
       <Navbar />
-      <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "32px 20px 80px", position: "relative", zIndex: 1 }}>
+      <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "20px 16px 60px", position: "relative", zIndex: 1 }}>
 
         <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#94a3b8", marginBottom: "24px" }}>
           <a href="/" style={{ color: "#7c3aed", textDecoration: "none" }}>Home</a><span>›</span>
@@ -95,7 +103,7 @@ export default function PasswordBreach() {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "24px", alignItems: "start" }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 320px", gap: "24px", alignItems: "start" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 
             <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "20px", padding: "32px", boxShadow: "0 4px 24px rgba(124,58,237,0.06)" }}>
@@ -209,7 +217,7 @@ export default function PasswordBreach() {
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px", position: "sticky", top: "90px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px", position: isMobile ? "static" : "sticky", top: "90px" }}>
             <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "22px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
               <h3 style={{ fontSize: "15px", fontWeight: "700", color: "#1e293b", marginBottom: "14px" }}>🔧 Related Tools</h3>
               {[{ name: "Password Generator", href: "/tools/password-generator" }, { name: "Password Strength Checker", href: "/tools/password-strength" }, { name: "TOTP 2FA Generator", href: "/" }, { name: "QR Code Generator", href: "/tools/qr-generator" }, { name: "Link Checker", href: "/tools/link-checker" }].map((tool, i) => (

@@ -52,6 +52,15 @@ const faqs = [
 
 export default function PasswordStrength() {
   const [password, setPassword] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const [show, setShow] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const result = password ? checkStrength(password) : null;
@@ -59,7 +68,7 @@ export default function PasswordStrength() {
   return (
     <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0f9ff 100%)", fontFamily: "Inter, sans-serif", position: "relative" }}>
       <DotsBackground /><Navbar />
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "32px 20px 80px", position: "relative", zIndex: 1 }}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px 16px 60px", position: "relative", zIndex: 1 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#94a3b8", marginBottom: "20px" }}>
           <a href="/" style={{ color: "#7c3aed", textDecoration: "none" }}>Home</a><span>›</span>
           <a href="/tools" style={{ color: "#7c3aed", textDecoration: "none" }}>Tools</a><span>›</span>
@@ -80,7 +89,7 @@ export default function PasswordStrength() {
             <div key={i} style={{ display: "flex", alignItems: "center", gap: "6px", background: "#fff", border: "1px solid #e2e8f0", borderRadius: "8px", padding: "6px 12px", fontSize: "12px", color: "#64748b", fontWeight: "500" }}><span>{b.icon}</span>{b.label}</div>
           ))}
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: "24px", alignItems: "start" }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 300px", gap: "24px", alignItems: "start" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
             <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "20px", padding: "32px", boxShadow: "0 4px 24px rgba(124,58,237,0.06)" }}>
               <div style={{ position: "relative", marginBottom: "20px" }}>
@@ -116,7 +125,7 @@ export default function PasswordStrength() {
               )}
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
               <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "24px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
                 <h2 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b", marginBottom: "12px" }}>About Password Strength Checker</h2>
                 <p style={{ fontSize: "13px", color: "#64748b", lineHeight: "1.8", margin: "0 0 10px" }}>Our Password Strength Checker analyzes your password and gives you a detailed strength score instantly with 8 different security criteria.</p>
@@ -170,7 +179,7 @@ export default function PasswordStrength() {
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px", position: "sticky", top: "90px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px", position: isMobile ? "static" : "sticky", top: "90px" }}>
             <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "20px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
               <h3 style={{ fontSize: "14px", fontWeight: "700", color: "#1e293b", marginBottom: "12px" }}>🔧 Related Tools</h3>
               {[{ name: "Password Generator", href: "/tools/password-generator" }, { name: "Password Breach Checker", href: "/tools/password-breach" }, { name: "TOTP 2FA Generator", href: "/" }, { name: "Hash Generator", href: "/tools/hash-generator" }, { name: "UUID Generator", href: "/tools/uuid-generator" }].map((tool, i, arr) => (
