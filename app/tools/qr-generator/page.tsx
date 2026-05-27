@@ -1,18 +1,9 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { Navbar, Footer } from "../../shared";
-import { HeaderAd, FooterAd } from "../../adsense";
 
 function DotsBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
-    checkMobile();
-    setMounted(true);
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
   useEffect(() => {
     const canvas = canvasRef.current; if (!canvas) return;
     const ctx = canvas.getContext("2d"); if (!ctx) return;
@@ -73,6 +64,15 @@ export default function QRGenerator() {
   const [text, setText] = useState("");
   const [isMobile, setIsMobile] = useState(false);
   const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    setMounted(true);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const [qrUrl, setQrUrl] = useState("");
   const [type, setType] = useState("2fa");
   const [size, setSize] = useState(256);
@@ -96,8 +96,7 @@ export default function QRGenerator() {
     <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0f9ff 100%)", fontFamily: "Inter, sans-serif", position: "relative" }}>
       <DotsBackground />
       <Navbar />
-      <HeaderAd />
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "32px 20px 80px", position: "relative", zIndex: 1 }}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px 16px 60px", position: "relative", zIndex: 1 }}>
 
         {/* Breadcrumbs */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#94a3b8", marginBottom: "20px" }}>
@@ -300,7 +299,7 @@ export default function QRGenerator() {
             <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "20px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
               <h3 style={{ fontSize: "14px", fontWeight: "700", color: "#1e293b", marginBottom: "6px" }}>🔗 Works With</h3>
               <p style={{ fontSize: "12px", color: "#94a3b8", marginBottom: "14px" }}>Our QR codes work seamlessly with:</p>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "8px", marginBottom: "10px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(80px, 1fr))", gap: "8px", marginBottom: "10px" }}>
                 {worksWith.map((app, i) => (
                   <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
                     <div style={{ width: "40px", height: "40px", borderRadius: "10px", background: "rgba(124,58,237,0.08)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px" }}>{app.emoji}</div>
@@ -324,7 +323,6 @@ export default function QRGenerator() {
           </div>
         </div>
       </div>
-      <FooterAd />
       <Footer />
     </main>
   );
