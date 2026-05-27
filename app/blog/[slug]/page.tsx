@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const { data: post } = await supabase
     .from("blog_posts")
-    .select("title, seo_title, seo_description, excerpt")
+    .select("title, seo_title, seo_description, excerpt, cover_image")
     .eq("slug", slug)
     .eq("published", true)
     .single();
