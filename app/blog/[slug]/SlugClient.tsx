@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Navbar, Footer } from "../../shared";
+import { HeaderAd, FooterAd, InArticleAd } from "../../adsense";
 
 const ALL_TOOLS = [
   { name: "TOTP 2FA Generator", href: "/" },
@@ -103,6 +104,7 @@ export default function SlugClient({ post, allPosts, slug }: { post: any; allPos
   return (
     <main style={{ minHeight: "100vh", background: "linear-gradient(135deg,#f0f4ff 0%,#faf5ff 50%,#f0f9ff 100%)", fontFamily: "Inter,sans-serif" }}>
       <Navbar />
+      <HeaderAd />
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px 16px 60px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#94a3b8", marginBottom: "28px" }}>
           <a href="/" style={{ color: "#7c3aed", textDecoration: "none" }}>Home</a><span>›</span>
@@ -197,6 +199,7 @@ export default function SlugClient({ post, allPosts, slug }: { post: any; allPos
         </div>
       </div>
       <style>{`article h1{font-size:26px;font-weight:800;color:#1e293b;margin:28px 0 14px}article h2{font-size:22px;font-weight:700;color:#1e293b;margin:32px 0 12px}article h3{font-size:17px;font-weight:700;color:#1e293b;margin:24px 0 10px}article p{margin:0 0 16px;font-size:15px;line-height:1.8;color:#374151}article ul,article ol{margin:0 0 18px 24px}article li{font-size:15px;line-height:1.8;color:#374151;margin-bottom:6px}article a{color:#7c3aed;text-decoration:underline}article strong{font-weight:700;color:#1e293b}article blockquote{border-left:4px solid #7c3aed;background:rgba(124,58,237,0.05);padding:16px 20px;border-radius:0 12px 12px 0;margin:20px 0;font-style:italic;color:#64748b}article code{background:rgba(124,58,237,0.08);color:#7c3aed;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:13px}article pre{background:#1e293b;color:#e2e8f0;padding:20px;border-radius:12px;overflow-x:auto;margin:20px 0}article img{max-width:100%;border-radius:12px;margin:16px 0}article table{width:100%;border-collapse:collapse;margin:20px 0}article thead{background:#7c3aed}article thead th{color:white;font-weight:700;font-size:13px;padding:12px 16px;text-align:left}article tbody td{padding:12px 16px;font-size:14px;color:#374151;border-bottom:1px solid #e2e8f0}`}</style>
+      <FooterAd />
       <Footer />
     </main>
   );

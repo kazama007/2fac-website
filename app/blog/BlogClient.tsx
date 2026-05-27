@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { Navbar, Footer } from "../shared";
+import { HeaderAd, FooterAd, InArticleAd } from "../adsense";
 
 function DotsBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -65,6 +66,7 @@ export default function BlogClient({ initialPosts }: { initialPosts: any[] }) {
     <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0f9ff 100%)", color: "#1a1a2e", fontFamily: "Inter, sans-serif", position: "relative" }}>
       <DotsBackground />
       <Navbar />
+      <HeaderAd />
       <section style={{ maxWidth: "1000px", margin: "0 auto", padding: "clamp(20px, 5vw, 40px) 16px", position: "relative", zIndex: 1 }}>
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
           <div style={{ display: "inline-block", background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "20px", padding: "6px 16px", fontSize: "13px", color: "#7c3aed", marginBottom: "12px", fontWeight: "500" }}>📝 2fa.ac Blog</div>
@@ -115,6 +117,7 @@ export default function BlogClient({ initialPosts }: { initialPosts: any[] }) {
           </div>
         )}
       </section>
+      <FooterAd />
       <Footer />
     </main>
   );

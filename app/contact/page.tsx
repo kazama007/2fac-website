@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { Navbar, Footer } from "../shared";
+import { HeaderAd, FooterAd, InArticleAd } from "../adsense";
 
 function DotsBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -78,6 +79,7 @@ export default function ContactPage() {
     <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0f9ff 100%)", color: "#1a1a2e", fontFamily: "Inter, sans-serif", position: "relative" }}>
       <DotsBackground />
       <Navbar />
+      <HeaderAd />
 
       <section style={{ maxWidth: "900px", margin: "0 auto", padding: "24px 16px 60px", position: "relative", zIndex: 1 }}>
 
@@ -211,6 +213,7 @@ export default function ContactPage() {
         </div>
       </section>
 
+      <FooterAd />
       <Footer />
     </main>
   );

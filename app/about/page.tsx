@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { Navbar, Footer } from "../shared";
+import { HeaderAd, FooterAd, InArticleAd } from "../adsense";
 
 function DotsBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -80,6 +81,7 @@ export default function AboutPage() {
     <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0f9ff 100%)", color: "#1a1a2e", fontFamily: "Inter, sans-serif", position: "relative" }}>
       <DotsBackground />
       <Navbar />
+      <HeaderAd />
 
       {/* Hero */}
       <section style={{ maxWidth: "800px", margin: "0 auto", padding: "32px 16px 24px", textAlign: "center", position: "relative", zIndex: 1 }}>
@@ -163,6 +165,7 @@ export default function AboutPage() {
         </div>
       </section>
 
+      <FooterAd />
       <Footer />
     </main>
   );
