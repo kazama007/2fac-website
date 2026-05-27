@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { generateTOTP } from "./totp";
 import AnimatedBackground from "./background";
+import { HeaderAd, FooterAd, InArticleAd } from "./adsense";
 
 interface SavedKey {
   name: string;
@@ -317,6 +318,11 @@ export default function Home() {
         </div>
       )}
 
+      {/* Header Ad */}
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 20px", position: "relative", zIndex: 1 }}>
+        <HeaderAd />
+      </div>
+
       {/* 2FA Tool */}
       <section style={{ maxWidth: "1200px", margin: "40px auto 20px", padding: "0 20px", position: "relative", zIndex: 1 }}>
         <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "12px" }}>
@@ -439,6 +445,11 @@ export default function Home() {
       </section>
 
       {/* Footer */}
+      {/* Footer Ad */}
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 20px", position: "relative", zIndex: 1 }}>
+        <FooterAd />
+      </div>
+
       <footer style={{ background: "#1e1b4b", borderTop: "1px solid rgba(255,255,255,0.08)", position: "relative", zIndex: 1 }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "40px 20px 30px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "28px" }}>
           <div>
