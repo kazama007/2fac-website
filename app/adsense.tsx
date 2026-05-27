@@ -24,10 +24,17 @@ function useAdsSettings() {
     // Fetch from Supabase
     supabase.from("ads_settings").select("*").eq("id", 1).single().then(({ data }) => {
       if (data) {
-        cachedSettings = data;
-        setSettings(data);
+        const mapped: AdsSettings = {
+          publisherId: data.publisher_id || "",
+          headerAdSlot: data.header_ad_slot || "",
+          footerAdSlot: data.footer_ad_slot || "",
+          sidebarAdSlot: data.sidebar_ad_slot || "",
+          inArticleAdSlot: data.in_article_ad_slot || "",
+          adsEnabled: data.ads_enabled || false,
+        };
+        cachedSettings = mapped;
+        setSettings(mapped);
       } else {
-        // Fallback to localStorage
         const saved = localStorage.getItem("ads-settings");
         if (saved) { const parsed = JSON.parse(saved); cachedSettings = parsed; setSettings(parsed); }
       }
