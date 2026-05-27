@@ -1,10 +1,17 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function AnimatedBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    // Mobile pe animation band karo
+    if (window.innerWidth <= 768) {
+      setIsMobile(true);
+      return;
+    }
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -25,16 +32,15 @@ export default function AnimatedBackground() {
 
     let animId: number;
     let lastTime = 0;
-    const FPS = 30; // cap at 30fps — enough for dots
+    const FPS = 30;
     const interval = 1000 / FPS;
 
     const animate = (now: number) => {
       animId = requestAnimationFrame(animate);
-      if (now - lastTime < interval) return; // skip frame
+      if (now - lastTime < interval) return;
       lastTime = now;
 
       ctx.clearRect(0, 0, width, height);
-
       const cols = Math.ceil(width / DOT_SPACING) + 1;
       const rows = Math.ceil(height / DOT_SPACING) + 1;
       const glowRadius = 100;
@@ -43,7 +49,6 @@ export default function AnimatedBackground() {
         for (let row = 0; row < rows; row++) {
           const x = col * DOT_SPACING;
           const y = row * DOT_SPACING;
-
           const dx = mouse.x - x;
           const dy = mouse.y - y;
           const dist = Math.sqrt(dx * dx + dy * dy);
@@ -78,6 +83,9 @@ export default function AnimatedBackground() {
       window.removeEventListener("resize", onResize);
     };
   }, []);
+
+  // Mobile pe canvas render hi mat karo
+  if (isMobile) return null;
 
   return (
     <canvas
