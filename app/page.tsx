@@ -324,7 +324,7 @@ export default function Home() {
       </div>
 
       {/* 2FA Tool */}
-      <section style={{ maxWidth: "1200px", margin: "40px auto 20px", padding: "0 20px", position: "relative", zIndex: 1, minHeight: "500px", contain: "layout" as any }}>
+      <section style={{ maxWidth: "1200px", margin: "40px auto 20px", padding: "0 20px", position: "relative", zIndex: 1, minHeight: "400px" }}>
         <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "12px", minHeight: "36px" }}>
           <a href="/saved-keys" style={{ background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.25)", color: "#7c3aed", textDecoration: "none", padding: "8px 16px", borderRadius: "8px", fontSize: "14px", fontWeight: "600", display: "flex", alignItems: "center", gap: "6px" }}>
             🔑 2FA History
