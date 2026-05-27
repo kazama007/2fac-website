@@ -51,16 +51,17 @@ const faqs = [
 ];
 
 export default function PasswordStrength() {
-  const [password, setPassword] = useState("");
   const [isMobile, setIsMobile] = useState(false);
-
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
     checkMobile();
+    setMounted(true);
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const result = password ? checkStrength(password) : null;
@@ -89,7 +90,7 @@ export default function PasswordStrength() {
             <div key={i} style={{ display: "flex", alignItems: "center", gap: "6px", background: "#fff", border: "1px solid #e2e8f0", borderRadius: "8px", padding: "6px 12px", fontSize: "12px", color: "#64748b", fontWeight: "500" }}><span>{b.icon}</span>{b.label}</div>
           ))}
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 300px", gap: "24px", alignItems: "start" }}>
+        <div style={{ display: "grid", gridTemplateColumns: mounted && isMobile ? "1fr" : "1fr 300px", gap: "24px", alignItems: "start" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
             <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "20px", padding: "32px", boxShadow: "0 4px 24px rgba(124,58,237,0.06)" }}>
               <div style={{ position: "relative", marginBottom: "20px" }}>
@@ -179,7 +180,7 @@ export default function PasswordStrength() {
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px", position: isMobile ? "static" : "sticky", top: "90px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px", position: mounted && isMobile ? "static" : "sticky", top: "90px" }}>
             <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "20px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
               <h3 style={{ fontSize: "14px", fontWeight: "700", color: "#1e293b", marginBottom: "12px" }}>🔧 Related Tools</h3>
               {[{ name: "Password Generator", href: "/tools/password-generator" }, { name: "Password Breach Checker", href: "/tools/password-breach" }, { name: "TOTP 2FA Generator", href: "/" }, { name: "Hash Generator", href: "/tools/hash-generator" }, { name: "UUID Generator", href: "/tools/uuid-generator" }].map((tool, i, arr) => (

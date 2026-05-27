@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "2FA.ac — Free 2FA Code Generator & Security Tools",
   description: "Generate 2FA codes instantly, check passwords, decode JWT, lookup DNS & IP. 15+ free cybersecurity tools. No signup required.",
-  keywords: "2FA generator, TOTP generator, password generator, JWT decoder, DNS lookup, IP lookup, cybersecurity tools, free security tools, two factor authentication",
+  keywords: "2FA generator, TOTP generator, password generator, JWT decoder, DNS lookup, IP lookup, cybersecurity tools, free security tools",
   authors: [{ name: "2fa.ac" }],
   creator: "2fa.ac",
   publisher: "2fa.ac",
@@ -30,15 +31,33 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <meta name="theme-color" content="#7c3aed" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        {/* Preconnect for faster external requests */}
         <link rel="preconnect" href="https://ukyalnzbxdokqwmupdcq.supabase.co" />
-        <link rel="preconnect" href="https://api.imgbb.com" />
         <link rel="dns-prefetch" href="https://ukyalnzbxdokqwmupdcq.supabase.co" />
-        {/* Preload logo */}
         <link rel="preload" href="/logo2.png" as="image" />
       </head>
       <body suppressHydrationWarning>
         {children}
+
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-J24856B8ZQ"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-J24856B8ZQ');
+          `}
+        </Script>
+
+        {/* Google AdSense */}
+        <Script
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4107684422068090"
+          strategy="afterInteractive"
+          crossOrigin="anonymous"
+        />
       </body>
     </html>
   );
