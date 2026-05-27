@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { Navbar, Footer } from "../../shared";
-import { HeaderAd, FooterAd } from "../../adsense";
+import { HeaderAd, FooterAd, SidebarAd, InArticleAd } from "../../adsense";
 
 function DotsBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -229,6 +229,7 @@ export default function LinkChecker() {
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "16px", position: mounted && isMobile ? "static" : "sticky", top: "90px" }}>
+            <SidebarAd />
             <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "22px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
               <h3 style={{ fontSize: "15px", fontWeight: "700", color: "#1e293b", marginBottom: "14px" }}>🔧 Related Tools</h3>
               {[{ name: "Password Breach Checker", href: "/tools/password-breach" }, { name: "DNS Lookup", href: "/tools/dns-lookup" }, { name: "IP Lookup", href: "/tools/ip-lookup" }, { name: "WHOIS Lookup", href: "/tools/whois-lookup" }, { name: "Password Generator", href: "/tools/password-generator" }].map((tool, i) => (

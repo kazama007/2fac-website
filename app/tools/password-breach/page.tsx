@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { Navbar, Footer } from "../../shared";
-import { HeaderAd, FooterAd } from "../../adsense";
+import { HeaderAd, FooterAd, SidebarAd, InArticleAd } from "../../adsense";
 
 function DotsBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -222,6 +222,7 @@ export default function PasswordBreach() {
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "16px", position: mounted && isMobile ? "static" : "sticky", top: "90px" }}>
+            <SidebarAd />
             <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "22px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
               <h3 style={{ fontSize: "15px", fontWeight: "700", color: "#1e293b", marginBottom: "14px" }}>🔧 Related Tools</h3>
               {[{ name: "Password Generator", href: "/tools/password-generator" }, { name: "Password Strength Checker", href: "/tools/password-strength" }, { name: "TOTP 2FA Generator", href: "/" }, { name: "QR Code Generator", href: "/tools/qr-generator" }, { name: "Link Checker", href: "/tools/link-checker" }].map((tool, i) => (

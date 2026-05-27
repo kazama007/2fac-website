@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { Navbar, Footer } from "../../shared";
-import { HeaderAd, FooterAd } from "../../adsense";
+import { HeaderAd, FooterAd, SidebarAd, InArticleAd } from "../../adsense";
 
 function DotsBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -196,6 +196,7 @@ export default function JWTDecoder() {
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "16px", position: mounted && isMobile ? "static" : "sticky", top: "90px" }}>
+            <SidebarAd />
             <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "20px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
               <h3 style={{ fontSize: "14px", fontWeight: "700", color: "#1e293b", marginBottom: "12px" }}>🔧 Related Tools</h3>
               {[{ name: "Hash Generator", href: "/tools/hash-generator" }, { name: "Base64 Encoder/Decoder", href: "/tools/base64" }, { name: "UUID Generator", href: "/tools/uuid-generator" }, { name: "JSON Formatter", href: "/tools/json-formatter" }, { name: "Password Generator", href: "/tools/password-generator" }].map((tool, i, arr) => (

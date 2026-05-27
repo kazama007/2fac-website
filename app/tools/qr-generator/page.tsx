@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { Navbar, Footer } from "../../shared";
+import { HeaderAd, FooterAd, SidebarAd } from "../../adsense";
 
 function DotsBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -96,16 +97,15 @@ export default function QRGenerator() {
     <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0f9ff 100%)", fontFamily: "Inter, sans-serif", position: "relative" }}>
       <DotsBackground />
       <Navbar />
+      <HeaderAd />
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px 16px 60px", position: "relative", zIndex: 1 }}>
 
-        {/* Breadcrumbs */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#94a3b8", marginBottom: "20px" }}>
           <a href="/" style={{ color: "#7c3aed", textDecoration: "none" }}>Home</a><span>›</span>
           <a href="/tools" style={{ color: "#7c3aed", textDecoration: "none" }}>Tools</a><span>›</span>
           <span style={{ color: "#1e293b", fontWeight: "500" }}>QR Code Generator</span>
         </div>
 
-        {/* Title Row */}
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "20px", marginBottom: "16px", flexWrap: "wrap" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <div style={{ width: "64px", height: "64px", background: "linear-gradient(135deg, #7c3aed, #9f67ff)", borderRadius: "16px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "30px", flexShrink: 0, boxShadow: "0 8px 24px rgba(124,58,237,0.3)" }}>📱</div>
@@ -119,7 +119,6 @@ export default function QRGenerator() {
           </div>
         </div>
 
-        {/* Trust Badges */}
         <div style={{ display: "flex", gap: "12px", marginBottom: "28px", flexWrap: "wrap" }}>
           {[{ icon: "✅", label: "100% Free" }, { icon: "🚫", label: "No Signup" }, { icon: "🖥️", label: "Browser-Based" }, { icon: "🔒", label: "Private & Secure" }].map((b, i) => (
             <div key={i} style={{ display: "flex", alignItems: "center", gap: "6px", background: "#fff", border: "1px solid #e2e8f0", borderRadius: "8px", padding: "6px 12px", fontSize: "12px", color: "#64748b", fontWeight: "500" }}>
@@ -131,7 +130,6 @@ export default function QRGenerator() {
         <div style={{ display: "grid", gridTemplateColumns: mounted && isMobile ? "1fr" : "1fr 300px", gap: "24px", alignItems: "start" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 
-            {/* Tool Card */}
             <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "20px", padding: "32px", boxShadow: "0 4px 24px rgba(124,58,237,0.06)" }}>
               <div style={{ marginBottom: "20px" }}>
                 <label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600", display: "block", marginBottom: "10px" }}>QR Code Type</label>
@@ -188,14 +186,12 @@ export default function QRGenerator() {
               )}
             </div>
 
-            {/* About + Benefits - 2 column */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
               <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "24px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
                 <h2 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b", marginBottom: "12px" }}>About QR Code Generator</h2>
                 <p style={{ fontSize: "13px", color: "#64748b", lineHeight: "1.8", margin: "0 0 10px" }}>Our free QR Code Generator lets you create QR codes instantly for 2FA authentication setup, website URLs, or any custom text. No signup required and completely private.</p>
                 <p style={{ fontSize: "13px", color: "#64748b", lineHeight: "1.8", margin: 0 }}>Perfect for setting up two-factor authentication on apps like Google Authenticator, Authy, or Microsoft Authenticator.</p>
               </div>
-
               <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "24px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
                 <h2 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b", marginBottom: "12px" }}>Why Use Our QR Code Generator?</h2>
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -211,20 +207,6 @@ export default function QRGenerator() {
               </div>
             </div>
 
-            {/* How to Use */}
-            <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "24px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-              <h2 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b", marginBottom: "16px" }}>How to Use</h2>
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                {["Select the QR Code type — 2FA Secret, URL, or plain text.", "Enter your 2FA secret key, website URL, or any text you want to encode.", "Adjust the QR code size using the slider (256px for digital, 512px for print).", "Click Generate QR Code to instantly create your QR code.", "Download as PNG or copy the image URL for use anywhere."].map((step, i) => (
-                  <div key={i} style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
-                    <div style={{ width: "26px", height: "26px", borderRadius: "50%", background: "linear-gradient(135deg, #7c3aed, #9f67ff)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "700", flexShrink: 0 }}>{i + 1}</div>
-                    <p style={{ fontSize: "13px", color: "#64748b", lineHeight: "1.7", margin: 0, paddingTop: "3px" }}>{step}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Privacy */}
             <div style={{ background: "rgba(34,197,94,0.04)", border: "1px solid rgba(34,197,94,0.2)", borderRadius: "16px", padding: "20px", display: "flex", gap: "14px", alignItems: "flex-start" }}>
               <div style={{ fontSize: "28px", flexShrink: 0 }}>🛡️</div>
               <div>
@@ -233,13 +215,12 @@ export default function QRGenerator() {
               </div>
             </div>
 
-            {/* FAQ - 2 column */}
             <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "24px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-              <h2 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b", marginBottom: "16px" }}>Frequently Asked Questions (FAQ)</h2>
+              <h2 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b", marginBottom: "16px" }}>Frequently Asked Questions</h2>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0" }}>
                 {faqs.map((faq, i) => (
                   <div key={i} style={{ borderBottom: "1px solid #f1f5f9", paddingRight: i % 2 === 0 ? "16px" : "0", paddingLeft: i % 2 === 1 ? "16px" : "0", borderRight: i % 2 === 0 ? "1px solid #f1f5f9" : "none" }}>
-                    <button onClick={() => setOpenFaq(openFaq === i ? null : i)} style={{ width: "100%", padding: "14px 0", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
+                    <button onClick={() => setOpenFaq(openFaq === i ? null : i)} style={{ width: "100%", padding: "14px 0", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", cursor: "pointer", textAlign: "left" as const }}>
                       <span style={{ fontSize: "13px", fontWeight: "600", color: "#1e293b", paddingRight: "8px" }}>{faq.q}</span>
                       <span style={{ color: "#7c3aed", fontSize: "16px", fontWeight: "700", flexShrink: 0 }}>{openFaq === i ? "−" : "+"}</span>
                     </button>
@@ -249,37 +230,33 @@ export default function QRGenerator() {
               </div>
             </div>
 
-            {/* CTA */}
             <div style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.08), rgba(159,103,255,0.08))", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "16px", padding: "24px", display: "flex", gap: "20px", alignItems: "center" }}>
               <div style={{ fontSize: "44px", flexShrink: 0 }}>🔐</div>
               <div style={{ flex: 1 }}>
                 <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b", marginBottom: "4px" }}>Secure Your Accounts with 2FA</h3>
                 <p style={{ fontSize: "13px", color: "#64748b", margin: "0 0 12px" }}>Use our TOTP generator to create 2FA codes and protect all your important accounts instantly.</p>
-                <a href="/" style={{ display: "inline-block", background: "linear-gradient(135deg, #7c3aed, #9f67ff)", color: "white", textDecoration: "none", padding: "10px 20px", borderRadius: "10px", fontSize: "13px", fontWeight: "600", boxShadow: "0 4px 14px rgba(124,58,237,0.3)" }}>Try 2FA Generator →</a>
+                <a href="/" style={{ display: "inline-block", background: "linear-gradient(135deg, #7c3aed, #9f67ff)", color: "white", textDecoration: "none", padding: "10px 20px", borderRadius: "10px", fontSize: "13px", fontWeight: "600" }}>Try 2FA Generator →</a>
               </div>
             </div>
           </div>
 
           {/* SIDEBAR */}
           <div style={{ display: "flex", flexDirection: "column", gap: "16px", position: mounted && isMobile ? "static" : "sticky", top: "90px" }}>
-
-            {/* Related Tools */}
+            <SidebarAd />
             <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "20px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-              <h3 style={{ fontSize: "14px", fontWeight: "700", color: "#1e293b", marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>🔧 Related Tools</h3>
+              <h3 style={{ fontSize: "14px", fontWeight: "700", color: "#1e293b", marginBottom: "12px" }}>🔧 Related Tools</h3>
               <div style={{ display: "flex", flexDirection: "column" }}>
                 {relatedTools.map((tool, i) => (
                   <a key={i} href={tool.href} style={{ fontSize: "13px", color: "#64748b", textDecoration: "none", padding: "10px 12px", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: i < relatedTools.length - 1 ? "1px solid #f8fafc" : "none" }}
                     onMouseEnter={e => { e.currentTarget.style.background = "rgba(124,58,237,0.06)"; e.currentTarget.style.color = "#7c3aed"; }}
                     onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#64748b"; }}>
-                    <span>→ {tool.name}</span>
-                    <span style={{ fontSize: "16px", opacity: 0.4 }}>›</span>
+                    <span>→ {tool.name}</span><span style={{ fontSize: "16px", opacity: 0.4 }}>›</span>
                   </a>
                 ))}
               </div>
               <a href="/tools" style={{ display: "block", textAlign: "center", marginTop: "10px", padding: "8px", background: "#f1f5f9", color: "#7c3aed", textDecoration: "none", borderRadius: "8px", fontSize: "12px", fontWeight: "600" }}>View All Tools →</a>
             </div>
 
-            {/* Related Articles */}
             <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "20px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
               <h3 style={{ fontSize: "14px", fontWeight: "700", color: "#1e293b", marginBottom: "12px" }}>📝 Related Articles</h3>
               <div style={{ display: "flex", flexDirection: "column" }}>
@@ -287,18 +264,15 @@ export default function QRGenerator() {
                   <a key={i} href="/blog" style={{ fontSize: "13px", color: "#64748b", textDecoration: "none", padding: "10px 12px", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: i < relatedArticles.length - 1 ? "1px solid #f8fafc" : "none" }}
                     onMouseEnter={e => { e.currentTarget.style.background = "rgba(124,58,237,0.06)"; e.currentTarget.style.color = "#7c3aed"; }}
                     onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#64748b"; }}>
-                    <span>→ {article}</span>
-                    <span style={{ fontSize: "16px", opacity: 0.4 }}>›</span>
+                    <span>→ {article}</span><span style={{ fontSize: "16px", opacity: 0.4 }}>›</span>
                   </a>
                 ))}
               </div>
               <a href="/blog" style={{ display: "block", textAlign: "center", marginTop: "10px", padding: "8px", background: "#f1f5f9", color: "#7c3aed", textDecoration: "none", borderRadius: "8px", fontSize: "12px", fontWeight: "600" }}>View All Articles →</a>
             </div>
 
-            {/* Works With */}
             <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "20px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
               <h3 style={{ fontSize: "14px", fontWeight: "700", color: "#1e293b", marginBottom: "6px" }}>🔗 Works With</h3>
-              <p style={{ fontSize: "12px", color: "#94a3b8", marginBottom: "14px" }}>Our QR codes work seamlessly with:</p>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(80px, 1fr))", gap: "8px", marginBottom: "10px" }}>
                 {worksWith.map((app, i) => (
                   <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
@@ -307,10 +281,8 @@ export default function QRGenerator() {
                   </div>
                 ))}
               </div>
-              <p style={{ fontSize: "11px", color: "#94a3b8", margin: 0 }}>Compatible with all major authenticator apps.</p>
             </div>
 
-            {/* Quick Info */}
             <div style={{ background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.15)", borderRadius: "16px", padding: "18px" }}>
               <h3 style={{ fontSize: "13px", fontWeight: "700", color: "#7c3aed", marginBottom: "10px" }}>⚡ Quick Info</h3>
               {[{ label: "Type", value: "Free Tool" }, { label: "Processing", value: "Browser-based" }, { label: "Account Required", value: "No" }, { label: "Data Stored", value: "None" }, { label: "Formats", value: "PNG Image" }].map((item, i) => (
@@ -323,6 +295,7 @@ export default function QRGenerator() {
           </div>
         </div>
       </div>
+      <FooterAd />
       <Footer />
     </main>
   );

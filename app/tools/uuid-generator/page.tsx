@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { Navbar, Footer } from "../../shared";
-import { HeaderAd, FooterAd } from "../../adsense";
+import { HeaderAd, FooterAd, SidebarAd, InArticleAd } from "../../adsense";
 function DotsBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
