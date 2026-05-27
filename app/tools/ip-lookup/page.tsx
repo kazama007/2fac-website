@@ -1,35 +1,10 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { Navbar, Footer } from "../../shared";
+import AnimatedBackground from "../../background";
 import { HeaderAd, FooterAd, SidebarAd, InArticleAd } from "../../adsense";
 
-function DotsBackground() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const canvas = canvasRef.current; if (!canvas) return;
-    const ctx = canvas.getContext("2d"); if (!ctx) return;
-    let width = canvas.width = window.innerWidth, height = canvas.height = window.innerHeight;
-    const DOT_SPACING = 28, DOT_RADIUS = 1.2, mouse = { x: -999, y: -999 };
-    const onMouseMove = (e: MouseEvent) => { mouse.x = e.clientX; mouse.y = e.clientY; };
-    window.addEventListener("mousemove", onMouseMove);
-    let animId: number;
-    const animate = () => {
-      ctx.clearRect(0, 0, width, height);
-      const cols = Math.ceil(width / DOT_SPACING) + 1, rows = Math.ceil(height / DOT_SPACING) + 1;
-      for (let col = 0; col < cols; col++) for (let row = 0; row < rows; row++) {
-        const x = col * DOT_SPACING, y = row * DOT_SPACING, dx = mouse.x - x, dy = mouse.y - y, dist = Math.sqrt(dx*dx+dy*dy);
-        ctx.beginPath(); ctx.arc(x, y, dist < 100 ? DOT_RADIUS + (1-dist/100)*1.2 : DOT_RADIUS, 0, Math.PI*2);
-        ctx.fillStyle = dist < 100 ? `rgba(124,58,237,${0.3+(1-dist/100)*0.5})` : "rgba(148,163,184,0.25)"; ctx.fill();
-      }
-      animId = requestAnimationFrame(animate);
-    };
-    animate();
-    const onResize = () => { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; };
-    window.addEventListener("resize", onResize);
-    return () => { cancelAnimationFrame(animId); window.removeEventListener("mousemove", onMouseMove); window.removeEventListener("resize", onResize); };
-  }, []);
-  return <canvas ref={canvasRef} style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", zIndex: 0, pointerEvents: "none" }} />;
-}
+
 
 const faqs = [
   { q: "What is an IP address?", a: "An IP (Internet Protocol) address is a unique numerical label assigned to every device connected to a network. It serves two main purposes: identifying the host and providing the location of the host in the network." },
@@ -79,7 +54,7 @@ export default function IPLookup() {
 
   return (
     <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0f9ff 100%)", fontFamily: "Inter, sans-serif", position: "relative" }}>
-      <DotsBackground />
+      <AnimatedBackground />
       <Navbar />
       <HeaderAd />
       <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "20px 16px 60px", position: "relative", zIndex: 1 }}>

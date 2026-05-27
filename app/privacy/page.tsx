@@ -1,49 +1,8 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { Navbar, Footer } from "../shared";
-
-function DotsBackground() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
-    const DOT_SPACING = 28, DOT_RADIUS = 1.2;
-    const mouse = { x: -999, y: -999 };
-    const onMouseMove = (e: MouseEvent) => { mouse.x = e.clientX; mouse.y = e.clientY; };
-    window.addEventListener("mousemove", onMouseMove);
-    let animId: number;
-    const animate = () => {
-      ctx.clearRect(0, 0, width, height);
-      const cols = Math.ceil(width / DOT_SPACING) + 1;
-      const rows = Math.ceil(height / DOT_SPACING) + 1;
-      for (let col = 0; col < cols; col++) {
-        for (let row = 0; row < rows; row++) {
-          const x = col * DOT_SPACING, y = row * DOT_SPACING;
-          const dx = mouse.x - x, dy = mouse.y - y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 100) {
-            const intensity = 1 - dist / 100;
-            ctx.beginPath(); ctx.arc(x, y, DOT_RADIUS + intensity * 1.2, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(124,58,237,${0.3 + intensity * 0.5})`; ctx.fill();
-          } else {
-            ctx.beginPath(); ctx.arc(x, y, DOT_RADIUS, 0, Math.PI * 2);
-            ctx.fillStyle = "rgba(148,163,184,0.25)"; ctx.fill();
-          }
-        }
-      }
-      animId = requestAnimationFrame(animate);
-    };
-    animate();
-    const onResize = () => { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; };
-    window.addEventListener("resize", onResize);
-    return () => { cancelAnimationFrame(animId); window.removeEventListener("mousemove", onMouseMove); window.removeEventListener("resize", onResize); };
-  }, []);
-  return <canvas ref={canvasRef} style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", zIndex: 0, pointerEvents: "none" }} />;
-}
+import AnimatedBackground from "../background";
+import { HeaderAd, FooterAd } from "../adsense";
 
 const sections = [
   {
@@ -146,39 +105,26 @@ We will respond to your inquiry within 7 business days.`
 export default function PrivacyPolicy() {
   return (
     <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0f9ff 100%)", color: "#1a1a2e", fontFamily: "Inter, sans-serif", position: "relative" }}>
-      <DotsBackground />
+      <AnimatedBackground />
       <Navbar />
+      <HeaderAd />
 
       <section style={{ maxWidth: "860px", margin: "0 auto", padding: "60px 20px 80px", position: "relative", zIndex: 1 }}>
-
-        {/* Header */}
         <div style={{ textAlign: "center", marginBottom: "48px" }}>
-          <div style={{ display: "inline-block", background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "20px", padding: "6px 16px", fontSize: "13px", color: "#7c3aed", marginBottom: "16px", fontWeight: "500" }}>
-            🔒 Legal
-          </div>
-          <h1 style={{ fontSize: "40px", fontWeight: "800", marginBottom: "12px", background: "linear-gradient(135deg, #1e293b 0%, #7c3aed 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-            Privacy Policy
-          </h1>
-          <p style={{ color: "#64748b", fontSize: "15px", marginBottom: "8px" }}>
-            Last updated: May 2025
-          </p>
-          <p style={{ color: "#64748b", fontSize: "15px", maxWidth: "600px", margin: "0 auto", lineHeight: "1.7" }}>
-            At 2FA.AC, your privacy is our priority. This policy explains what data we collect, how we use it, and how we protect it.
-          </p>
+          <div style={{ display: "inline-block", background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: "20px", padding: "6px 16px", fontSize: "13px", color: "#7c3aed", marginBottom: "16px", fontWeight: "500" }}>🔒 Legal</div>
+          <h1 style={{ fontSize: "40px", fontWeight: "800", marginBottom: "12px", background: "linear-gradient(135deg, #1e293b 0%, #7c3aed 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Privacy Policy</h1>
+          <p style={{ color: "#64748b", fontSize: "15px", marginBottom: "8px" }}>Last updated: May 2025</p>
+          <p style={{ color: "#64748b", fontSize: "15px", maxWidth: "600px", margin: "0 auto", lineHeight: "1.7" }}>At 2FA.AC, your privacy is our priority. This policy explains what data we collect, how we use it, and how we protect it.</p>
         </div>
 
-        {/* Privacy Highlight */}
         <div style={{ background: "rgba(34,197,94,0.06)", border: "1px solid rgba(34,197,94,0.2)", borderRadius: "16px", padding: "20px 24px", marginBottom: "40px", display: "flex", alignItems: "flex-start", gap: "16px" }}>
           <span style={{ fontSize: "28px", flexShrink: 0 }}>✅</span>
           <div>
             <div style={{ fontSize: "15px", fontWeight: "700", color: "#16a34a", marginBottom: "6px" }}>Our Privacy Commitment</div>
-            <div style={{ fontSize: "14px", color: "#64748b", lineHeight: "1.7" }}>
-              All tools on 2FA.AC process data locally in your browser. We do not collect passwords, secret keys, or any sensitive inputs. No account required. No data sold. Ever.
-            </div>
+            <div style={{ fontSize: "14px", color: "#64748b", lineHeight: "1.7" }}>All tools on 2FA.AC process data locally in your browser. We do not collect passwords, secret keys, or any sensitive inputs. No account required. No data sold. Ever.</div>
           </div>
         </div>
 
-        {/* Sections */}
         <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
           {sections.map((section, i) => (
             <div key={i} style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "32px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
@@ -189,7 +135,6 @@ export default function PrivacyPolicy() {
               <div style={{ fontSize: "14px", color: "#64748b", lineHeight: "1.8" }}>
                 {section.content.split("\n").map((line, j) => {
                   if (line.trim() === "") return <br key={j} />;
-                  // Bold text between **
                   const parts = line.split(/\*\*(.*?)\*\*/g);
                   return (
                     <p key={j} style={{ margin: "4px 0" }}>
@@ -206,16 +151,14 @@ export default function PrivacyPolicy() {
           ))}
         </div>
 
-        {/* Bottom CTA */}
         <div style={{ marginTop: "40px", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.15)", borderRadius: "16px", padding: "32px", textAlign: "center" }}>
           <h3 style={{ fontSize: "18px", fontWeight: "700", color: "#1e293b", marginBottom: "8px" }}>Questions about your privacy?</h3>
           <p style={{ color: "#64748b", fontSize: "14px", marginBottom: "20px" }}>We are happy to clarify anything in this policy.</p>
-          <a href="mailto:hello@2fa.ac" style={{ display: "inline-block", background: "linear-gradient(135deg, #7c3aed, #9f67ff)", color: "white", textDecoration: "none", padding: "12px 28px", borderRadius: "10px", fontSize: "14px", fontWeight: "600", boxShadow: "0 4px 16px rgba(124,58,237,0.3)" }}>
-            Contact Us →
-          </a>
+          <a href="mailto:hello@2fa.ac" style={{ display: "inline-block", background: "linear-gradient(135deg, #7c3aed, #9f67ff)", color: "white", textDecoration: "none", padding: "12px 28px", borderRadius: "10px", fontSize: "14px", fontWeight: "600" }}>Contact Us →</a>
         </div>
       </section>
 
+      <FooterAd />
       <Footer />
     </main>
   );

@@ -1,27 +1,13 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { Navbar, Footer } from "../../shared";
-import { HeaderAd, FooterAd, SidebarAd, InArticleAd } from "../../adsense";
-function DotsBackground() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const canvas = canvasRef.current; if (!canvas) return;
-    const ctx = canvas.getContext("2d"); if (!ctx) return;
-    let width = canvas.width = window.innerWidth, height = canvas.height = window.innerHeight;
-    const S=28,R=1.2,m={x:-999,y:-999};
-    const mm=(e:MouseEvent)=>{m.x=e.clientX;m.y=e.clientY;};
-    window.addEventListener("mousemove",mm);
-    let id:number;
-    const draw=()=>{ctx.clearRect(0,0,width,height);const c=Math.ceil(width/S)+1,r=Math.ceil(height/S)+1;for(let i=0;i<c;i++)for(let j=0;j<r;j++){const x=i*S,y=j*S,dx=m.x-x,dy=m.y-y,d=Math.sqrt(dx*dx+dy*dy);ctx.beginPath();ctx.arc(x,y,d<100?R+(1-d/100)*1.2:R,0,Math.PI*2);ctx.fillStyle=d<100?`rgba(124,58,237,${0.3+(1-d/100)*0.5})`:"rgba(148,163,184,0.25)";ctx.fill();}id=requestAnimationFrame(draw);};
-    draw();
-    const rs=()=>{width=canvas.width=window.innerWidth;height=canvas.height=window.innerHeight;};
-    window.addEventListener("resize",rs);
-    return()=>{cancelAnimationFrame(id);window.removeEventListener("mousemove",mm);window.removeEventListener("resize",rs);};
-  },[]);
-  return <canvas ref={canvasRef} style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",zIndex:0,pointerEvents:"none"}}/>;
-}
+import { HeaderAd, FooterAd, SidebarAd } from "../../adsense";
+import AnimatedBackground from "../../background";
+
 function genUUID(){return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==="x"?r:r&0x3|0x8).toString(16);});}
+
 const faqs=[{q:"What is a UUID?",a:"UUID (Universally Unique Identifier) is a 128-bit label used in software to uniquely identify information without requiring a central authority. Formatted as 32 hexadecimal digits separated by hyphens."},{q:"What is UUID v4?",a:"UUID v4 is generated using random numbers. It is the most commonly used UUID version for general-purpose unique identifiers in applications and databases."},{q:"How unique are UUIDs?",a:"UUID v4 has 122 random bits — 5.3 x 10^36 possible values. The probability of generating two identical UUIDs is astronomically low."},{q:"Where are UUIDs used?",a:"UUIDs are used as primary keys in databases, session identifiers, transaction IDs, file names, API request tracking, and distributed systems."},{q:"Are these UUIDs cryptographically secure?",a:"These UUIDs use Math.random() which is not cryptographically secure. For security-sensitive use cases, use crypto.randomUUID() or a server-side UUID library."}];
+
 export default function UUIDGenerator() {
   const [isMobile, setIsMobile] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -41,9 +27,12 @@ export default function UUIDGenerator() {
   const generate=()=>setUuids(Array.from({length:count},()=>genUUID()));
   const copy=(u:string)=>{navigator.clipboard.writeText(u);setCopied(u);setTimeout(()=>setCopied(""),2000);};
   const copyAll=()=>{navigator.clipboard.writeText(uuids.join("\n"));setCopiedAll(true);setTimeout(()=>setCopiedAll(false),2000);};
+
   return (
     <main style={{minHeight:"100vh",background:"linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0f9ff 100%)",fontFamily:"Inter, sans-serif",position:"relative"}}>
-      <DotsBackground/><Navbar/>
+      <AnimatedBackground />
+      <Navbar />
+      <HeaderAd />
       <div style={{maxWidth:"1200px",margin:"0 auto",padding:"32px 20px 80px",position:"relative",zIndex:1}}>
         <div style={{display:"flex",alignItems:"center",gap:"8px",fontSize:"13px",color:"#94a3b8",marginBottom:"20px"}}>
           <a href="/" style={{color:"#7c3aed",textDecoration:"none"}}>Home</a><span>›</span><a href="/tools" style={{color:"#7c3aed",textDecoration:"none"}}>Tools</a><span>›</span><span style={{color:"#1e293b",fontWeight:"500"}}>UUID Generator</span>
@@ -86,7 +75,7 @@ export default function UUIDGenerator() {
                 </div>
               </>)}
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"20px"}}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(280px, 1fr))",gap:"16px"}}>
               <div style={{background:"#ffffff",border:"1px solid rgba(124,58,237,0.1)",borderRadius:"16px",padding:"24px",boxShadow:"0 2px 12px rgba(0,0,0,0.04)"}}>
                 <h2 style={{fontSize:"16px",fontWeight:"700",color:"#1e293b",marginBottom:"12px"}}>About UUID Generator</h2>
                 <p style={{fontSize:"13px",color:"#64748b",lineHeight:"1.8",margin:"0 0 10px"}}>Our UUID Generator creates UUID v4 unique identifiers instantly. Generate up to 20 UUIDs at once and copy them individually or all at once.</p>
@@ -110,7 +99,7 @@ export default function UUIDGenerator() {
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0"}}>
                 {faqs.map((faq,i)=>(
                   <div key={i} style={{borderBottom:"1px solid #f1f5f9",paddingRight:i%2===0?"16px":"0",paddingLeft:i%2===1?"16px":"0",borderRight:i%2===0?"1px solid #f1f5f9":"none"}}>
-                    <button onClick={()=>setOpenFaq(openFaq===i?null:i)} style={{width:"100%",padding:"14px 0",display:"flex",justifyContent:"space-between",alignItems:"center",background:"none",border:"none",cursor:"pointer",textAlign:"left"}}>
+                    <button onClick={()=>setOpenFaq(openFaq===i?null:i)} style={{width:"100%",padding:"14px 0",display:"flex",justifyContent:"space-between",alignItems:"center",background:"none",border:"none",cursor:"pointer",textAlign:"left" as const}}>
                       <span style={{fontSize:"13px",fontWeight:"600",color:"#1e293b",paddingRight:"8px"}}>{faq.q}</span><span style={{color:"#7c3aed",fontSize:"16px",fontWeight:"700",flexShrink:0}}>{openFaq===i?"−":"+"}</span>
                     </button>
                     {openFaq===i&&<div style={{padding:"0 0 14px",fontSize:"13px",color:"#64748b",lineHeight:"1.7"}}>{faq.a}</div>}
@@ -127,7 +116,10 @@ export default function UUIDGenerator() {
               </div>
             </div>
           </div>
+
+          {/* SIDEBAR */}
           <div style={{display:"flex",flexDirection:"column",gap:"16px",position:mounted&&isMobile?"static":"sticky",top:"90px"}}>
+            <SidebarAd />
             <div style={{background:"#ffffff",border:"1px solid rgba(124,58,237,0.1)",borderRadius:"16px",padding:"20px",boxShadow:"0 2px 12px rgba(0,0,0,0.04)"}}>
               <h3 style={{fontSize:"14px",fontWeight:"700",color:"#1e293b",marginBottom:"12px"}}>🔧 Related Tools</h3>
               {[{name:"Hash Generator",href:"/tools/hash-generator"},{name:"JWT Decoder",href:"/tools/jwt-decoder"},{name:"Base64 Encoder/Decoder",href:"/tools/base64"},{name:"JSON Formatter",href:"/tools/json-formatter"},{name:"Password Generator",href:"/tools/password-generator"}].map((tool,i,arr)=>(
@@ -157,7 +149,8 @@ export default function UUIDGenerator() {
           </div>
         </div>
       </div>
-      <Footer/>
+      <FooterAd />
+      <Footer />
     </main>
   );
 }
