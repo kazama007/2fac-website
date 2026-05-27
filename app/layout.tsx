@@ -38,7 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body suppressHydrationWarning>
         {children}
 
-        {/* Google Analytics */}
+        {/* Google Analytics - sab pages pe */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-J24856B8ZQ"
           strategy="afterInteractive"
@@ -52,12 +52,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           `}
         </Script>
 
-        {/* Google AdSense */}
-        <Script
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4107684422068090"
-          strategy="afterInteractive"
-          crossOrigin="anonymous"
-        />
+        {/* Google AdSense - sirf non-admin pages pe */}
+        <Script id="adsense-check" strategy="afterInteractive">
+          {`
+            if (!window.location.pathname.startsWith('/admin')) {
+              var script = document.createElement('script');
+              script.async = true;
+              script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4107684422068090';
+              script.crossOrigin = 'anonymous';
+              document.head.appendChild(script);
+            }
+          `}
+        </Script>
       </body>
     </html>
   );
