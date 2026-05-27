@@ -18,9 +18,26 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   if (!post) return { title: "Post Not Found | 2FA.ac" };
 
+  const title = post.seo_title || post.title + " | 2FA.ac";
+  const description = post.seo_description || post.excerpt;
+
   return {
-    title: post.seo_title || post.title + " | 2FA.ac",
-    description: post.seo_description || post.excerpt,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      url: `https://2fa.ac/blog/${slug}`,
+      siteName: "2FA.ac",
+      images: post.cover_image ? [{ url: post.cover_image, width: 1200, height: 630, alt: post.title }] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: post.cover_image ? [post.cover_image] : [],
+    },
   };
 }
 
