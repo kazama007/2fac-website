@@ -53,8 +53,8 @@ export function AdUnit({ slot, style }: { slot: string; style?: React.CSSPropert
   }, [settings, slot, mounted]);
   if (!mounted || !settings?.adsEnabled || !settings?.publisherId || !slot) return null;
   return (
-    <div style={{ textAlign: "center", overflow: "hidden", ...style }}>
-      <ins className="adsbygoogle" style={{ display: "block" }} data-ad-client={settings.publisherId} data-ad-slot={slot} data-ad-format="auto" data-full-width-responsive="true" />
+    <div style={{ textAlign: "center", overflow: "hidden", minHeight: "90px", ...style }}>
+      <ins className="adsbygoogle" style={{ display: "block", minHeight: "90px" }} data-ad-client={settings.publisherId} data-ad-slot={slot} data-ad-format="auto" data-full-width-responsive="true" />
     </div>
   );
 }
