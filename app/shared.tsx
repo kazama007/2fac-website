@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
+import NextImage from "next/image";
 import { HeaderAd, FooterAd } from "./adsense";
 
 export function Navbar() {
@@ -96,7 +97,7 @@ export function Navbar() {
 
         {/* LEFT: Logo + tagline (tagline only desktop) */}
         <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: "0 0 auto" }}>
-          <a href="/"><img src="/logo2.png" alt="2fa.ac logo" width="120" height="32" style={{ height: "32px", width: "auto" }} /></a>
+          <a href="/"><NextImage src="/logo2.png" alt="2fa.ac logo" width={140} height={32} priority style={{ height: "32px", width: "auto" }} /></a>
           {mounted && !isMobile && (
             <span style={{ fontSize: "12px", color: "#94a3b8", fontWeight: "400", paddingLeft: "10px", borderLeft: "1px solid #e2e8f0", whiteSpace: "nowrap" }}>
               Free Online Security & Utility Tools
@@ -249,7 +250,7 @@ export function Footer() {
     <footer style={{ background: "#1e1b4b", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
       <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "40px 20px 30px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "28px" }}>
         <div>
-          <img src="/logo1.png" alt="2fa.ac" width="100" height="28" style={{ height: "28px", marginBottom: "12px" }} />
+          <NextImage src="/logo1.png" alt="2fa.ac" width={100} height={28} style={{ height: "28px", width: "auto", marginBottom: "12px" }} />
           <p style={{ fontSize: "13px", color: "#a5b4fc", lineHeight: "1.7" }}>
             Free cybersecurity tools. Browser-only, zero signup.
           </p>
