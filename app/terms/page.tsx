@@ -19,7 +19,7 @@ These terms apply to all visitors, users, and others who access or use the Servi
     title: "2. Description of Service",
     content: `2FA.AC provides free, browser-based cybersecurity tools including but not limited to:
 
-• **TOTP/2FA Code Generator** — Generate one-time passwords compatible with Google Authenticator and Authy.
+• **2FA Code Generator** — Generate one-time passwords compatible with Google Authenticator and Authy.
 • **QR Code Generator** — Create QR codes for 2FA setup and other uses.
 • **Password Tools** — Generate, check strength, and verify breach status of passwords.
 • **Developer Tools** — JWT decoder, hash generator, UUID generator, Base64 encoder, JSON formatter.
