@@ -58,23 +58,23 @@ export function Navbar() {
   ];
 
   const categories = [
-    { name: "Authentication", color: "#7c3aed", icon: "🔐", tools: [
+    { name: "Authentication", color: "#7c3aed", icon: "🔐", href: "/tools?category=2FA+%26+QR", tools: [
       { icon: "🔐", name: "TOTP Generator", desc: "Generate OTP codes like Google Authenticator", href: "/" },
       { icon: "📱", name: "QR Code Generator", desc: "Generate QR codes for authenticator apps", href: "/tools/qr-generator" },
     ]},
-    { name: "Password", color: "#3b82f6", icon: "🔑", tools: [
+    { name: "Password", color: "#3b82f6", icon: "🔑", href: "/tools?category=Password", tools: [
       { icon: "🔑", name: "Password Generator", desc: "Generate strong secure passwords", href: "/tools/password-generator" },
       { icon: "💪", name: "Password Strength", desc: "Check how strong your password is", href: "/tools/password-strength" },
       { icon: "🔓", name: "Password Breach Checker", desc: "Check if your password was leaked", href: "/tools/password-breach" },
     ]},
-    { name: "Developer", color: "#7c3aed", icon: "👨‍💻", tools: [
+    { name: "Developer", color: "#7c3aed", icon: "👨‍💻", href: "/tools?category=Developer", tools: [
       { icon: "🔍", name: "JWT Decoder", desc: "Decode and verify JWT tokens", href: "/tools/jwt-decoder" },
       { icon: "#️⃣", name: "Hash Generator", desc: "Generate MD5, SHA-256, SHA-512 hashes", href: "/tools/hash-generator" },
       { icon: "🆔", name: "UUID Generator", desc: "Generate unique IDs instantly", href: "/tools/uuid-generator" },
       { icon: "📝", name: "Base64 Encoder", desc: "Encode and decode Base64 text", href: "/tools/base64" },
       { icon: "📋", name: "JSON Formatter", desc: "Format and validate JSON data", href: "/tools/json-formatter" },
     ]},
-    { name: "Security", color: "#ef4444", icon: "🛡️", tools: [
+    { name: "Security", color: "#ef4444", icon: "🛡️", href: "/tools?category=Network", tools: [
       { icon: "🔗", name: "Link Checker", desc: "Check links for scams and phishing", href: "/tools/link-checker" },
       { icon: "🌐", name: "DNS Lookup", desc: "Check domain DNS records", href: "/tools/dns-lookup" },
       { icon: "📍", name: "IP Lookup", desc: "Find location of any IP address", href: "/tools/ip-lookup" },
@@ -137,13 +137,15 @@ export function Navbar() {
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "4px", padding: "0 4px 8px" }}>
                     {categories.map(category => (
                       <div key={category.name} style={{ borderRadius: "14px", padding: "14px 12px", background: `${category.color}06`, border: `1px solid ${category.color}15` }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px", paddingBottom: "8px", borderBottom: `1px solid ${category.color}20` }}>
+                        <a href={category.href} style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px", paddingBottom: "8px", borderBottom: `1px solid ${category.color}20`, textDecoration: "none", borderRadius: "8px", padding: "6px 8px" }}
+                          onMouseEnter={e => { e.currentTarget.style.background = `${category.color}15`; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}>
                           <span style={{ fontSize: "14px" }}>{category.icon}</span>
                           <div>
                             <div style={{ fontSize: "10px", fontWeight: "700", color: category.color, letterSpacing: "0.8px" }}>{category.name.toUpperCase()}</div>
                             <div style={{ fontSize: "10px", color: "#94a3b8" }}>{category.tools.length} tools</div>
                           </div>
-                        </div>
+                        </a>
                         {category.tools.map(tool => (
                           <a key={tool.name} href={tool.href} style={{ display: "block", padding: "6px 8px", color: "#1e293b", textDecoration: "none", borderRadius: "8px", marginBottom: "2px", fontSize: "12px", fontWeight: "500" }}
                             onMouseEnter={e => { e.currentTarget.style.background = `${category.color}10`; e.currentTarget.style.color = category.color; }}
@@ -268,9 +270,10 @@ export function Footer() {
           <h4 style={{ fontSize: "11px", fontWeight: "700", color: "#6366f1", letterSpacing: "2px", marginBottom: "14px" }}>CATEGORIES</h4>
           {[
             { name: "All Tools", href: "/tools" },
-            { name: "2FA & QR", href: "/tools" },
-            { name: "Password", href: "/tools" },
-            { name: "Developer", href: "/tools" },
+            { name: "2FA & QR", href: "/tools?category=2FA+%26+QR" },
+            { name: "Password", href: "/tools?category=Password" },
+            { name: "Developer", href: "/tools?category=Developer" },
+            { name: "Network", href: "/tools?category=Network" },
             { name: "Blog", href: "/blog" },
           ].map(link => (
             <a key={link.name} href={link.href} style={{ display: "block", color: "#a5b4fc", textDecoration: "none", fontSize: "13px", marginBottom: "8px" }}>{link.name}</a>

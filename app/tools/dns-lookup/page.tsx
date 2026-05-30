@@ -1,8 +1,8 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Navbar, Footer } from "../../shared";
 import AnimatedBackground from "../../background";
-import { HeaderAd, FooterAd, SidebarAd, InArticleAd } from "../../adsense";
+import { HeaderAd, FooterAd, SidebarAd } from "../../adsense";
 
 
 
@@ -40,7 +40,7 @@ export default function DNSLookup() {
     setLoading(true); setError(""); setActiveType(type);
     try {
       const cleanDomain = domain.replace(/^https?:\/\//, "").replace(/\/.*$/, "");
-      const res = await fetch(`https://dns.google/resolve?name=${cleanDomain}&type=${type}`);
+      const res = await fetch(`https://dns.google/resolve?name=${encodeURIComponent(cleanDomain)}&type=${type}`);
       const data = await res.json();
       setResults({ type, domain: cleanDomain, answers: data.Answer || [] });
     } catch { setError("Failed to fetch DNS records. Please try again."); }
@@ -54,7 +54,7 @@ export default function DNSLookup() {
       const cleanDomain = domain.replace(/^https?:\/\//, "").replace(/\/.*$/, "");
       const allResults: any = {};
       for (const type of ["A", "MX", "NS", "TXT"]) {
-        const res = await fetch(`https://dns.google/resolve?name=${cleanDomain}&type=${type}`);
+        const res = await fetch(`https://dns.google/resolve?name=${encodeURIComponent(cleanDomain)}&type=${type}`);
         const data = await res.json();
         if (data.Answer && data.Answer.length > 0) allResults[type] = data.Answer;
       }

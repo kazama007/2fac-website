@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { generateTOTP } from "./totp";
 import AnimatedBackground from "./background";
-import { HeaderAd, FooterAd, InArticleAd } from "./adsense";
+import { HeaderAd, FooterAd } from "./adsense";
 
 interface SavedKey {
   name: string;
@@ -38,8 +38,10 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const keys = localStorage.getItem("2fa-saved-keys");
-    if (keys) setSavedKeys(JSON.parse(keys));
+    try {
+      const keys = localStorage.getItem("2fa-saved-keys");
+      if (keys) setSavedKeys(JSON.parse(keys));
+    } catch { localStorage.removeItem("2fa-saved-keys"); }
     const savedDark = localStorage.getItem("darkMode");
     if (savedDark === "true") {
       setDarkMode(true);
@@ -55,8 +57,9 @@ export default function Home() {
 
   const startTimer = (currentSecret: string) => {
     if (timerRef.current) clearInterval(timerRef.current);
-    setTimeLeft(30);
-    let count = 30;
+    const initial = 30 - (Math.floor(Date.now() / 1000) % 30);
+    setTimeLeft(initial);
+    let count = initial;
     timerRef.current = setInterval(() => {
       count -= 1;
       setTimeLeft(count);

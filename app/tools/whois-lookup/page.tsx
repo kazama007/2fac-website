@@ -1,8 +1,8 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Navbar, Footer } from "../../shared";
 import AnimatedBackground from "../../background";
-import { HeaderAd, FooterAd, SidebarAd, InArticleAd } from "../../adsense";
+import { HeaderAd, FooterAd, SidebarAd } from "../../adsense";
 
 
 
@@ -37,7 +37,7 @@ export default function WHOISLookup() {
     try {
       const cleanDomain = domain.replace(/^https?:\/\//, "").replace(/\/.*$/, "").trim();
       const tld = cleanDomain.split(".").pop();
-      const res = await fetch(`https://rdap.org/domain/${cleanDomain}`);
+      const res = await fetch(`https://rdap.org/domain/${encodeURIComponent(cleanDomain)}`);
       const data = await res.json();
       const registrar = data.entities?.find((e: any) => e.roles?.includes("registrar"))?.vcardArray?.[1]?.find((v: any) => v[0] === "fn")?.[3] || "N/A";
       const registrant = data.entities?.find((e: any) => e.roles?.includes("registrant"))?.vcardArray?.[1]?.find((v: any) => v[0] === "fn")?.[3] || "Privacy Protected";
@@ -51,15 +51,16 @@ export default function WHOISLookup() {
         created: created !== "N/A" ? new Date(created).toLocaleDateString() : "N/A",
         updated: updated !== "N/A" ? new Date(updated).toLocaleDateString() : "N/A",
         expires: expires !== "N/A" ? new Date(expires).toLocaleDateString() : "N/A",
+        expiresRaw: expires,
         nameservers, status, tld: `.${tld}`,
       });
     } catch { setError("Could not fetch WHOIS data. Try again or check the domain name."); }
     setLoading(false);
   };
 
-  const isExpiringSoon = (dateStr: string) => {
-    if (!dateStr || dateStr === "N/A") return false;
-    const diff = new Date(dateStr).getTime() - Date.now();
+  const isExpiringSoon = (isoDateStr: string) => {
+    if (!isoDateStr || isoDateStr === "N/A") return false;
+    const diff = new Date(isoDateStr).getTime() - Date.now();
     return diff > 0 && diff < 30 * 24 * 60 * 60 * 1000;
   };
 
@@ -123,7 +124,7 @@ export default function WHOISLookup() {
                       { icon: "👤", label: "Registrant", value: result.registrant },
                       { icon: "📅", label: "Created", value: result.created },
                       { icon: "🔄", label: "Last Updated", value: result.updated },
-                      { icon: "⏰", label: "Expires", value: result.expires, warn: isExpiringSoon(result.expires) },
+                      { icon: "⏰", label: "Expires", value: result.expires, warn: isExpiringSoon(result.expiresRaw) },
                       { icon: "🌐", label: "Name Servers", value: result.nameservers },
                       { icon: "📋", label: "Status", value: result.status },
                     ].map(item => item.value && item.value !== "N/A" ? (

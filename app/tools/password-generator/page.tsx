@@ -1,8 +1,8 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Navbar, Footer } from "../../shared";
 import AnimatedBackground from "../../background";
-import { HeaderAd, FooterAd, SidebarAd, InArticleAd } from "../../adsense";
+import { HeaderAd, FooterAd, SidebarAd } from "../../adsense";
 
 
 
@@ -13,7 +13,9 @@ function generatePassword(length: number, upper: boolean, lower: boolean, number
   if (numbers) chars += "0123456789";
   if (symbols) chars += "!@#$%^&*()_+-=[]{}|;:,.<>?";
   if (!chars) chars = "abcdefghijklmnopqrstuvwxyz";
-  return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+  const arr = new Uint32Array(length);
+  crypto.getRandomValues(arr);
+  return Array.from(arr, v => chars[v % chars.length]).join("");
 }
 
 function getStrength(password: string) {

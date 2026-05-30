@@ -1,10 +1,10 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Navbar, Footer } from "../../shared";
 import { HeaderAd, FooterAd, SidebarAd } from "../../adsense";
 import AnimatedBackground from "../../background";
 
-function genUUID(){return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==="x"?r:r&0x3|0x8).toString(16);});}
+function genUUID(){return crypto.randomUUID();}
 
 const faqs=[{q:"What is a UUID?",a:"UUID (Universally Unique Identifier) is a 128-bit label used in software to uniquely identify information without requiring a central authority. Formatted as 32 hexadecimal digits separated by hyphens."},{q:"What is UUID v4?",a:"UUID v4 is generated using random numbers. It is the most commonly used UUID version for general-purpose unique identifiers in applications and databases."},{q:"How unique are UUIDs?",a:"UUID v4 has 122 random bits — 5.3 x 10^36 possible values. The probability of generating two identical UUIDs is astronomically low."},{q:"Where are UUIDs used?",a:"UUIDs are used as primary keys in databases, session identifiers, transaction IDs, file names, API request tracking, and distributed systems."},{q:"Are these UUIDs cryptographically secure?",a:"These UUIDs use Math.random() which is not cryptographically secure. For security-sensitive use cases, use crypto.randomUUID() or a server-side UUID library."}];
 

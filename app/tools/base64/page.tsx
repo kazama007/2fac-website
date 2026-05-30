@@ -1,8 +1,8 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Navbar, Footer } from "../../shared";
 import AnimatedBackground from "../../background";
-import { HeaderAd, FooterAd, SidebarAd, InArticleAd } from "../../adsense";
+import { HeaderAd, FooterAd, SidebarAd } from "../../adsense";
 
 
 
@@ -36,8 +36,13 @@ export default function Base64Tool() {
     if (!input) return;
     setError("");
     try {
-      if (mode === "encode") setOutput(btoa(unescape(encodeURIComponent(input))));
-      else setOutput(decodeURIComponent(escape(atob(input))));
+      if (mode === "encode") {
+        const bytes = new TextEncoder().encode(input);
+        setOutput(btoa(String.fromCharCode(...bytes)));
+      } else {
+        const bytes = Uint8Array.from(atob(input), c => c.charCodeAt(0));
+        setOutput(new TextDecoder().decode(bytes));
+      }
     } catch {
       setError(mode === "decode" ? "Invalid Base64 string!" : "Encoding error!");
       setOutput("");

@@ -54,8 +54,8 @@ export default function PasswordBreach() {
       const suffix = hash.slice(5);
       const res = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`, { headers: { "Add-Padding": "true" } });
       const text = await res.text();
-      const found = text.split("\n").find(line => line.startsWith(suffix));
-      if (found) setResult({ breached: true, count: parseInt(found.split(":")[1].trim()) });
+      const found = text.split("\n").find(line => line.trimEnd().startsWith(suffix));
+      if (found) setResult({ breached: true, count: parseInt(found.split(":")[1].trim(), 10) });
       else setResult({ breached: false });
     } catch { setError("Failed to check. Please try again."); }
     setLoading(false);

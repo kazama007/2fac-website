@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Navbar, Footer } from "../shared";
 import AnimatedBackground from "../background";
 import { HeaderAd, FooterAd } from "../adsense";
@@ -18,8 +18,10 @@ export default function SavedKeys() {
   const [copied, setCopied] = useState("");
 
   useEffect(() => {
-    const keys = localStorage.getItem("2fa-saved-keys");
-    if (keys) setSavedKeys(JSON.parse(keys));
+    try {
+      const keys = localStorage.getItem("2fa-saved-keys");
+      if (keys) setSavedKeys(JSON.parse(keys));
+    } catch { localStorage.removeItem("2fa-saved-keys"); }
   }, []);
 
   const handleDelete = (index: number) => {
