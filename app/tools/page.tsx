@@ -12,7 +12,7 @@ const categories = ["All", "2FA & QR", "Password", "Developer", "Network"];
 const tools = [
   {
     icon: "🔐",
-    name: "TOTP 2FA Generator",
+    name: "2FA Code Generator",
     desc: "Generate time-based one-time passwords compatible with Google Authenticator and Authy.",
     href: "/",
     category: "2FA & QR",

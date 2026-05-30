@@ -20,7 +20,7 @@ const values = [
 ];
 
 const tools = [
-  { icon: "🔐", name: "TOTP Generator", desc: "Generate 2FA codes like Google Authenticator" },
+  { icon: "🔐", name: "2FA Code Generator", desc: "Generate 2FA codes like Google Authenticator" },
   { icon: "📱", name: "QR Code Generator", desc: "Create QR codes for 2FA setup" },
   { icon: "🔑", name: "Password Generator", desc: "Create strong, secure passwords" },
   { icon: "💪", name: "Password Strength Checker", desc: "Test how strong your password is" },

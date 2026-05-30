@@ -7,7 +7,7 @@ import { HeaderAd, FooterAd, SidebarAd } from "../../adsense";
 
 
 const relatedTools = [
-  { name: "TOTP 2FA Generator", href: "/" },
+  { name: "2FA Code Generator", href: "/" },
   { name: "Password Generator", href: "/tools/password-generator" },
   { name: "Password Strength Checker", href: "/tools/password-strength" },
   { name: "Hash Generator", href: "/tools/hash-generator" },

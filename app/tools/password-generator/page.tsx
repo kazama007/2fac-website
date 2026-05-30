@@ -223,7 +223,7 @@ export default function PasswordGenerator() {
             <SidebarAd />
             <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "16px", padding: "20px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
               <h3 style={{ fontSize: "14px", fontWeight: "700", color: "#1e293b", marginBottom: "12px" }}>🔧 Related Tools</h3>
-              {[{ name: "Password Strength Checker", href: "/tools/password-strength" }, { name: "Password Breach Checker", href: "/tools/password-breach" }, { name: "TOTP 2FA Generator", href: "/" }, { name: "Hash Generator", href: "/tools/hash-generator" }, { name: "UUID Generator", href: "/tools/uuid-generator" }].map((tool, i, arr) => (
+              {[{ name: "Password Strength Checker", href: "/tools/password-strength" }, { name: "Password Breach Checker", href: "/tools/password-breach" }, { name: "2FA Code Generator", href: "/" }, { name: "Hash Generator", href: "/tools/hash-generator" }, { name: "UUID Generator", href: "/tools/uuid-generator" }].map((tool, i, arr) => (
                 <a key={i} href={tool.href} style={{ fontSize: "13px", color: "#64748b", textDecoration: "none", padding: "10px 12px", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: i < arr.length - 1 ? "1px solid #f8fafc" : "none" }}
                   onMouseEnter={e => { e.currentTarget.style.background = "rgba(124,58,237,0.06)"; e.currentTarget.style.color = "#7c3aed"; }}
                   onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#64748b"; }}>

@@ -42,7 +42,7 @@ export function Navbar() {
   };
 
   const allTools = [
-    { icon: "🔐", name: "TOTP Generator", href: "/" },
+    { icon: "🔐", name: "2FA Code Generator", href: "/" },
     { icon: "📱", name: "QR Code Generator", href: "/tools/qr-generator" },
     { icon: "🔑", name: "Password Generator", href: "/tools/password-generator" },
     { icon: "💪", name: "Password Strength", href: "/tools/password-strength" },
@@ -60,7 +60,7 @@ export function Navbar() {
 
   const categories = [
     { name: "Authentication", color: "#7c3aed", icon: "🔐", href: "/tools?category=2FA+%26+QR", tools: [
-      { icon: "🔐", name: "TOTP Generator", desc: "Generate OTP codes like Google Authenticator", href: "/" },
+      { icon: "🔐", name: "2FA Code Generator", desc: "Generate OTP codes like Google Authenticator", href: "/" },
       { icon: "📱", name: "QR Code Generator", desc: "Generate QR codes for authenticator apps", href: "/tools/qr-generator" },
     ]},
     { name: "Password", color: "#3b82f6", icon: "🔑", href: "/tools?category=Password", tools: [
@@ -258,7 +258,7 @@ export function Footer() {
         <div>
           <h4 style={{ fontSize: "11px", fontWeight: "700", color: "#6366f1", letterSpacing: "2px", marginBottom: "14px" }}>TOOLS</h4>
           {[
-            { name: "TOTP Generator", href: "/" },
+            { name: "2FA Code Generator", href: "/" },
             { name: "Password Generator", href: "/tools/password-generator" },
             { name: "JWT Decoder", href: "/tools/jwt-decoder" },
             { name: "Hash Generator", href: "/tools/hash-generator" },

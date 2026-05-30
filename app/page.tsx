@@ -127,7 +127,7 @@ export default function Home() {
     {
       name: "Authentication", color: "#7c3aed", icon: "🔐",
       tools: [
-        { icon: "🔐", name: "TOTP Generator", desc: "Generate OTP codes like Google Authenticator", href: "/" },
+        { icon: "🔐", name: "2FA Code Generator", desc: "Generate OTP codes like Google Authenticator", href: "/" },
         { icon: "📱", name: "QR Code Generator", desc: "Generate QR codes for authenticator apps", href: "/tools/qr-generator" },
       ]
     },
@@ -465,7 +465,7 @@ export default function Home() {
           <div>
             <h4 style={{ fontSize: "11px", fontWeight: "700", color: "#6366f1", letterSpacing: "2px", marginBottom: "20px" }}>POPULAR TOOLS</h4>
             {[
-              { name: "TOTP Generator", href: "/" },
+              { name: "2FA Code Generator", href: "/" },
               { name: "Password Generator", href: "/tools/password-generator" },
               { name: "JWT Decoder", href: "/tools/jwt-decoder" },
               { name: "Hash Generator", href: "/tools/hash-generator" },

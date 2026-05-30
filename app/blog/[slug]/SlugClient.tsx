@@ -4,7 +4,7 @@ import { Navbar, Footer } from "../../shared";
 import { HeaderAd, FooterAd, InArticleAd, SidebarAd } from "../../adsense";
 
 const ALL_TOOLS = [
-  { name: "TOTP 2FA Generator", href: "/" },
+  { name: "2FA Code Generator", href: "/" },
   { name: "QR Code Generator", href: "/tools/qr-generator" },
   { name: "Password Generator", href: "/tools/password-generator" },
   { name: "Password Strength Checker", href: "/tools/password-strength" },

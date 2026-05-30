@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://2fa.ac"),
   title: "2FA.ac — Free 2FA Code Generator & Security Tools",
   description: "Generate 2FA codes instantly, check passwords, decode JWT, lookup DNS & IP. 15+ free cybersecurity tools. No signup required.",
-  keywords: "2FA generator, TOTP generator, password generator, JWT decoder, DNS lookup, IP lookup, cybersecurity tools, free security tools",
+  keywords: "2FA code generator, 2FA generator, TOTP generator, free 2FA code generator, two factor authentication code generator, TOTP 2FA, password generator, JWT decoder, DNS lookup, IP lookup, cybersecurity tools, free security tools",
   authors: [{ name: "2fa.ac" }],
   creator: "2fa.ac",
   publisher: "2fa.ac",
