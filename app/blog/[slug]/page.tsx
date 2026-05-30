@@ -1,4 +1,4 @@
-import { Navbar, Footer } from "../../shared";
+import { notFound } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import SlugClient from "./SlugClient";
 
@@ -57,19 +57,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     .eq("published", true)
     .order("created_at", { ascending: false });
 
-  if (!postData) {
-    return (
-      <main style={{ minHeight: "100vh", background: "linear-gradient(135deg,#f0f4ff,#faf5ff,#f0f9ff)", fontFamily: "Inter,sans-serif" }}>
-        <Navbar />
-        <div style={{ textAlign: "center", padding: "80px 20px" }}>
-          <div style={{ fontSize: "60px" }}>📄</div>
-          <h1 style={{ color: "#1e293b" }}>Article Not Found</h1>
-          <a href="/blog" style={{ background: "#7c3aed", color: "white", padding: "12px 28px", borderRadius: "10px", textDecoration: "none" }}>Back to Blog</a>
-        </div>
-        <Footer />
-      </main>
-    );
-  }
+  if (!postData) notFound();
 
   // Map DB fields
   const post = {

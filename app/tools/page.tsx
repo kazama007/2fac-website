@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, Suspense } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Navbar, Footer } from "../shared";
 import AnimatedBackground from "../background";

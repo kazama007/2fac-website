@@ -3,6 +3,7 @@ import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://2fa.ac"),
   title: "2FA.ac — Free 2FA Code Generator & Security Tools",
   description: "Generate 2FA codes instantly, check passwords, decode JWT, lookup DNS & IP. 15+ free cybersecurity tools. No signup required.",
   keywords: "2FA generator, TOTP generator, password generator, JWT decoder, DNS lookup, IP lookup, cybersecurity tools, free security tools",

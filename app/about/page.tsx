@@ -1,8 +1,7 @@
 "use client";
-import { useEffect, useRef } from "react";
 import { Navbar, Footer } from "../shared";
 import AnimatedBackground from "../background";
-import { HeaderAd, FooterAd, InArticleAd } from "../adsense";
+import { HeaderAd, FooterAd } from "../adsense";
 
 
 
@@ -34,6 +33,7 @@ const tools = [
   { icon: "🔗", name: "Link Checker", desc: "Detect phishing and malicious links" },
   { icon: "🌐", name: "DNS Lookup", desc: "Query domain DNS records" },
   { icon: "📍", name: "IP Lookup", desc: "Find geolocation of any IP address" },
+  { icon: "🏢", name: "WHOIS Lookup", desc: "Check domain owner and registration info" },
 ];
 
 export default function AboutPage() {

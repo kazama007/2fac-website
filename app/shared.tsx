@@ -132,7 +132,7 @@ export function Navbar() {
                 }}>
                   <div style={{ padding: "12px 16px 10px", borderBottom: "1px solid #f1f5f9", marginBottom: "8px", display: "flex", justifyContent: "space-between" }}>
                     <span style={{ fontSize: "11px", color: "#94a3b8", letterSpacing: "2px", fontWeight: "600" }}>ALL TOOLS</span>
-                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>14 tools available</span>
+                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>{allTools.length} tools available</span>
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "4px", padding: "0 4px 8px" }}>
                     {categories.map(category => (
