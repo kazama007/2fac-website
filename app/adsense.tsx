@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import { supabase } from "./lib/supabase";
 
 interface AdsSettings {
   publisherId: string;
@@ -11,7 +10,6 @@ interface AdsSettings {
   adsEnabled: boolean;
 }
 
-// Global cache so we don't fetch multiple times
 let cachedSettings: AdsSettings | null = null;
 
 function useAdsSettings() {
@@ -21,24 +19,9 @@ function useAdsSettings() {
   useEffect(() => {
     setMounted(true);
     if (cachedSettings) { setSettings(cachedSettings); return; }
-    // Fetch from Supabase
-    supabase.from("ads_settings").select("*").eq("id", 1).single().then(({ data }) => {
-      if (data) {
-        const mapped: AdsSettings = {
-          publisherId: data.publisher_id || "",
-          headerAdSlot: data.header_ad_slot || "",
-          footerAdSlot: data.footer_ad_slot || "",
-          sidebarAdSlot: data.sidebar_ad_slot || "",
-          inArticleAdSlot: data.in_article_ad_slot || "",
-          adsEnabled: data.ads_enabled || false,
-        };
-        cachedSettings = mapped;
-        setSettings(mapped);
-      } else {
-        const saved = localStorage.getItem("ads-settings");
-        if (saved) { const parsed = JSON.parse(saved); cachedSettings = parsed; setSettings(parsed); }
-      }
-    });
+    fetch("/api/ads").then(r => r.json()).then(data => {
+      if (data) { cachedSettings = data; setSettings(data); }
+    }).catch(() => {});
   }, []);
 
   return { settings, mounted };
