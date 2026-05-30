@@ -20,12 +20,6 @@ img {
   display: block;
 }
 
-/* Font display swap to prevent render blocking */
-@font-face {
-  font-family: 'Inter';
-  font-display: swap;
-}
-
 /* Prevent layout shift from ads */
 .adsbygoogle {
   display: block;

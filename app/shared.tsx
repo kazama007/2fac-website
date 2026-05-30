@@ -106,7 +106,7 @@ export function Navbar() {
         </div>
 
         {/* CENTER: Desktop Nav only */}
-        {mounted && !isMobile && (
+        {!isMobile && (
           <div style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", display: "flex", alignItems: "center", gap: "2px" }}>
 
             <a href="/" style={{ padding: "6px 12px", borderRadius: "7px", fontSize: "13.5px", fontWeight: "500", color: "#64748b", textDecoration: "none" }}
@@ -178,7 +178,7 @@ export function Navbar() {
 
         {/* RIGHT: Dark toggle + Hamburger */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px", flex: "0 0 auto" }}>
-          {mounted && (
+          {true && (
             <button onClick={toggleDark}
               style={{ width: "36px", height: "36px", borderRadius: "9px", background: "rgba(124,58,237,0.08)", border: "1.5px solid rgba(124,58,237,0.2)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px" }}>
               {darkMode ? "☀️" : "🌙"}
@@ -186,7 +186,7 @@ export function Navbar() {
           )}
 
           {/* Hamburger — only mobile */}
-          {mounted && isMobile && (
+          {isMobile && (
             <button onClick={() => setShowMobile(!showMobile)}
               style={{ width: "36px", height: "36px", borderRadius: "9px", background: "rgba(124,58,237,0.08)", border: "1.5px solid rgba(124,58,237,0.2)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
               {showMobile ? (
@@ -204,7 +204,7 @@ export function Navbar() {
       </nav>
 
       {/* Mobile Fullscreen Menu */}
-      {mounted && isMobile && showMobile && (
+      {isMobile && showMobile && (
         <div style={{
           position: "fixed", top: "60px", left: 0, right: 0, bottom: 0,
           background: "#fff", zIndex: 99, overflowY: "auto", padding: "16px",
