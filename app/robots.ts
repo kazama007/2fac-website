@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: "/admin",
+      disallow: ["/admin", "/saved-keys"],
     },
     sitemap: "https://2fa.ac/sitemap.xml",
   };

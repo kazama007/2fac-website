@@ -18,7 +18,7 @@ export default function BlogClient({ initialPosts }: { initialPosts: any[] }) {
   const categories = ["All", ...Array.from(new Set(initialPosts.map(p => p.category)))];
   const filtered = initialPosts.filter(p => {
     const matchCat = activeCategory === "All" || p.category === activeCategory;
-    const matchSearch = search === "" || p.title.toLowerCase().includes(search.toLowerCase()) || p.excerpt.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = search === "" || p.title.toLowerCase().includes(search.toLowerCase()) || (p.excerpt ?? "").toLowerCase().includes(search.toLowerCase());
     return matchCat && matchSearch;
   });
 

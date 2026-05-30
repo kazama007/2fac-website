@@ -376,13 +376,13 @@ export default function Home() {
           Free Security Tools for Everyone
         </h1>
         <p style={{ fontSize: "15px", color: "#64748b", lineHeight: "1.7" }}>
-          20+ free cybersecurity tools. Completely free, no signup required.
+          14+ free cybersecurity tools. Completely free, no signup required.
         </p>
       </section>
 
       {/* Trust Metrics */}
       <section style={{ display: "flex", justifyContent: "center", gap: "60px", padding: "40px 20px", borderTop: "1px solid rgba(124,58,237,0.08)", borderBottom: "1px solid rgba(124,58,237,0.08)", flexWrap: "wrap", position: "relative", zIndex: 1, background: "rgba(255,255,255,0.5)" }}>
-        {[{ num: "20+", label: "Security Tools" }, { num: "1M+", label: "Daily Users" }, { num: "99.9%", label: "Uptime" }, { num: "100%", label: "Free Forever" }].map((item) => (
+        {[{ num: "14+", label: "Security Tools" }, { num: "1M+", label: "Daily Users" }, { num: "99.9%", label: "Uptime" }, { num: "100%", label: "Free Forever" }].map((item) => (
           <div key={item.label} style={{ textAlign: "center" }}>
             <div style={{ fontSize: "32px", fontWeight: "800", background: "linear-gradient(135deg, #7c3aed, #9f67ff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{item.num}</div>
             <div style={{ fontSize: "14px", color: "#64748b", marginTop: "4px" }}>{item.label}</div>

@@ -6,7 +6,7 @@ import { HeaderAd, FooterAd } from "../adsense";
 
 
 const stats = [
-  { num: "13+", label: "Free Security Tools" },
+  { num: "14+", label: "Free Security Tools" },
   { num: "300+", label: "Daily Users" },
   { num: "100%", label: "Browser-Based" },
   { num: "0", label: "Data Collected" },
@@ -98,7 +98,7 @@ export default function AboutPage() {
       {/* Tools List */}
       <section style={{ maxWidth: "900px", margin: "0 auto 60px", padding: "0 20px", position: "relative", zIndex: 1 }}>
         <h2 style={{ fontSize: "28px", fontWeight: "700", color: "#1e293b", marginBottom: "8px", textAlign: "center" }}>All Our Tools</h2>
-        <p style={{ textAlign: "center", color: "#64748b", marginBottom: "28px", fontSize: "14px" }}>13 free tools — no account required</p>
+        <p style={{ textAlign: "center", color: "#64748b", marginBottom: "28px", fontSize: "14px" }}>14 free tools — no account required</p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "12px" }}>
           {tools.map(t => (
             <div key={t.name} style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "12px", padding: "18px", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", display: "flex", alignItems: "flex-start", gap: "12px" }}>

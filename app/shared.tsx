@@ -106,7 +106,7 @@ export function Navbar() {
         </div>
 
         {/* CENTER: Desktop Nav only */}
-        {!isMobile && (
+        {mounted && !isMobile && (
           <div style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", display: "flex", alignItems: "center", gap: "2px" }}>
 
             <a href="/" style={{ padding: "6px 12px", borderRadius: "7px", fontSize: "13.5px", fontWeight: "500", color: "#64748b", textDecoration: "none" }}
@@ -186,7 +186,7 @@ export function Navbar() {
           )}
 
           {/* Hamburger — only mobile */}
-          {isMobile && (
+          {mounted && isMobile && (
             <button onClick={() => setShowMobile(!showMobile)}
               style={{ width: "36px", height: "36px", borderRadius: "9px", background: "rgba(124,58,237,0.08)", border: "1.5px solid rgba(124,58,237,0.2)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
               {showMobile ? (

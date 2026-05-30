@@ -1,5 +1,4 @@
 "use client";
-import { useEffect, useRef } from "react";
 import { Navbar, Footer } from "../shared";
 import AnimatedBackground from "../background";
 import { HeaderAd, FooterAd } from "../adsense";

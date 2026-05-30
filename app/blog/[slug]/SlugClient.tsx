@@ -20,13 +20,6 @@ const ALL_TOOLS = [
   { name: "WHOIS Lookup", href: "/tools/whois-lookup" },
 ];
 
-const toolCategories = [
-  { name: "2FA & QR", icon: "🔐", href: "/tools?category=2FA+%26+QR", count: 2 },
-  { name: "Password", icon: "🔑", href: "/tools?category=Password", count: 3 },
-  { name: "Developer", icon: "💻", href: "/tools?category=Developer", count: 5 },
-  { name: "Network", icon: "🌐", href: "/tools?category=Network", count: 4 },
-  { name: "All Tools", icon: "🔧", href: "/tools", count: 14 },
-];
 
 function extractHeadings(html: string) {
   const out: { level: number; text: string; id: string }[] = [];
@@ -57,9 +50,6 @@ export default function SlugClient({ post, allPosts, slug }: { post: any; allPos
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
-  const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
-  const [emailError, setEmailError] = useState("");
   const [activeHeading, setActiveHeading] = useState("");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
@@ -76,13 +66,6 @@ export default function SlugClient({ post, allPosts, slug }: { post: any; allPos
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
-  const handleSubscribe = () => {
-    if (!email) { setEmailError("Please enter your email."); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setEmailError("Invalid email."); return; }
-    setEmailError("");
-    setSubscribed(true); setEmail("");
-    setTimeout(() => setSubscribed(false), 5000);
-  };
 
   const share = (p: string) => {
     const url = window.location.href;
@@ -90,12 +73,13 @@ export default function SlugClient({ post, allPosts, slug }: { post: any; allPos
     if (p === "twitter") window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(t)}&url=${encodeURIComponent(url)}`);
     if (p === "facebook") window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`);
     if (p === "linkedin") window.open(`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(url)}&title=${encodeURIComponent(t)}`);
-    if (p === "copy") { navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 2000); }
+    if (p === "copy") { navigator.clipboard.writeText(url).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }).catch(() => {}); }
   };
 
-  const headings = extractHeadings(post.content);
-  const html = addIds(post.content);
-  const readTime = Math.ceil(post.content.replace(/<[^>]+>/g, "").split(" ").length / 200);
+  const content = post.content ?? "";
+  const headings = extractHeadings(content);
+  const html = addIds(content);
+  const readTime = Math.ceil(content.replace(/<[^>]+>/g, "").split(" ").length / 200);
   const related = post.relatedArticles?.length
     ? allPosts.filter(p => post.relatedArticles.includes(p.title) && p.slug !== slug).slice(0, 4)
     : allPosts.filter(p => p.category === post.category && p.slug !== slug).slice(0, 4);
