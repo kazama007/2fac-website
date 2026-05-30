@@ -32,9 +32,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <meta name="theme-color" content="#7c3aed" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="preconnect" href="https://ukyalnzbxdokqwmupdcq.supabase.co" />
+        {/* Supabase */}
+        <link rel="preconnect" href="https://ukyalnzbxdokqwmupdcq.supabase.co" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://ukyalnzbxdokqwmupdcq.supabase.co" />
-        <link rel="preload" href="/logo2.png" as="image" />
+        {/* Google Analytics */}
+        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        {/* AdSense */}
+        <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
       </head>
       <body suppressHydrationWarning>
         {children}

@@ -1,16 +1,12 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 export default function AnimatedBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
 
   useEffect(() => {
-    // Mobile pe animation band karo
-    if (window.innerWidth <= 768) {
-      setIsMobile(true);
-      return;
-    }
+    if (isMobile) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -84,7 +80,6 @@ export default function AnimatedBackground() {
     };
   }, []);
 
-  // Mobile pe canvas render hi mat karo
   if (isMobile) return null;
 
   return (
