@@ -87,13 +87,34 @@ export default function SlugClient({ post, allPosts, slug }: { post: any; allPos
 
   return (
     <main style={{ minHeight: "100vh", background: "linear-gradient(135deg,#f0f4ff 0%,#faf5ff 50%,#f0f9ff 100%)", fontFamily: "Inter,sans-serif" }}>
+      <style>{`
+        article h1{font-size:clamp(20px,4vw,26px);font-weight:800;color:#1e293b;margin:28px 0 14px}
+        article h2{font-size:clamp(18px,3.5vw,22px);font-weight:700;color:#1e293b;margin:32px 0 12px}
+        article h3{font-size:clamp(15px,3vw,17px);font-weight:700;color:#1e293b;margin:24px 0 10px}
+        article p{margin:0 0 16px;font-size:15px;line-height:1.8;color:#374151}
+        article ul,article ol{margin:0 0 18px 24px}
+        article li{font-size:15px;line-height:1.8;color:#374151;margin-bottom:6px}
+        article a{color:#7c3aed;text-decoration:underline}
+        article strong{font-weight:700;color:#1e293b}
+        article blockquote{border-left:4px solid #7c3aed;background:rgba(124,58,237,0.05);padding:16px 20px;border-radius:0 12px 12px 0;margin:20px 0;font-style:italic;color:#64748b}
+        article code{background:rgba(124,58,237,0.08);color:#7c3aed;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:13px}
+        article pre{background:#1e293b;color:#e2e8f0;padding:20px;border-radius:12px;overflow-x:auto;margin:20px 0;max-width:100%}
+        article pre code{background:transparent;color:inherit;padding:0;font-size:13px}
+        article img{max-width:100%;height:auto;border-radius:12px;margin:16px 0;display:block}
+        article table{display:block;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border-collapse:collapse;margin:20px 0;border-radius:12px;border:1px solid #e2e8f0}
+        article thead{background:#7c3aed}
+        article thead th{color:white;font-weight:700;font-size:13px;padding:12px 16px;text-align:left;white-space:nowrap}
+        article tbody td{padding:12px 16px;font-size:14px;color:#374151;border-bottom:1px solid #e2e8f0}
+        article tbody tr:hover{background:rgba(124,58,237,0.03)}
+        @media(max-width:768px){article h2{margin:24px 0 10px}article pre{padding:14px;font-size:12px}article tbody td,article thead th{padding:8px 12px;font-size:13px}}
+      `}</style>
       <Navbar />
       <HeaderAd />
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px 16px 60px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#94a3b8", marginBottom: "28px" }}>
           <a href="/" style={{ color: "#7c3aed", textDecoration: "none" }}>Home</a><span>›</span>
           <a href="/blog" style={{ color: "#7c3aed", textDecoration: "none" }}>Blog</a><span>›</span>
-          <span style={{ color: "#1e293b" }}>{post.title.slice(0, 40)}</span>
+          <span style={{ color: "#1e293b" }}>{post.title.length > 40 ? post.title.slice(0, 40) + "…" : post.title}</span>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: mounted && isMobile ? "1fr" : "1fr 300px", gap: "40px" }}>
           <article style={{ minWidth: 0 }}>
@@ -118,8 +139,8 @@ export default function SlugClient({ post, allPosts, slug }: { post: any; allPos
             {headings.length > 0 && !isMobile && (
               <div style={{ background: "#fff", border: "1px solid rgba(124,58,237,0.15)", borderRadius: "14px", padding: "20px 24px", marginBottom: "28px" }}>
                 <div style={{ fontSize: "14px", fontWeight: "700", color: "#1e293b", marginBottom: "14px" }}>📋 In this article</div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "6px 16px" }}>
-                  {headings.map((h,i) => <a key={i} href={`#${h.id}`} style={{ fontSize: "13px", color: "#7c3aed", textDecoration: "none", display: "flex", gap: "6px" }}><span style={{ color: "#94a3b8" }}>{i+1}.</span><span>{h.text}</span></a>)}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "6px 16px" }}>
+                  {headings.map((h,i) => <a key={i} href={`#${h.id}`} style={{ fontSize: "13px", color: "#7c3aed", textDecoration: "none", display: "flex", gap: "6px", lineHeight: "1.4" }}><span style={{ color: "#94a3b8", flexShrink: 0 }}>{i+1}.</span><span>{h.text}</span></a>)}
                 </div>
               </div>
             )}
@@ -201,27 +222,6 @@ export default function SlugClient({ post, allPosts, slug }: { post: any; allPos
           </aside>
         </div>
       </div>
-      <style>{`
-        article h1{font-size:clamp(20px,4vw,26px);font-weight:800;color:#1e293b;margin:28px 0 14px}
-        article h2{font-size:clamp(18px,3.5vw,22px);font-weight:700;color:#1e293b;margin:32px 0 12px}
-        article h3{font-size:clamp(15px,3vw,17px);font-weight:700;color:#1e293b;margin:24px 0 10px}
-        article p{margin:0 0 16px;font-size:15px;line-height:1.8;color:#374151}
-        article ul,article ol{margin:0 0 18px 24px}
-        article li{font-size:15px;line-height:1.8;color:#374151;margin-bottom:6px}
-        article a{color:#7c3aed;text-decoration:underline}
-        article strong{font-weight:700;color:#1e293b}
-        article blockquote{border-left:4px solid #7c3aed;background:rgba(124,58,237,0.05);padding:16px 20px;border-radius:0 12px 12px 0;margin:20px 0;font-style:italic;color:#64748b}
-        article code{background:rgba(124,58,237,0.08);color:#7c3aed;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:13px}
-        article pre{background:#1e293b;color:#e2e8f0;padding:20px;border-radius:12px;overflow-x:auto;margin:20px 0;max-width:100%}
-        article pre code{background:transparent;color:inherit;padding:0;font-size:13px}
-        article img{max-width:100%;height:auto;border-radius:12px;margin:16px 0;display:block}
-        article .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border-radius:12px}
-        article table{width:100%;border-collapse:collapse;min-width:400px}
-        article thead{background:#7c3aed}
-        article thead th{color:white;font-weight:700;font-size:13px;padding:12px 16px;text-align:left;white-space:nowrap}
-        article tbody td{padding:12px 16px;font-size:14px;color:#374151;border-bottom:1px solid #e2e8f0}
-        @media(max-width:768px){article h2{margin:24px 0 10px}article pre{padding:14px;font-size:12px}article tbody td,article thead th{padding:8px 12px;font-size:13px}}
-      `}</style>
       <FooterAd />
       <Footer />
     </main>
