@@ -23,7 +23,7 @@ const ALL_TOOLS = [
 
 function extractHeadings(html: string) {
   const out: { level: number; text: string; id: string }[] = [];
-  const re = /<h([1-3])[^>]*>(.*?)<\/h[1-3]>/gi;
+  const re = /<h([1-3])[^>]*>([\s\S]*?)<\/h[1-3]>/gi;
   let m;
   while ((m = re.exec(html)) !== null) {
     const text = m[2].replace(/<[^>]+>/g, "");
@@ -33,7 +33,7 @@ function extractHeadings(html: string) {
 }
 
 function addIds(html: string) {
-  return html.replace(/<h([1-3])([^>]*)>(.*?)<\/h[1-3]>/gi, (_, l, a, t) => {
+  return html.replace(/<h([1-3])([^>]*?)>([\s\S]*?)<\/h[1-3]>/gi, (_, l, a, t) => {
     const id = t.replace(/<[^>]+>/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     return `<h${l}${a} id="${id}">${t}</h${l}>`;
   });
@@ -96,7 +96,7 @@ export default function SlugClient({ post, allPosts, slug }: { post: any; allPos
           <span style={{ color: "#1e293b" }}>{post.title.slice(0, 40)}</span>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: mounted && isMobile ? "1fr" : "1fr 300px", gap: "40px" }}>
-          <article>
+          <article style={{ minWidth: 0 }}>
             <div style={{ marginBottom: "14px" }}>
               <span style={{ background: "rgba(124,58,237,0.1)", color: "#7c3aed", fontSize: "11px", padding: "4px 12px", borderRadius: "6px", fontWeight: "700", textTransform: "uppercase" as const }}>{post.category}</span>
             </div>
@@ -115,10 +115,18 @@ export default function SlugClient({ post, allPosts, slug }: { post: any; allPos
               </div>
             </div>
             {post.coverImage && <div style={{ borderRadius: "16px", overflow: "hidden", marginBottom: "28px" }}><img src={post.coverImage} alt={post.title} style={{ width: "100%", maxHeight: "400px", objectFit: "cover" }} /></div>}
-            {headings.length > 0 && (
+            {headings.length > 0 && !isMobile && (
               <div style={{ background: "#fff", border: "1px solid rgba(124,58,237,0.15)", borderRadius: "14px", padding: "20px 24px", marginBottom: "28px" }}>
                 <div style={{ fontSize: "14px", fontWeight: "700", color: "#1e293b", marginBottom: "14px" }}>📋 In this article</div>
-                <div style={{ display: "grid", gridTemplateColumns: mounted && isMobile ? "1fr" : "1fr 1fr 1fr", gap: "6px 16px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "6px 16px" }}>
+                  {headings.map((h,i) => <a key={i} href={`#${h.id}`} style={{ fontSize: "13px", color: "#7c3aed", textDecoration: "none", display: "flex", gap: "6px" }}><span style={{ color: "#94a3b8" }}>{i+1}.</span><span>{h.text}</span></a>)}
+                </div>
+              </div>
+            )}
+            {headings.length > 0 && isMobile && (
+              <div style={{ background: "#fff", border: "1px solid rgba(124,58,237,0.15)", borderRadius: "14px", padding: "16px 20px", marginBottom: "24px" }}>
+                <div style={{ fontSize: "14px", fontWeight: "700", color: "#1e293b", marginBottom: "10px" }}>📋 In this article</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                   {headings.map((h,i) => <a key={i} href={`#${h.id}`} style={{ fontSize: "13px", color: "#7c3aed", textDecoration: "none", display: "flex", gap: "6px" }}><span style={{ color: "#94a3b8" }}>{i+1}.</span><span>{h.text}</span></a>)}
                 </div>
               </div>
@@ -156,18 +164,18 @@ export default function SlugClient({ post, allPosts, slug }: { post: any; allPos
                 ))}
               </div>
             )}
-            <div style={{ marginTop:"32px",background:"linear-gradient(135deg,#7c3aed,#9f67ff)",borderRadius:"20px",padding:"32px",display:"flex",alignItems:"center",gap:"20px" }}>
-              <div style={{ fontSize:"52px" }}>🛡️</div>
-              <div style={{ flex:1,color:"white" }}>
-                <h3 style={{ fontSize:"18px",fontWeight:"700",marginBottom:"6px" }}>{post.ctaTitle||"Secure Your Accounts with 2FA"}</h3>
+            <div style={{ marginTop:"32px",background:"linear-gradient(135deg,#7c3aed,#9f67ff)",borderRadius:"20px",padding: mounted && isMobile ? "24px 20px" : "32px",display:"flex",alignItems:"center",gap:"16px",flexWrap:"wrap" }}>
+              <div style={{ fontSize: mounted && isMobile ? "40px" : "52px",flexShrink:0 }}>🛡️</div>
+              <div style={{ flex:1,color:"white",minWidth:"200px" }}>
+                <h3 style={{ fontSize: mounted && isMobile ? "16px" : "18px",fontWeight:"700",marginBottom:"6px" }}>{post.ctaTitle||"Secure Your Accounts with 2FA"}</h3>
                 <p style={{ fontSize:"13px",opacity:0.85,marginBottom:"16px" }}>{post.ctaDesc||"Enable two-factor authentication and protect your accounts."}</p>
-                <a href={post.ctaLink||"/tools"} style={{ background:"white",color:"#7c3aed",padding:"10px 24px",borderRadius:"10px",textDecoration:"none",fontWeight:"700",fontSize:"14px" }}>{post.ctaButton||"Explore 2FA Tools →"}</a>
+                <a href={post.ctaLink||"/tools"} style={{ background:"white",color:"#7c3aed",padding:"10px 24px",borderRadius:"10px",textDecoration:"none",fontWeight:"700",fontSize:"14px",display:"inline-block" }}>{post.ctaButton||"Explore 2FA Tools →"}</a>
               </div>
             </div>
           </article>
-          <aside style={{ display:"flex",flexDirection:"column",gap:"20px",position: mounted && isMobile ? "static" : "sticky",top:"90px",alignSelf:"start" }}>
+          <aside style={{ display:"flex",flexDirection:"column",gap:"20px",position: mounted && isMobile ? "static" : "sticky",top:"90px",alignSelf:"start",minWidth:0 }}>
             <SidebarAd />
-            {headings.length > 0 && (
+            {headings.length > 0 && !isMobile && (
               <div style={{ background:"#fff",border:"1px solid rgba(124,58,237,0.1)",borderRadius:"16px",padding:"20px" }}>
                 <h3 style={{ fontSize:"14px",fontWeight:"700",color:"#1e293b",marginBottom:"14px" }}>On this page</h3>
                 {headings.map((h,i) => <a key={i} href={`#${h.id}`} style={{ fontSize:"13px",color:activeHeading===h.id?"#7c3aed":"#64748b",textDecoration:"none",padding:"6px 10px",borderRadius:"6px",display:"flex",gap:"8px",background:activeHeading===h.id?"rgba(124,58,237,0.06)":"transparent",borderLeft:`2px solid ${activeHeading===h.id?"#7c3aed":"transparent"}`,fontWeight:activeHeading===h.id?"600":"400",lineHeight:"1.4",marginBottom:"2px" }}><span style={{ color:"#94a3b8",fontSize:"11px",flexShrink:0 }}>{i+1}.</span><span>{h.text}</span></a>)}
@@ -193,7 +201,27 @@ export default function SlugClient({ post, allPosts, slug }: { post: any; allPos
           </aside>
         </div>
       </div>
-      <style>{`article h1{font-size:26px;font-weight:800;color:#1e293b;margin:28px 0 14px}article h2{font-size:22px;font-weight:700;color:#1e293b;margin:32px 0 12px}article h3{font-size:17px;font-weight:700;color:#1e293b;margin:24px 0 10px}article p{margin:0 0 16px;font-size:15px;line-height:1.8;color:#374151}article ul,article ol{margin:0 0 18px 24px}article li{font-size:15px;line-height:1.8;color:#374151;margin-bottom:6px}article a{color:#7c3aed;text-decoration:underline}article strong{font-weight:700;color:#1e293b}article blockquote{border-left:4px solid #7c3aed;background:rgba(124,58,237,0.05);padding:16px 20px;border-radius:0 12px 12px 0;margin:20px 0;font-style:italic;color:#64748b}article code{background:rgba(124,58,237,0.08);color:#7c3aed;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:13px}article pre{background:#1e293b;color:#e2e8f0;padding:20px;border-radius:12px;overflow-x:auto;margin:20px 0}article img{max-width:100%;border-radius:12px;margin:16px 0}article table{width:100%;border-collapse:collapse;margin:20px 0}article thead{background:#7c3aed}article thead th{color:white;font-weight:700;font-size:13px;padding:12px 16px;text-align:left}article tbody td{padding:12px 16px;font-size:14px;color:#374151;border-bottom:1px solid #e2e8f0}`}</style>
+      <style>{`
+        article h1{font-size:clamp(20px,4vw,26px);font-weight:800;color:#1e293b;margin:28px 0 14px}
+        article h2{font-size:clamp(18px,3.5vw,22px);font-weight:700;color:#1e293b;margin:32px 0 12px}
+        article h3{font-size:clamp(15px,3vw,17px);font-weight:700;color:#1e293b;margin:24px 0 10px}
+        article p{margin:0 0 16px;font-size:15px;line-height:1.8;color:#374151}
+        article ul,article ol{margin:0 0 18px 24px}
+        article li{font-size:15px;line-height:1.8;color:#374151;margin-bottom:6px}
+        article a{color:#7c3aed;text-decoration:underline}
+        article strong{font-weight:700;color:#1e293b}
+        article blockquote{border-left:4px solid #7c3aed;background:rgba(124,58,237,0.05);padding:16px 20px;border-radius:0 12px 12px 0;margin:20px 0;font-style:italic;color:#64748b}
+        article code{background:rgba(124,58,237,0.08);color:#7c3aed;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:13px}
+        article pre{background:#1e293b;color:#e2e8f0;padding:20px;border-radius:12px;overflow-x:auto;margin:20px 0;max-width:100%}
+        article pre code{background:transparent;color:inherit;padding:0;font-size:13px}
+        article img{max-width:100%;height:auto;border-radius:12px;margin:16px 0;display:block}
+        article .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border-radius:12px}
+        article table{width:100%;border-collapse:collapse;min-width:400px}
+        article thead{background:#7c3aed}
+        article thead th{color:white;font-weight:700;font-size:13px;padding:12px 16px;text-align:left;white-space:nowrap}
+        article tbody td{padding:12px 16px;font-size:14px;color:#374151;border-bottom:1px solid #e2e8f0}
+        @media(max-width:768px){article h2{margin:24px 0 10px}article pre{padding:14px;font-size:12px}article tbody td,article thead th{padding:8px 12px;font-size:13px}}
+      `}</style>
       <FooterAd />
       <Footer />
     </main>
