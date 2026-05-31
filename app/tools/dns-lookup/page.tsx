@@ -76,11 +76,11 @@ export default function DNSLookup() {
           <span style={{ color: "#1e293b", fontWeight: "500" }}>DNS Lookup</span>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "36px" }}>
-          <div style={{ width: "64px", height: "64px", background: "linear-gradient(135deg, #3b82f6, #60a5fa)", borderRadius: "16px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "32px", flexShrink: 0, boxShadow: "0 8px 24px rgba(59,130,246,0.3)" }}>🌐</div>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "36px", flexWrap: "wrap" }}>
+          <div style={{ width: mounted && isMobile ? "48px" : "64px", height: mounted && isMobile ? "48px" : "64px", background: "linear-gradient(135deg, #3b82f6, #60a5fa)", borderRadius: "16px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: mounted && isMobile ? "24px" : "32px", flexShrink: 0, boxShadow: "0 8px 24px rgba(59,130,246,0.3)" }}>🌐</div>
           <div>
-            <h1 style={{ fontSize: "32px", fontWeight: "800", color: "#1e293b", margin: "0 0 6px" }}>DNS Lookup</h1>
-            <p style={{ color: "#64748b", fontSize: "15px", margin: 0 }}>Query A, AAAA, MX, NS, TXT, CNAME, and SOA records for any domain instantly.</p>
+            <h1 style={{ fontSize: mounted && isMobile ? "24px" : "32px", fontWeight: "800", color: "#1e293b", margin: "0 0 6px" }}>DNS Lookup</h1>
+            <p style={{ color: "#64748b", fontSize: mounted && isMobile ? "13px" : "15px", margin: 0 }}>Query A, AAAA, MX, NS, TXT, CNAME, and SOA records for any domain instantly.</p>
           </div>
         </div>
 
@@ -88,15 +88,15 @@ export default function DNSLookup() {
           <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 
             <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "20px", padding: "32px", boxShadow: "0 4px 24px rgba(124,58,237,0.06)" }}>
-              <div style={{ display: "flex", gap: "10px", marginBottom: "16px" }}>
+              <div style={{ display: "flex", gap: "10px", marginBottom: "16px", flexDirection: mounted && isMobile ? "column" : "row" }}>
                 <input type="text" value={domain} onChange={(e) => setDomain(e.target.value)} onKeyDown={(e) => e.key === "Enter" && lookupAll()}
                   placeholder="Enter domain (e.g. google.com)"
-                  style={{ flex: 1, padding: "14px 16px", background: "#f8fafc", border: "1.5px solid #e2e8f0", borderRadius: "12px", color: "#1e293b", fontSize: "15px", outline: "none" }}
+                  style={{ flex: 1, padding: "14px 16px", background: "#f8fafc", border: "1.5px solid #e2e8f0", borderRadius: "12px", color: "#1e293b", fontSize: "15px", outline: "none", width: "100%", boxSizing: "border-box" as const }}
                   onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"}
                   onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"}
                 />
-                <button onClick={lookupAll} disabled={loading} style={{ padding: "14px 20px", background: "linear-gradient(135deg, #7c3aed, #9f67ff)", color: "white", border: "none", borderRadius: "12px", fontSize: "15px", fontWeight: "700", cursor: "pointer", boxShadow: "0 4px 20px rgba(124,58,237,0.35)" }}>
-                  {loading ? "..." : "Lookup"}
+                <button onClick={lookupAll} disabled={loading} style={{ padding: "14px 20px", background: "linear-gradient(135deg, #7c3aed, #9f67ff)", color: "white", border: "none", borderRadius: "12px", fontSize: "15px", fontWeight: "700", cursor: "pointer", boxShadow: "0 4px 20px rgba(124,58,237,0.35)", width: mounted && isMobile ? "100%" : "auto" }}>
+                  {loading ? "🔍 Looking up..." : "Lookup"}
                 </button>
               </div>
 
