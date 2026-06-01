@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-
 const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
@@ -9,6 +8,16 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 31536000,
+  },
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.2fa.ac" }],
+        destination: "https://2fa.ac/:path*",
+        permanent: true,
+      },
+    ];
   },
   headers: async () => [
     {
@@ -33,5 +42,4 @@ const nextConfig: NextConfig = {
     },
   ],
 };
-
 export default nextConfig;
