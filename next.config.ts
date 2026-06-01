@@ -3,6 +3,16 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.2fa.ac" }],
+        destination: "https://2fa.ac/:path*",
+        permanent: true,
+      },
+    ];
+  },
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },

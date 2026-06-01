@@ -23,6 +23,9 @@ export const metadata: Metadata = {
   creator: "2fa.ac",
   publisher: "2fa.ac",
   robots: "index, follow",
+  alternates: {
+    canonical: "https://2fa.ac",
+  },
   openGraph: {
     title: "2FA.ac — Free 2FA Code Generator & Security Tools",
     description: "Generate 2FA codes instantly. 15+ free cybersecurity tools. No signup required.",
