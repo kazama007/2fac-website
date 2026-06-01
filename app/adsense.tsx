@@ -11,7 +11,6 @@ interface AdsSettings {
 }
 
 let cachedSettings: AdsSettings | null = null;
-let fetchFailed = false;
 
 function useAdsSettings() {
   const [settings, setSettings] = useState<AdsSettings | null>(cachedSettings);
@@ -20,11 +19,9 @@ function useAdsSettings() {
   useEffect(() => {
     setMounted(true);
     if (cachedSettings) { setSettings(cachedSettings); return; }
-    if (fetchFailed) return;
     fetch("/api/ads").then(r => r.json()).then(data => {
       if (data) { cachedSettings = data; setSettings(data); }
-      else { fetchFailed = true; }
-    }).catch(() => { fetchFailed = true; });
+    }).catch(() => {});
   }, []);
 
   return { settings, mounted };

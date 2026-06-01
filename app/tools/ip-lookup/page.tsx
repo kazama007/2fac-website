@@ -47,7 +47,7 @@ export default function IPLookup() {
       if (data.error) throw new Error(data.reason);
       setResult(data);
     } catch { setError("Failed to lookup IP. Please check the IP address and try again."); }
-    finally { setLoading(false); }
+    setLoading(false);
   };
 
   const lookupMyIp = () => { if (myIp) { setIp(myIp); lookup(myIp); } };

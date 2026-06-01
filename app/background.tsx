@@ -3,8 +3,9 @@ import { useEffect, useRef } from "react";
 
 export default function AnimatedBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
+
   useEffect(() => {
-    const isMobile = window.innerWidth <= 768;
     if (isMobile) return;
 
     const canvas = canvasRef.current;
@@ -101,6 +102,8 @@ export default function AnimatedBackground() {
       window.removeEventListener("resize", onResize);
     };
   }, []);
+
+  if (isMobile) return null;
 
   return (
     <canvas

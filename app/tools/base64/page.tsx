@@ -38,9 +38,7 @@ export default function Base64Tool() {
     try {
       if (mode === "encode") {
         const bytes = new TextEncoder().encode(input);
-        let bin = "";
-        for (const b of bytes) bin += String.fromCharCode(b);
-        setOutput(btoa(bin));
+        setOutput(btoa(String.fromCharCode(...bytes)));
       } else {
         const bytes = Uint8Array.from(atob(input), c => c.charCodeAt(0));
         setOutput(new TextDecoder().decode(bytes));

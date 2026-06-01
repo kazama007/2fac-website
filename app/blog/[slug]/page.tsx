@@ -38,9 +38,6 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description,
       images: post.cover_image ? [post.cover_image] : [],
     },
-    alternates: {
-      canonical: `https://2fa.ac/blog/${slug}`,
-    },
   };
 }
 
