@@ -114,9 +114,9 @@ function MenuBar({ editor }: { editor: any }) {
     input.type = "file"; input.accept = "image/*"; input.click();
     input.onchange = async () => {
       const file = input.files?.[0]; if (!file) return;
+      const alt = prompt("Enter alt text for the image (SEO):", file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ")) || "";
       try {
         const url = await uploadToGitHub(file);
-        const alt = prompt("Enter alt text for the image (important for SEO):", file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ")) || "";
         editor.chain().focus().setImage({ src: url, alt, title: alt }).run();
       } catch { alert("Upload failed! Check GitHub token."); }
     };
