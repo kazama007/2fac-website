@@ -162,23 +162,12 @@ function MenuBar({ editor }: { editor: any }) {
       <Sep />
       <button onClick={addLink} style={btn(editor.isActive("link"))}>🔗 Link</button>
       <Sep />
+      <input type="text" value={altText} onChange={e => setAltText(e.target.value)} placeholder="Image alt text..." style={{ padding: "4px 8px", border: "1.5px solid rgba(124,58,237,0.4)", borderRadius: "6px", fontSize: "12px", color: "#1e293b", outline: "none", width: "150px", background: "rgba(124,58,237,0.04)" }} onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border = "1.5px solid rgba(124,58,237,0.4)"} />
+      <button onClick={uploadImage} style={{ ...btn(), background: "rgba(124,58,237,0.1)", border: "1.5px solid rgba(124,58,237,0.3)", color: "#7c3aed" }}>🖼 Image</button>
+      <Sep />
       <button onClick={() => editor.chain().focus().undo().run()} style={btn()}>↩</button>
       <button onClick={() => editor.chain().focus().redo().run()} style={btn()}>↪</button>
       <button onClick={() => editor.chain().focus().clearNodes().unsetAllMarks().run()} style={{ ...btn(), background: "rgba(239,68,68,0.08)", border: "1.5px solid rgba(239,68,68,0.2)", color: "#ef4444" }}>Clear</button>
-    </div>
-    {/* Image upload row — always visible */}
-    <div style={{ background: "#f0f4ff", padding: "8px 12px", display: "flex", alignItems: "center", gap: "8px", borderBottom: "1.5px solid #e2e8f0" }}>
-      <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "600", whiteSpace: "nowrap" }}>🖼 Image:</span>
-      <input
-        type="text"
-        value={altText}
-        onChange={e => setAltText(e.target.value)}
-        placeholder="Alt text likho (SEO ke liye)..."
-        style={{ flex: 1, padding: "6px 10px", border: "1.5px solid #e2e8f0", borderRadius: "6px", fontSize: "13px", color: "#1e293b", outline: "none" }}
-        onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"}
-        onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"}
-      />
-      <button onClick={uploadImage} style={{ padding: "6px 14px", background: "linear-gradient(135deg,#7c3aed,#9f67ff)", color: "white", border: "none", borderRadius: "6px", fontSize: "13px", fontWeight: "600", cursor: "pointer", whiteSpace: "nowrap" }}>Upload Image</button>
     </div>
     </>
   );
