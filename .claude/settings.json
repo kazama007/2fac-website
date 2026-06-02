@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /Users/sachin/Desktop/2fac-website add app/admin/page.tsx)",
+      "Bash(git -C /Users/sachin/Desktop/2fac-website commit -m \"fix: use DOM click listener for image alt text — works on any img in editor\")",
+      "Bash(git -C /Users/sachin/Desktop/2fac-website push origin main)"
+    ]
+  }
+}

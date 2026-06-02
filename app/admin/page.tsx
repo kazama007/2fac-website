@@ -45,7 +45,6 @@ const GITHUB_BRANCH = "main";
 async function uploadToGitHub(file: File): Promise<string> {
   const fileName = `${Date.now()}-${file.name.replace(/\s/g, "-")}`;
   const reader = new FileReader();
-  
   return new Promise((resolve, reject) => {
     reader.onload = async () => {
       const base64 = (reader.result as string).split(",")[1];
@@ -96,43 +95,43 @@ const ALL_TOOLS = [
   { name: "WHOIS Lookup", href: "/tools/whois-lookup" },
 ];
 
-const WORKS_WITH_OPTIONS = [
-  { name: "Google Authenticator", emoji: "🔐" },
-  { name: "Authy", emoji: "🛡️" },
-  { name: "Microsoft Authenticator", emoji: "🔷" },
-  { name: "1Password", emoji: "🔑" },
-  { name: "Bitwarden", emoji: "🔒" },
-  { name: "LastPass", emoji: "🔓" },
-  { name: "Dashlane", emoji: "🛡️" },
-  { name: "KeePass", emoji: "🗝️" },
-];
+// ─── IMAGE ALT TEXT MODAL ────────────────────────────────────────────────────
+function AltTextModal({ onConfirm, onCancel }: { onConfirm: (alt: string) => void; onCancel: () => void }) {
+  const [alt, setAlt] = useState("");
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ background: "#fff", borderRadius: "16px", padding: "32px", width: "480px", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
+        <h3 style={{ fontSize: "18px", fontWeight: "700", color: "#1e293b", marginBottom: "8px" }}>🖼 Image Alt Text</h3>
+        <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "16px" }}>Alt text is important for SEO and accessibility. Describe what the image shows.</p>
+        <input
+          autoFocus
+          type="text"
+          value={alt}
+          onChange={e => setAlt(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && onConfirm(alt)}
+          placeholder="e.g. 2FA QR code generator tool interface screenshot"
+          style={{ width: "100%", padding: "12px 14px", border: "1.5px solid #7c3aed", borderRadius: "10px", fontSize: "14px", color: "#1e293b", outline: "none", boxSizing: "border-box", marginBottom: "16px" }}
+        />
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button onClick={() => onConfirm(alt)} style={{ flex: 1, padding: "12px", background: "linear-gradient(135deg, #7c3aed, #9f67ff)", color: "white", border: "none", borderRadius: "10px", fontSize: "14px", fontWeight: "700", cursor: "pointer" }}>
+            ✅ Upload Image
+          </button>
+          <button onClick={onCancel} style={{ padding: "12px 20px", background: "#f1f5f9", color: "#64748b", border: "1.5px solid #e2e8f0", borderRadius: "10px", fontSize: "14px", cursor: "pointer" }}>
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-function MenuBar({ editor }: { editor: any }) {
-  const [altText, setAltText] = useState("");
-
+// ─── MENUBAR ─────────────────────────────────────────────────────────────────
+function MenuBar({ editor, onImageUpload }: { editor: any; onImageUpload: () => void }) {
   if (!editor) return null;
-
-  const uploadImage = () => {
-    const input = document.createElement("input");
-    input.type = "file"; input.accept = "image/*"; input.click();
-    input.onchange = async () => {
-      const file = input.files?.[0]; if (!file) return;
-      try {
-        const url = await uploadToGitHub(file);
-        const altInput = document.getElementById("img-alt-input") as HTMLInputElement;
-        const alt = (altInput?.value || altText).trim() || file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ");
-        editor.chain().focus().setImage({ src: url, alt, title: alt }).run();
-        if (altInput) altInput.value = "";
-        setAltText("");
-      } catch { alert("Upload failed! Check GitHub token."); }
-    };
-  };
-
   const addLink = () => { const url = prompt("Enter URL:"); if (url) editor.chain().focus().setLink({ href: url }).run(); };
   const btn = (active?: boolean) => ({ background: active ? "#7c3aed" : "#f1f5f9", border: `1.5px solid ${active ? "#7c3aed" : "#e2e8f0"}`, color: active ? "white" : "#64748b", borderRadius: "6px", padding: "4px 8px", cursor: "pointer", fontSize: "12px", fontWeight: active ? "700" : "400", minWidth: "28px" });
   const Sep = () => <div style={{ width: "1px", height: "24px", background: "#e2e8f0", margin: "0 4px" }} />;
   return (
-    <>
     <div style={{ background: "#f8fafc", padding: "8px 12px", display: "flex", gap: "4px", flexWrap: "wrap", alignItems: "center", borderBottom: "1.5px solid #e2e8f0", borderRadius: "12px 12px 0 0" }}>
       <select onChange={(e) => { const val = e.target.value; if (val === "p") editor.chain().focus().setParagraph().run(); else editor.chain().focus().setHeading({ level: parseInt(val) as 1|2|3|4 }).run(); e.target.value = "p"; }} style={{ background: "#fff", border: "1.5px solid #e2e8f0", color: "#1e293b", borderRadius: "6px", padding: "4px 8px", fontSize: "12px", cursor: "pointer" }}>
         <option value="p">Paragraph</option>
@@ -163,79 +162,75 @@ function MenuBar({ editor }: { editor: any }) {
       <button onClick={() => editor.chain().focus().toggleCodeBlock().run()} style={btn(editor.isActive("codeBlock"))}>{"</>"}</button>
       <Sep />
       <button onClick={addLink} style={btn(editor.isActive("link"))}>🔗 Link</button>
-      <Sep />
-      <input type="text" value={altText} onChange={e => setAltText(e.target.value)} placeholder="Image alt text..." style={{ padding: "4px 8px", border: "1.5px solid rgba(124,58,237,0.4)", borderRadius: "6px", fontSize: "12px", color: "#1e293b", outline: "none", width: "150px", background: "rgba(124,58,237,0.04)" }} onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border = "1.5px solid rgba(124,58,237,0.4)"} />
-      <button onClick={uploadImage} style={{ ...btn(), background: "rgba(124,58,237,0.1)", border: "1.5px solid rgba(124,58,237,0.3)", color: "#7c3aed" }}>🖼 Image</button>
+      <button onClick={onImageUpload} style={{ ...btn(), background: "rgba(124,58,237,0.1)", border: "1.5px solid rgba(124,58,237,0.3)", color: "#7c3aed" }}>🖼 Image</button>
       <Sep />
       <button onClick={() => editor.chain().focus().undo().run()} style={btn()}>↩</button>
       <button onClick={() => editor.chain().focus().redo().run()} style={btn()}>↪</button>
       <button onClick={() => editor.chain().focus().clearNodes().unsetAllMarks().run()} style={{ ...btn(), background: "rgba(239,68,68,0.08)", border: "1.5px solid rgba(239,68,68,0.2)", color: "#ef4444" }}>Clear</button>
     </div>
-    </>
   );
 }
 
+// ─── TIPTAP EDITOR ────────────────────────────────────────────────────────────
 function TipTapEditor({ value, onChange }: { value: string; onChange: (val: string) => void }) {
-  const [imgSelected, setImgSelected] = useState(false);
-  const [imgAlt, setImgAlt] = useState("");
-  const currentImg = useRef<HTMLImageElement | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const pendingFile = useRef<File | null>(null);
 
   const editor = useEditor({
-    extensions: [StarterKit, Underline, TextStyle, Color, Image.configure({ HTMLAttributes: { style: "max-width:100%;border-radius:8px;margin:12px 0;cursor:pointer;" } }), Link.configure({ openOnClick: false, HTMLAttributes: { style: "color:#7c3aed;text-decoration:underline;" } }), TextAlign.configure({ types: ["heading", "paragraph"] })],
+    extensions: [
+      StarterKit,
+      Underline,
+      TextStyle,
+      Color,
+      Image.configure({ HTMLAttributes: { style: "max-width:100%;border-radius:8px;margin:12px 0;" } }),
+      Link.configure({ openOnClick: false, HTMLAttributes: { style: "color:#7c3aed;text-decoration:underline;" } }),
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
+    ],
     content: value,
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
     editorProps: { attributes: { style: "min-height:400px;padding:20px;outline:none;font-size:15px;line-height:1.8;color:#1e293b;" } },
   });
 
-  useEffect(() => {
-    if (!editor) return;
-    const dom = editor.view.dom;
-    const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === "IMG") {
-        const img = target as HTMLImageElement;
-        currentImg.current = img;
-        setImgAlt(img.alt || "");
-        setImgSelected(true);
-      } else {
-        setImgSelected(false);
-        currentImg.current = null;
-      }
+  const handleImageUpload = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.click();
+    input.onchange = () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      pendingFile.current = file;
+      setShowModal(true);
     };
-    dom.addEventListener("click", handleClick);
-    return () => dom.removeEventListener("click", handleClick);
-  }, [editor]);
+  };
 
-  const updateAlt = (val: string) => {
-    setImgAlt(val);
-    if (currentImg.current) {
-      currentImg.current.alt = val;
-      currentImg.current.title = val;
-      onChange(editor?.getHTML() || "");
+  const handleAltConfirm = async (alt: string) => {
+    setShowModal(false);
+    const file = pendingFile.current;
+    if (!file) return;
+    try {
+      const url = await uploadToGitHub(file);
+      editor?.chain().focus().setImage({ src: url, alt: alt || file.name, title: alt || file.name }).run();
+    } catch {
+      alert("Upload failed! Check GitHub token.");
     }
-    editor?.commands.updateAttributes("image", { alt: val, title: val });
+    pendingFile.current = null;
+  };
+
+  const handleAltCancel = () => {
+    setShowModal(false);
+    pendingFile.current = null;
   };
 
   return (
-    <div style={{ border: "1.5px solid #e2e8f0", borderRadius: "12px", overflow: "hidden", background: "#fff" }}>
-      <style>{`.tiptap-editor h1{font-size:28px;font-weight:800;color:#1e293b;margin:20px 0 10px}.tiptap-editor h2{font-size:22px;font-weight:700;color:#1e293b;margin:18px 0 8px}.tiptap-editor h3{font-size:18px;font-weight:600;color:#1e293b;margin:14px 0 6px}.tiptap-editor p{margin:10px 0;color:#1e293b}.tiptap-editor ul,.tiptap-editor ol{padding-left:24px;margin:10px 0}.tiptap-editor li{margin:4px 0;color:#1e293b}.tiptap-editor blockquote{border-left:4px solid #7c3aed;padding-left:16px;margin:16px 0;color:#64748b;font-style:italic}.tiptap-editor pre{background:#f8fafc;color:#1e293b;padding:16px;border-radius:8px;margin:12px 0;overflow-x:auto;border:1px solid #e2e8f0}.tiptap-editor code{background:rgba(124,58,237,0.1);color:#7c3aed;padding:2px 6px;border-radius:4px}.tiptap-editor img{max-width:100%;border-radius:8px;margin:12px 0;display:block;cursor:pointer;}.tiptap-editor img:hover{outline:2px solid #7c3aed;outline-offset:2px}.tiptap-editor a{color:#7c3aed;text-decoration:underline}.ProseMirror:focus{outline:none}`}</style>
-      <MenuBar editor={editor} />
-      {imgSelected && (
-        <div style={{ padding: "10px 14px", background: "linear-gradient(135deg,rgba(124,58,237,0.1),rgba(159,103,255,0.08))", borderBottom: "1.5px solid rgba(124,58,237,0.25)", display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ fontSize: "13px", fontWeight: "700", color: "#7c3aed", whiteSpace: "nowrap" }}>🖼 Alt Text:</span>
-          <input
-            type="text"
-            value={imgAlt}
-            onChange={e => updateAlt(e.target.value)}
-            placeholder="Image ka description likho (SEO ke liye zaroori)..."
-            autoFocus
-            style={{ flex: 1, padding: "7px 12px", border: "1.5px solid #7c3aed", borderRadius: "8px", fontSize: "13px", color: "#1e293b", outline: "none", background: "#fff" }}
-          />
-          <span style={{ fontSize: "11px", color: "#16a34a", fontWeight: "600", whiteSpace: "nowrap" }}>✓ Auto save</span>
-        </div>
-      )}
-      <div className="tiptap-editor"><EditorContent editor={editor} /></div>
-    </div>
+    <>
+      {showModal && <AltTextModal onConfirm={handleAltConfirm} onCancel={handleAltCancel} />}
+      <div style={{ border: "1.5px solid #e2e8f0", borderRadius: "12px", overflow: "hidden", background: "#fff" }}>
+        <style>{`.tiptap-editor h1{font-size:28px;font-weight:800;color:#1e293b;margin:20px 0 10px}.tiptap-editor h2{font-size:22px;font-weight:700;color:#1e293b;margin:18px 0 8px}.tiptap-editor h3{font-size:18px;font-weight:600;color:#1e293b;margin:14px 0 6px}.tiptap-editor p{margin:10px 0;color:#1e293b}.tiptap-editor ul,.tiptap-editor ol{padding-left:24px;margin:10px 0}.tiptap-editor li{margin:4px 0;color:#1e293b}.tiptap-editor blockquote{border-left:4px solid #7c3aed;padding-left:16px;margin:16px 0;color:#64748b;font-style:italic}.tiptap-editor pre{background:#f8fafc;color:#1e293b;padding:16px;border-radius:8px;margin:12px 0;overflow-x:auto;border:1px solid #e2e8f0}.tiptap-editor code{background:rgba(124,58,237,0.1);color:#7c3aed;padding:2px 6px;border-radius:4px}.tiptap-editor img{max-width:100%;border-radius:8px;margin:12px 0;display:block}.tiptap-editor a{color:#7c3aed;text-decoration:underline}.ProseMirror:focus{outline:none}`}</style>
+        <MenuBar editor={editor} onImageUpload={handleImageUpload} />
+        <div className="tiptap-editor"><EditorContent editor={editor} /></div>
+      </div>
+    </>
   );
 }
 
@@ -271,16 +266,8 @@ export default function AdminPanel() {
   const loadAdsSettings = async () => {
     const { data } = await supabase.from("ads_settings").select("*").eq("id", 1).single();
     if (data) {
-      setAdsSettings({
-        publisherId: data.publisher_id || "",
-        headerAdSlot: data.header_ad_slot || "",
-        footerAdSlot: data.footer_ad_slot || "",
-        sidebarAdSlot: data.sidebar_ad_slot || "",
-        inArticleAdSlot: data.in_article_ad_slot || "",
-        adsEnabled: data.ads_enabled || false,
-      });
+      setAdsSettings({ publisherId: data.publisher_id || "", headerAdSlot: data.header_ad_slot || "", footerAdSlot: data.footer_ad_slot || "", sidebarAdSlot: data.sidebar_ad_slot || "", inArticleAdSlot: data.in_article_ad_slot || "", adsEnabled: data.ads_enabled || false });
     } else {
-      // Fallback localStorage
       const saved = localStorage.getItem("ads-settings");
       if (saved) setAdsSettings(JSON.parse(saved));
     }
@@ -288,18 +275,9 @@ export default function AdminPanel() {
 
   const saveAdsSettings = async () => {
     setAdsSaving(true);
-    const { error } = await supabase.from("ads_settings").upsert({
-      id: 1,
-      publisher_id: adsSettings.publisherId,
-      header_ad_slot: adsSettings.headerAdSlot,
-      footer_ad_slot: adsSettings.footerAdSlot,
-      sidebar_ad_slot: adsSettings.sidebarAdSlot,
-      in_article_ad_slot: adsSettings.inArticleAdSlot,
-      ads_enabled: adsSettings.adsEnabled,
-    });
+    const { error } = await supabase.from("ads_settings").upsert({ id: 1, publisher_id: adsSettings.publisherId, header_ad_slot: adsSettings.headerAdSlot, footer_ad_slot: adsSettings.footerAdSlot, sidebar_ad_slot: adsSettings.sidebarAdSlot, in_article_ad_slot: adsSettings.inArticleAdSlot, ads_enabled: adsSettings.adsEnabled });
     setAdsSaving(false);
     if (error) { alert("Error saving: " + error.message); return; }
-    // Also save to localStorage as backup
     localStorage.setItem("ads-settings", JSON.stringify(adsSettings));
     setAdsSaved(true);
     setTimeout(() => setAdsSaved(false), 2000);
@@ -321,7 +299,6 @@ export default function AdminPanel() {
 
   const toggleTool = (toolName: string) => setForm(f => ({ ...f, relatedTools: f.relatedTools.includes(toolName) ? f.relatedTools.filter(t => t !== toolName) : [...f.relatedTools, toolName] }));
   const toggleArticle = (articleTitle: string) => setForm(f => ({ ...f, relatedArticles: f.relatedArticles.includes(articleTitle) ? f.relatedArticles.filter(a => a !== articleTitle) : [...f.relatedArticles, articleTitle] }));
-  const toggleWorksWith = (app: string) => setForm(f => ({ ...f, worksWith: f.worksWith.includes(app) ? f.worksWith.filter(w => w !== app) : [...f.worksWith, app] }));
   const addFaq = () => { if (!newFaq.q || !newFaq.a) return; setForm(f => ({ ...f, faqs: [...f.faqs, { q: newFaq.q, a: newFaq.a }] })); setNewFaq({ q: "", a: "" }); };
   const removeFaq = (i: number) => setForm(f => ({ ...f, faqs: f.faqs.filter((_, idx) => idx !== i) }));
   const readingTime = Math.ceil(form.content.replace(/<[^>]*>/g, "").split(" ").length / 200);
@@ -415,8 +392,6 @@ export default function AdminPanel() {
         </div>
 
         <div style={{ flex: 1, padding: "28px 36px", overflow: "auto" }}>
-
-          {/* ALL POSTS */}
           {activeTab === "posts" && (
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
@@ -457,12 +432,11 @@ export default function AdminPanel() {
             </div>
           )}
 
-          {/* NEW / EDIT POST */}
           {(activeTab === "new" || activeTab === "edit") && (
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
                 <h2 style={{ fontSize: "22px", fontWeight: "700", color: "#1e293b", margin: 0 }}>{activeTab === "new" ? "✏️ New Blog Post" : "📝 Edit Post"}</h2>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.15)", borderRadius: "10px", padding: "8px 14px", fontSize: "13px", color: "#7c3aed" }}>⏱ Reading time: ~{readingTime} min</div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.15)", borderRadius: "10px", padding: "8px 14px", fontSize: "13px", color: "#7c3aed" }}>⏱ ~{readingTime} min read</div>
               </div>
               <div style={{ display: "flex", gap: "8px", marginBottom: "24px", flexWrap: "wrap" }}>
                 {sectionBtn("basic", "📄 Basic Info")}
@@ -517,16 +491,6 @@ export default function AdminPanel() {
                     <label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600" }}>Content *</label>
                     <button onClick={() => { const html = prompt("Paste your HTML content here:"); if (html) setForm({ ...form, content: html }); }} style={{ padding: "6px 14px", background: "rgba(124,58,237,0.08)", border: "1.5px solid rgba(124,58,237,0.3)", color: "#7c3aed", borderRadius: "8px", cursor: "pointer", fontSize: "12px", fontWeight: "600" }}>📥 Import HTML</button>
                   </div>
-                  <div style={{ background: "rgba(124,58,237,0.06)", border: "1.5px solid rgba(124,58,237,0.25)", borderRadius: "10px", padding: "12px 16px", marginBottom: "12px", display: "flex", alignItems: "center", gap: "10px" }}>
-                    <span style={{ fontSize: "13px", fontWeight: "700", color: "#7c3aed", whiteSpace: "nowrap" }}>🖼 Image Alt Text:</span>
-                    <input
-                      id="img-alt-input"
-                      type="text"
-                      placeholder="Pehle alt text likho, phir toolbar se Image upload karo..."
-                      style={{ flex: 1, padding: "8px 12px", border: "1.5px solid rgba(124,58,237,0.3)", borderRadius: "8px", fontSize: "13px", color: "#1e293b", outline: "none", background: "#fff" }}
-                    />
-                    <span style={{ fontSize: "11px", color: "#94a3b8", whiteSpace: "nowrap" }}>SEO zaroori</span>
-                  </div>
                   <TipTapEditor value={form.content} onChange={(val) => setForm({ ...form, content: val })} />
                 </div>
               )}
@@ -566,7 +530,6 @@ export default function AdminPanel() {
                   )}
                 </div>
               )}
-
 
               {activeSection === "faq" && (
                 <div>
@@ -637,7 +600,6 @@ export default function AdminPanel() {
                 </div>
               )}
 
-
               <div style={{ display: "flex", gap: "12px", marginTop: "28px", paddingTop: "20px", borderTop: "1px solid #e2e8f0" }}>
                 <button onClick={activeTab === "new" ? handlePublish : handleUpdate} disabled={!form.title || !form.content} style={{ padding: "12px 28px", background: (!form.title || !form.content) ? "#e2e8f0" : "linear-gradient(135deg, #7c3aed, #9f67ff)", color: (!form.title || !form.content) ? "#94a3b8" : "white", border: "none", borderRadius: "10px", fontSize: "15px", fontWeight: "700", cursor: "pointer" }}>
                   {activeTab === "new" ? "🚀 Publish Post" : "💾 Update Post"}
@@ -647,35 +609,29 @@ export default function AdminPanel() {
             </div>
           )}
 
-          {/* ADSENSE SETTINGS */}
           {activeTab === "ads" && (
             <div>
               <h2 style={{ fontSize: "22px", fontWeight: "700", color: "#1e293b", marginBottom: "8px" }}>💰 AdSense Settings</h2>
-              <p style={{ color: "#64748b", fontSize: "14px", marginBottom: "24px" }}>Ye settings Supabase mein save hongi — har device pe same rahegi.</p>
-
-              {/* Enable/Disable toggle */}
+              <p style={{ color: "#64748b", fontSize: "14px", marginBottom: "24px" }}>Settings save in Supabase — same on all devices.</p>
               <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "16px", padding: "20px 24px", marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
                   <div style={{ fontSize: "15px", fontWeight: "600", color: "#1e293b" }}>Enable AdSense Ads</div>
-                  <div style={{ fontSize: "13px", color: "#64748b", marginTop: "2px" }}>Puri website pe ads on/off karo</div>
+                  <div style={{ fontSize: "13px", color: "#64748b", marginTop: "2px" }}>Turn ads on/off across entire website</div>
                 </div>
                 <button onClick={() => setAdsSettings(a => ({ ...a, adsEnabled: !a.adsEnabled }))} style={{ padding: "10px 24px", background: adsSettings.adsEnabled ? "rgba(34,197,94,0.1)" : "#f1f5f9", border: `2px solid ${adsSettings.adsEnabled ? "rgba(34,197,94,0.4)" : "#e2e8f0"}`, color: adsSettings.adsEnabled ? "#16a34a" : "#64748b", borderRadius: "12px", cursor: "pointer", fontSize: "15px", fontWeight: "700" }}>
                   {adsSettings.adsEnabled ? "✅ Enabled" : "⭕ Disabled"}
                 </button>
               </div>
-
-              {/* Publisher ID + Slots */}
               <div style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "16px", padding: "28px" }}>
                 <div style={{ marginBottom: "20px" }}>
                   <label style={{ fontSize: "13px", fontWeight: "600", color: "#64748b", display: "block", marginBottom: "6px" }}>AdSense Publisher ID</label>
                   <input type="text" value={adsSettings.publisherId} onChange={e => setAdsSettings(a => ({ ...a, publisherId: e.target.value }))} placeholder="ca-pub-XXXXXXXXXXXXXXXX" style={{ ...inputStyle, fontFamily: "monospace" }} onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"} />
                 </div>
-
                 {[
-                  { key: "headerAdSlot", label: "Header Ad Slot", desc: "Site ke upar dikhega" },
-                  { key: "footerAdSlot", label: "Footer Ad Slot", desc: "Site ke neeche dikhega" },
-                  { key: "sidebarAdSlot", label: "Sidebar Ad Slot", desc: "Blog post sidebar mein" },
-                  { key: "inArticleAdSlot", label: "In-Article Ad Slot", desc: "Blog post content ke beech mein" },
+                  { key: "headerAdSlot", label: "Header Ad Slot", desc: "Shows at top of page" },
+                  { key: "footerAdSlot", label: "Footer Ad Slot", desc: "Shows at bottom of page" },
+                  { key: "sidebarAdSlot", label: "Sidebar Ad Slot", desc: "Shows in blog post sidebar" },
+                  { key: "inArticleAdSlot", label: "In-Article Ad Slot", desc: "Shows in middle of blog content" },
                 ].map(slot => (
                   <div key={slot.key} style={{ marginBottom: "16px" }}>
                     <label style={{ fontSize: "13px", fontWeight: "600", color: "#64748b", display: "block", marginBottom: "2px" }}>{slot.label}</label>
@@ -683,16 +639,9 @@ export default function AdminPanel() {
                     <input type="text" value={(adsSettings as any)[slot.key]} onChange={e => setAdsSettings(a => ({ ...a, [slot.key]: e.target.value }))} placeholder="1234567890" style={{ ...inputStyle, fontFamily: "monospace" }} onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"} />
                   </div>
                 ))}
-
                 <button onClick={saveAdsSettings} disabled={adsSaving} style={{ marginTop: "8px", padding: "14px 32px", background: adsSaved ? "linear-gradient(135deg, #22c55e, #16a34a)" : "linear-gradient(135deg, #7c3aed, #9f67ff)", color: "white", border: "none", borderRadius: "10px", fontSize: "15px", fontWeight: "700", cursor: "pointer", opacity: adsSaving ? 0.7 : 1 }}>
                   {adsSaving ? "⏳ Saving..." : adsSaved ? "✅ Settings Saved!" : "💾 Save to Database"}
                 </button>
-
-                {adsSaved && (
-                  <div style={{ marginTop: "12px", padding: "12px 16px", background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)", borderRadius: "10px", fontSize: "13px", color: "#16a34a" }}>
-                    ✅ Settings Supabase mein save ho gayi! Sare devices pe automatically update ho jayegi.
-                  </div>
-                )}
               </div>
             </div>
           )}
