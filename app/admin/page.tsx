@@ -116,7 +116,7 @@ function MenuBar({ editor }: { editor: any }) {
       const file = input.files?.[0]; if (!file) return;
       try {
         const url = await uploadToGitHub(file);
-        editor.chain().focus().setImage({ src: url }).run();
+        const altText = prompt("Enter Alt Text (important for SEO):", file.name.replace(/\.[^/.]+$/, "").replace(/-/g, " ")); editor.chain().focus().setImage({ src: url, alt: altText || "" }).run();
       } catch { alert("Upload failed! Check GitHub token."); }
     };
   };
