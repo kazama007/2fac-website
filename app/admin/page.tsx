@@ -108,8 +108,7 @@ const WORKS_WITH_OPTIONS = [
 ];
 
 function MenuBar({ editor }: { editor: any }) {
-  const [imgModal, setImgModal] = useState<{ url: string; alt: string } | null>(null);
-  const [uploading, setUploading] = useState(false);
+  const [altText, setAltText] = useState("");
 
   if (!editor) return null;
 
@@ -118,49 +117,19 @@ function MenuBar({ editor }: { editor: any }) {
     input.type = "file"; input.accept = "image/*"; input.click();
     input.onchange = async () => {
       const file = input.files?.[0]; if (!file) return;
-      setUploading(true);
       try {
         const url = await uploadToGitHub(file);
-        const defaultAlt = file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ");
-        setImgModal({ url, alt: defaultAlt });
+        const alt = altText.trim() || file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ");
+        editor.chain().focus().setImage({ src: url, alt, title: alt }).run();
+        setAltText("");
       } catch { alert("Upload failed! Check GitHub token."); }
-      setUploading(false);
     };
-  };
-
-  const insertImage = () => {
-    if (!imgModal) return;
-    editor.chain().focus().setImage({ src: imgModal.url, alt: imgModal.alt, title: imgModal.alt }).run();
-    setImgModal(null);
   };
 
   const addLink = () => { const url = prompt("Enter URL:"); if (url) editor.chain().focus().setLink({ href: url }).run(); };
   const btn = (active?: boolean) => ({ background: active ? "#7c3aed" : "#f1f5f9", border: `1.5px solid ${active ? "#7c3aed" : "#e2e8f0"}`, color: active ? "white" : "#64748b", borderRadius: "6px", padding: "4px 8px", cursor: "pointer", fontSize: "12px", fontWeight: active ? "700" : "400", minWidth: "28px" });
   const Sep = () => <div style={{ width: "1px", height: "24px", background: "#e2e8f0", margin: "0 4px" }} />;
   return (
-    <>
-    {imgModal && (
-      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ background: "#fff", borderRadius: "16px", padding: "28px", width: "420px", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
-          <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b", marginBottom: "6px" }}>🖼 Image Alt Text</h3>
-          <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "16px" }}>Alt text SEO ke liye zaroori hai — image ka description likho.</p>
-          <img src={imgModal.url} alt="" style={{ width: "100%", maxHeight: "160px", objectFit: "contain", borderRadius: "8px", background: "#f8fafc", marginBottom: "14px" }} />
-          <input
-            type="text"
-            value={imgModal.alt}
-            onChange={e => setImgModal({ ...imgModal, alt: e.target.value })}
-            onKeyDown={e => e.key === "Enter" && insertImage()}
-            placeholder="e.g. JWT token structure diagram"
-            autoFocus
-            style={{ width: "100%", padding: "10px 14px", border: "1.5px solid #7c3aed", borderRadius: "8px", fontSize: "14px", color: "#1e293b", outline: "none", boxSizing: "border-box" as const, marginBottom: "16px" }}
-          />
-          <div style={{ display: "flex", gap: "10px" }}>
-            <button onClick={insertImage} style={{ flex: 1, padding: "10px", background: "linear-gradient(135deg,#7c3aed,#9f67ff)", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: "700", fontSize: "14px" }}>Insert Image</button>
-            <button onClick={() => setImgModal(null)} style={{ padding: "10px 16px", background: "#f1f5f9", color: "#64748b", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "14px" }}>Cancel</button>
-          </div>
-        </div>
-      </div>
-    )}
     <div style={{ background: "#f8fafc", padding: "8px 12px", display: "flex", gap: "4px", flexWrap: "wrap", alignItems: "center", borderBottom: "1.5px solid #e2e8f0", borderRadius: "12px 12px 0 0" }}>
       <select onChange={(e) => { const val = e.target.value; if (val === "p") editor.chain().focus().setParagraph().run(); else editor.chain().focus().setHeading({ level: parseInt(val) as 1|2|3|4 }).run(); e.target.value = "p"; }} style={{ background: "#fff", border: "1.5px solid #e2e8f0", color: "#1e293b", borderRadius: "6px", padding: "4px 8px", fontSize: "12px", cursor: "pointer" }}>
         <option value="p">Paragraph</option>
@@ -191,13 +160,13 @@ function MenuBar({ editor }: { editor: any }) {
       <button onClick={() => editor.chain().focus().toggleCodeBlock().run()} style={btn(editor.isActive("codeBlock"))}>{"</>"}</button>
       <Sep />
       <button onClick={addLink} style={btn(editor.isActive("link"))}>🔗 Link</button>
+      <input type="text" value={altText} onChange={e => setAltText(e.target.value)} placeholder="Alt text (SEO)..." style={{ padding: "4px 8px", border: "1.5px solid #e2e8f0", borderRadius: "6px", fontSize: "12px", color: "#1e293b", outline: "none", width: "140px" }} onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"} />
       <button onClick={uploadImage} style={{ ...btn(), background: "rgba(124,58,237,0.1)", border: "1.5px solid rgba(124,58,237,0.3)", color: "#7c3aed" }}>🖼 Image</button>
       <Sep />
       <button onClick={() => editor.chain().focus().undo().run()} style={btn()}>↩</button>
       <button onClick={() => editor.chain().focus().redo().run()} style={btn()}>↪</button>
       <button onClick={() => editor.chain().focus().clearNodes().unsetAllMarks().run()} style={{ ...btn(), background: "rgba(239,68,68,0.08)", border: "1.5px solid rgba(239,68,68,0.2)", color: "#ef4444" }}>Clear</button>
     </div>
-    </>
   );
 }
 
