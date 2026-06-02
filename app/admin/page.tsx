@@ -119,8 +119,10 @@ function MenuBar({ editor }: { editor: any }) {
       const file = input.files?.[0]; if (!file) return;
       try {
         const url = await uploadToGitHub(file);
-        const alt = altText.trim() || file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ");
+        const altInput = document.getElementById("img-alt-input") as HTMLInputElement;
+        const alt = (altInput?.value || altText).trim() || file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ");
         editor.chain().focus().setImage({ src: url, alt, title: alt }).run();
+        if (altInput) altInput.value = "";
         setAltText("");
       } catch { alert("Upload failed! Check GitHub token."); }
     };
@@ -466,6 +468,16 @@ export default function AdminPanel() {
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
                     <label style={{ fontSize: "13px", color: "#64748b", fontWeight: "600" }}>Content *</label>
                     <button onClick={() => { const html = prompt("Paste your HTML content here:"); if (html) setForm({ ...form, content: html }); }} style={{ padding: "6px 14px", background: "rgba(124,58,237,0.08)", border: "1.5px solid rgba(124,58,237,0.3)", color: "#7c3aed", borderRadius: "8px", cursor: "pointer", fontSize: "12px", fontWeight: "600" }}>📥 Import HTML</button>
+                  </div>
+                  <div style={{ background: "rgba(124,58,237,0.06)", border: "1.5px solid rgba(124,58,237,0.25)", borderRadius: "10px", padding: "12px 16px", marginBottom: "12px", display: "flex", alignItems: "center", gap: "10px" }}>
+                    <span style={{ fontSize: "13px", fontWeight: "700", color: "#7c3aed", whiteSpace: "nowrap" }}>🖼 Image Alt Text:</span>
+                    <input
+                      id="img-alt-input"
+                      type="text"
+                      placeholder="Pehle alt text likho, phir toolbar se Image upload karo..."
+                      style={{ flex: 1, padding: "8px 12px", border: "1.5px solid rgba(124,58,237,0.3)", borderRadius: "8px", fontSize: "13px", color: "#1e293b", outline: "none", background: "#fff" }}
+                    />
+                    <span style={{ fontSize: "11px", color: "#94a3b8", whiteSpace: "nowrap" }}>SEO zaroori</span>
                   </div>
                   <TipTapEditor value={form.content} onChange={(val) => setForm({ ...form, content: val })} />
                 </div>
