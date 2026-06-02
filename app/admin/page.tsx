@@ -186,6 +186,10 @@ function TipTapEditor({ value, onChange }: { value: string; onChange: (val: stri
     <div style={{ border: "1.5px solid #e2e8f0", borderRadius: "12px", overflow: "hidden", background: "#fff" }}>
       <style>{`.tiptap-editor h1{font-size:28px;font-weight:800;color:#1e293b;margin:20px 0 10px}.tiptap-editor h2{font-size:22px;font-weight:700;color:#1e293b;margin:18px 0 8px}.tiptap-editor h3{font-size:18px;font-weight:600;color:#1e293b;margin:14px 0 6px}.tiptap-editor p{margin:10px 0;color:#1e293b}.tiptap-editor ul,.tiptap-editor ol{padding-left:24px;margin:10px 0}.tiptap-editor li{margin:4px 0;color:#1e293b}.tiptap-editor blockquote{border-left:4px solid #7c3aed;padding-left:16px;margin:16px 0;color:#64748b;font-style:italic}.tiptap-editor pre{background:#f8fafc;color:#1e293b;padding:16px;border-radius:8px;margin:12px 0;overflow-x:auto;border:1px solid #e2e8f0}.tiptap-editor code{background:rgba(124,58,237,0.1);color:#7c3aed;padding:2px 6px;border-radius:4px}.tiptap-editor img{max-width:100%;border-radius:8px;margin:12px 0;display:block}.tiptap-editor a{color:#7c3aed;text-decoration:underline}.ProseMirror:focus{outline:none}`}</style>
       <MenuBar editor={editor} />
+      <div style={{ padding: "10px 12px", background: "#f5f0ff", borderBottom: "1.5px solid #e2e8f0", display: "flex", alignItems: "center", gap: "10px" }}>
+        <span style={{ fontSize: "12px", fontWeight: "700", color: "#7c3aed", whiteSpace: "nowrap" }}>🖼 Image Alt Text:</span>
+        <input id="img-alt-input" type="text" placeholder="Image ka description likho (SEO)..." style={{ flex: 1, padding: "6px 10px", border: "1.5px solid #c4b5fd", borderRadius: "6px", fontSize: "13px", outline: "none", background: "#fff" }} />
+      </div>
       <div className="tiptap-editor"><EditorContent editor={editor} /></div>
     </div>
   );
