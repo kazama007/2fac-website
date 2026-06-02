@@ -130,6 +130,7 @@ function MenuBar({ editor }: { editor: any }) {
   const btn = (active?: boolean) => ({ background: active ? "#7c3aed" : "#f1f5f9", border: `1.5px solid ${active ? "#7c3aed" : "#e2e8f0"}`, color: active ? "white" : "#64748b", borderRadius: "6px", padding: "4px 8px", cursor: "pointer", fontSize: "12px", fontWeight: active ? "700" : "400", minWidth: "28px" });
   const Sep = () => <div style={{ width: "1px", height: "24px", background: "#e2e8f0", margin: "0 4px" }} />;
   return (
+    <>
     <div style={{ background: "#f8fafc", padding: "8px 12px", display: "flex", gap: "4px", flexWrap: "wrap", alignItems: "center", borderBottom: "1.5px solid #e2e8f0", borderRadius: "12px 12px 0 0" }}>
       <select onChange={(e) => { const val = e.target.value; if (val === "p") editor.chain().focus().setParagraph().run(); else editor.chain().focus().setHeading({ level: parseInt(val) as 1|2|3|4 }).run(); e.target.value = "p"; }} style={{ background: "#fff", border: "1.5px solid #e2e8f0", color: "#1e293b", borderRadius: "6px", padding: "4px 8px", fontSize: "12px", cursor: "pointer" }}>
         <option value="p">Paragraph</option>
@@ -160,13 +161,26 @@ function MenuBar({ editor }: { editor: any }) {
       <button onClick={() => editor.chain().focus().toggleCodeBlock().run()} style={btn(editor.isActive("codeBlock"))}>{"</>"}</button>
       <Sep />
       <button onClick={addLink} style={btn(editor.isActive("link"))}>🔗 Link</button>
-      <input type="text" value={altText} onChange={e => setAltText(e.target.value)} placeholder="Alt text (SEO)..." style={{ padding: "4px 8px", border: "1.5px solid #e2e8f0", borderRadius: "6px", fontSize: "12px", color: "#1e293b", outline: "none", width: "140px" }} onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"} onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"} />
-      <button onClick={uploadImage} style={{ ...btn(), background: "rgba(124,58,237,0.1)", border: "1.5px solid rgba(124,58,237,0.3)", color: "#7c3aed" }}>🖼 Image</button>
       <Sep />
       <button onClick={() => editor.chain().focus().undo().run()} style={btn()}>↩</button>
       <button onClick={() => editor.chain().focus().redo().run()} style={btn()}>↪</button>
       <button onClick={() => editor.chain().focus().clearNodes().unsetAllMarks().run()} style={{ ...btn(), background: "rgba(239,68,68,0.08)", border: "1.5px solid rgba(239,68,68,0.2)", color: "#ef4444" }}>Clear</button>
     </div>
+    {/* Image upload row — always visible */}
+    <div style={{ background: "#f0f4ff", padding: "8px 12px", display: "flex", alignItems: "center", gap: "8px", borderBottom: "1.5px solid #e2e8f0" }}>
+      <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "600", whiteSpace: "nowrap" }}>🖼 Image:</span>
+      <input
+        type="text"
+        value={altText}
+        onChange={e => setAltText(e.target.value)}
+        placeholder="Alt text likho (SEO ke liye)..."
+        style={{ flex: 1, padding: "6px 10px", border: "1.5px solid #e2e8f0", borderRadius: "6px", fontSize: "13px", color: "#1e293b", outline: "none" }}
+        onFocus={e => e.currentTarget.style.border = "1.5px solid #7c3aed"}
+        onBlur={e => e.currentTarget.style.border = "1.5px solid #e2e8f0"}
+      />
+      <button onClick={uploadImage} style={{ padding: "6px 14px", background: "linear-gradient(135deg,#7c3aed,#9f67ff)", color: "white", border: "none", borderRadius: "6px", fontSize: "13px", fontWeight: "600", cursor: "pointer", whiteSpace: "nowrap" }}>Upload Image</button>
+    </div>
+    </>
   );
 }
 
