@@ -178,40 +178,60 @@ function MenuBar({ editor }: { editor: any }) {
 function TipTapEditor({ value, onChange }: { value: string; onChange: (val: string) => void }) {
   const [imgSelected, setImgSelected] = useState(false);
   const [imgAlt, setImgAlt] = useState("");
+  const currentImg = useRef<HTMLImageElement | null>(null);
 
   const editor = useEditor({
     extensions: [StarterKit, Underline, TextStyle, Color, Image.configure({ HTMLAttributes: { style: "max-width:100%;border-radius:8px;margin:12px 0;cursor:pointer;" } }), Link.configure({ openOnClick: false, HTMLAttributes: { style: "color:#7c3aed;text-decoration:underline;" } }), TextAlign.configure({ types: ["heading", "paragraph"] })],
     content: value,
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
-    onSelectionUpdate: ({ editor }) => {
-      const isImg = editor.isActive("image");
-      setImgSelected(isImg);
-      if (isImg) setImgAlt(editor.getAttributes("image").alt || "");
-    },
     editorProps: { attributes: { style: "min-height:400px;padding:20px;outline:none;font-size:15px;line-height:1.8;color:#1e293b;" } },
   });
 
+  useEffect(() => {
+    if (!editor) return;
+    const dom = editor.view.dom;
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "IMG") {
+        const img = target as HTMLImageElement;
+        currentImg.current = img;
+        setImgAlt(img.alt || "");
+        setImgSelected(true);
+      } else {
+        setImgSelected(false);
+        currentImg.current = null;
+      }
+    };
+    dom.addEventListener("click", handleClick);
+    return () => dom.removeEventListener("click", handleClick);
+  }, [editor]);
+
   const updateAlt = (val: string) => {
     setImgAlt(val);
+    if (currentImg.current) {
+      currentImg.current.alt = val;
+      currentImg.current.title = val;
+      onChange(editor?.getHTML() || "");
+    }
     editor?.commands.updateAttributes("image", { alt: val, title: val });
   };
 
   return (
     <div style={{ border: "1.5px solid #e2e8f0", borderRadius: "12px", overflow: "hidden", background: "#fff" }}>
-      <style>{`.tiptap-editor h1{font-size:28px;font-weight:800;color:#1e293b;margin:20px 0 10px}.tiptap-editor h2{font-size:22px;font-weight:700;color:#1e293b;margin:18px 0 8px}.tiptap-editor h3{font-size:18px;font-weight:600;color:#1e293b;margin:14px 0 6px}.tiptap-editor p{margin:10px 0;color:#1e293b}.tiptap-editor ul,.tiptap-editor ol{padding-left:24px;margin:10px 0}.tiptap-editor li{margin:4px 0;color:#1e293b}.tiptap-editor blockquote{border-left:4px solid #7c3aed;padding-left:16px;margin:16px 0;color:#64748b;font-style:italic}.tiptap-editor pre{background:#f8fafc;color:#1e293b;padding:16px;border-radius:8px;margin:12px 0;overflow-x:auto;border:1px solid #e2e8f0}.tiptap-editor code{background:rgba(124,58,237,0.1);color:#7c3aed;padding:2px 6px;border-radius:4px}.tiptap-editor img{max-width:100%;border-radius:8px;margin:12px 0;display:block}.tiptap-editor a{color:#7c3aed;text-decoration:underline}.ProseMirror:focus{outline:none}`}</style>
+      <style>{`.tiptap-editor h1{font-size:28px;font-weight:800;color:#1e293b;margin:20px 0 10px}.tiptap-editor h2{font-size:22px;font-weight:700;color:#1e293b;margin:18px 0 8px}.tiptap-editor h3{font-size:18px;font-weight:600;color:#1e293b;margin:14px 0 6px}.tiptap-editor p{margin:10px 0;color:#1e293b}.tiptap-editor ul,.tiptap-editor ol{padding-left:24px;margin:10px 0}.tiptap-editor li{margin:4px 0;color:#1e293b}.tiptap-editor blockquote{border-left:4px solid #7c3aed;padding-left:16px;margin:16px 0;color:#64748b;font-style:italic}.tiptap-editor pre{background:#f8fafc;color:#1e293b;padding:16px;border-radius:8px;margin:12px 0;overflow-x:auto;border:1px solid #e2e8f0}.tiptap-editor code{background:rgba(124,58,237,0.1);color:#7c3aed;padding:2px 6px;border-radius:4px}.tiptap-editor img{max-width:100%;border-radius:8px;margin:12px 0;display:block;cursor:pointer;}.tiptap-editor img:hover{outline:2px solid #7c3aed;outline-offset:2px}.tiptap-editor a{color:#7c3aed;text-decoration:underline}.ProseMirror:focus{outline:none}`}</style>
       <MenuBar editor={editor} />
       {imgSelected && (
-        <div style={{ padding: "10px 14px", background: "linear-gradient(135deg,rgba(124,58,237,0.08),rgba(159,103,255,0.08))", borderBottom: "1.5px solid rgba(124,58,237,0.2)", display: "flex", alignItems: "center", gap: "10px" }}>
+        <div style={{ padding: "10px 14px", background: "linear-gradient(135deg,rgba(124,58,237,0.1),rgba(159,103,255,0.08))", borderBottom: "1.5px solid rgba(124,58,237,0.25)", display: "flex", alignItems: "center", gap: "10px" }}>
           <span style={{ fontSize: "13px", fontWeight: "700", color: "#7c3aed", whiteSpace: "nowrap" }}>🖼 Alt Text:</span>
           <input
             type="text"
             value={imgAlt}
             onChange={e => updateAlt(e.target.value)}
-            placeholder="Image ka description (SEO ke liye)..."
+            placeholder="Image ka description likho (SEO ke liye zaroori)..."
             autoFocus
             style={{ flex: 1, padding: "7px 12px", border: "1.5px solid #7c3aed", borderRadius: "8px", fontSize: "13px", color: "#1e293b", outline: "none", background: "#fff" }}
           />
-          <span style={{ fontSize: "11px", color: "#7c3aed", whiteSpace: "nowrap" }}>✓ Auto save</span>
+          <span style={{ fontSize: "11px", color: "#16a34a", fontWeight: "600", whiteSpace: "nowrap" }}>✓ Auto save</span>
         </div>
       )}
       <div className="tiptap-editor"><EditorContent editor={editor} /></div>
