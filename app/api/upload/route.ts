@@ -7,6 +7,12 @@ const GITHUB_BRANCH = "main";
 
 export async function POST(req: NextRequest) {
   try {
+    // Only the admin can upload — password verified server-side
+    const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "2fac@admin123";
+    if (req.headers.get("x-admin-password") !== ADMIN_PASSWORD) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     // Prefer server-only GITHUB_TOKEN; falls back to old var so nothing breaks
     // until the Vercel env var is renamed.
     const token = process.env.GITHUB_TOKEN || process.env.NEXT_PUBLIC_GITHUB_TOKEN;

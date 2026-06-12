@@ -37,10 +37,30 @@ interface BlogPost {
   show_steps?: boolean;
 }
 
-const ADMIN_PASSWORD = "2fac@admin123";
+// Password is verified server-side at /api/admin — nothing sensitive lives in this bundle.
+// The entered password is kept in sessionStorage for the session and sent with each admin request.
+function getAdminPass(): string {
+  return sessionStorage.getItem("admin-pass") || "";
+}
+
+async function adminApi(action: string, payload?: any): Promise<{ ok?: boolean; error?: string }> {
+  try {
+    const res = await fetch("/api/admin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-admin-password": getAdminPass() },
+      body: JSON.stringify({ action, payload }),
+    });
+    return await res.json();
+  } catch {
+    return { error: "Network error" };
+  }
+}
 
 // Upload via server API route — GitHub token is no longer exposed in the browser
 async function uploadToGitHub(file: File): Promise<string> {
+  if (file.size > 3 * 1024 * 1024) {
+    throw new Error("Image is larger than 3MB — please compress it first (try tinypng.com)");
+  }
   const reader = new FileReader();
   return new Promise((resolve, reject) => {
     reader.onload = async () => {
@@ -48,7 +68,7 @@ async function uploadToGitHub(file: File): Promise<string> {
       try {
         const res = await fetch("/api/upload", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "x-admin-password": getAdminPass() },
           body: JSON.stringify({ fileName: file.name, base64 }),
         });
         const data = await res.json();
@@ -239,7 +259,7 @@ export default function AdminPanel() {
   const [activeSection, setActiveSection] = useState("basic");
 
   useEffect(() => {
-    if (sessionStorage.getItem("admin-logged-in") === "true") setIsLoggedIn(true);
+    if (sessionStorage.getItem("admin-logged-in") === "true" && sessionStorage.getItem("admin-pass")) setIsLoggedIn(true);
     loadPosts();
     loadAdsSettings();
   }, []);
@@ -262,17 +282,19 @@ export default function AdminPanel() {
 
   const saveAdsSettings = async () => {
     setAdsSaving(true);
-    const { error } = await supabase.from("ads_settings").upsert({ id: 1, publisher_id: adsSettings.publisherId, header_ad_slot: adsSettings.headerAdSlot, footer_ad_slot: adsSettings.footerAdSlot, sidebar_ad_slot: adsSettings.sidebarAdSlot, in_article_ad_slot: adsSettings.inArticleAdSlot, ads_enabled: adsSettings.adsEnabled });
+    const res = await adminApi("saveAds", adsSettings);
     setAdsSaving(false);
-    if (error) { alert("Error saving: " + error.message); return; }
+    if (!res.ok) { alert("Error saving: " + (res.error || "unknown")); return; }
     localStorage.setItem("ads-settings", JSON.stringify(adsSettings));
     setAdsSaved(true);
     setTimeout(() => setAdsSaved(false), 2000);
   };
 
-  const handleLogin = () => {
-    if (password === ADMIN_PASSWORD) { setIsLoggedIn(true); sessionStorage.setItem("admin-logged-in", "true"); setLoginError(""); }
-    else setLoginError("Wrong password!");
+  const handleLogin = async () => {
+    sessionStorage.setItem("admin-pass", password);
+    const res = await adminApi("auth");
+    if (res.ok) { setIsLoggedIn(true); sessionStorage.setItem("admin-logged-in", "true"); setLoginError(""); }
+    else { sessionStorage.removeItem("admin-pass"); setLoginError("Wrong password!"); }
   };
 
   const handleCoverImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -294,16 +316,16 @@ export default function AdminPanel() {
     if (!form.title || !form.content) return;
     const slug = form.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     const newPost = { id: Date.now().toString(), title: form.title, slug, content: form.content, category: form.category, excerpt: form.excerpt || form.content.replace(/<[^>]*>/g, "").slice(0, 150) + "...", published: true, created_at: new Date().toISOString(), cover_image: form.coverImage, related_tools: form.relatedTools, related_articles: form.relatedArticles, works_with: form.worksWith, faqs: form.faqs, seo_title: form.seoTitle || form.title, seo_description: form.seoDescription || form.excerpt, author_name: form.authorName, author_avatar: form.authorAvatar, cta_title: form.ctaTitle, cta_desc: form.ctaDesc, cta_button: form.ctaButton, cta_link: form.ctaLink, newsletter_title: form.newsletterTitle, newsletter_desc: form.newsletterDesc, show_steps: form.showSteps };
-    const { error } = await supabase.from("blog_posts").insert([newPost]);
-    if (error) { alert("Error: " + error.message); return; }
+    const res = await adminApi("createPost", newPost);
+    if (!res.ok) { alert("Error: " + (res.error || "unknown")); return; }
     await loadPosts();
     setForm(emptyForm); setCoverPreview(""); setActiveTab("posts");
   };
 
   const handleUpdate = async () => {
     if (!editingPost || !form.title || !form.content) return;
-    const { error } = await supabase.from("blog_posts").update({ title: form.title, content: form.content, category: form.category, excerpt: form.excerpt || form.content.replace(/<[^>]*>/g, "").slice(0, 150) + "...", cover_image: form.coverImage, related_tools: form.relatedTools, related_articles: form.relatedArticles, works_with: form.worksWith, faqs: form.faqs, seo_title: form.seoTitle, seo_description: form.seoDescription, author_name: form.authorName, author_avatar: form.authorAvatar, cta_title: form.ctaTitle, cta_desc: form.ctaDesc, cta_button: form.ctaButton, cta_link: form.ctaLink, newsletter_title: form.newsletterTitle, newsletter_desc: form.newsletterDesc, show_steps: form.showSteps }).eq("id", editingPost.id);
-    if (error) { alert("Error: " + error.message); return; }
+    const res = await adminApi("updatePost", { id: editingPost.id, title: form.title, content: form.content, category: form.category, excerpt: form.excerpt || form.content.replace(/<[^>]*>/g, "").slice(0, 150) + "...", cover_image: form.coverImage, related_tools: form.relatedTools, related_articles: form.relatedArticles, works_with: form.worksWith, faqs: form.faqs, seo_title: form.seoTitle, seo_description: form.seoDescription, author_name: form.authorName, author_avatar: form.authorAvatar, cta_title: form.ctaTitle, cta_desc: form.ctaDesc, cta_button: form.ctaButton, cta_link: form.ctaLink, newsletter_title: form.newsletterTitle, newsletter_desc: form.newsletterDesc, show_steps: form.showSteps });
+    if (!res.ok) { alert("Error: " + (res.error || "unknown")); return; }
     await loadPosts(); setEditingPost(null); setActiveTab("posts");
   };
 
@@ -315,16 +337,16 @@ export default function AdminPanel() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this post?")) return;
-    const { error } = await supabase.from("blog_posts").delete().eq("id", id);
-    if (error) { alert("Error: " + error.message); return; }
+    const res = await adminApi("deletePost", { id });
+    if (!res.ok) { alert("Error: " + (res.error || "unknown")); return; }
     await loadPosts();
   };
 
   const togglePublish = async (id: string) => {
     const post = posts.find(p => p.id === id);
     if (!post) return;
-    const { error } = await supabase.from("blog_posts").update({ published: !post.published }).eq("id", id);
-    if (error) { alert("Error: " + error.message); return; }
+    const res = await adminApi("updatePost", { id, published: !post.published });
+    if (!res.ok) { alert("Error: " + (res.error || "unknown")); return; }
     await loadPosts();
   };
 
