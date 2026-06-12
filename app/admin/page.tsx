@@ -38,37 +38,24 @@ interface BlogPost {
 }
 
 const ADMIN_PASSWORD = "2fac@admin123";
-const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || "";
-const GITHUB_REPO = "kazama007/2fac-images";
-const GITHUB_BRANCH = "main";
 
+// Upload via server API route — GitHub token is no longer exposed in the browser
 async function uploadToGitHub(file: File): Promise<string> {
-  const fileName = `${Date.now()}-${file.name.replace(/\s/g, "-")}`;
   const reader = new FileReader();
   return new Promise((resolve, reject) => {
     reader.onload = async () => {
       const base64 = (reader.result as string).split(",")[1];
       try {
-        const res = await fetch(
-          `https://api.github.com/repos/${GITHUB_REPO}/contents/${fileName}`,
-          {
-            method: "PUT",
-            headers: {
-              Authorization: `token ${GITHUB_TOKEN}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              message: `Upload ${fileName}`,
-              content: base64,
-              branch: GITHUB_BRANCH,
-            }),
-          }
-        );
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fileName: file.name, base64 }),
+        });
         const data = await res.json();
-        if (data.content?.download_url) {
-          resolve(data.content.download_url);
+        if (data.url) {
+          resolve(data.url);
         } else {
-          reject(new Error("Upload failed"));
+          reject(new Error(data.error || "Upload failed"));
         }
       } catch (err) {
         reject(err);

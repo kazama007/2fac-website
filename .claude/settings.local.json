@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(git -C /Users/sachin/Desktop/2fac-website status)",
+      "Bash(node -e ' *)"
+    ]
+  }
+}

@@ -1,12 +1,18 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function AnimatedBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
+  const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    if (isMobile) return;
+    setMounted(true);
+    setIsMobile(window.innerWidth <= 768);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || isMobile) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -16,13 +22,11 @@ export default function AnimatedBackground() {
     let width = canvas.width = window.innerWidth;
     let height = canvas.height = window.innerHeight;
 
-    // Larger spacing = fewer dots = less main-thread work
     const DOT_SPACING = 36;
     const DOT_RADIUS = 1.1;
     const GLOW_RADIUS = 90;
     const mouse = { x: -9999, y: -9999 };
 
-    // Pre-draw static dot grid to an offscreen canvas
     const staticCanvas = document.createElement("canvas");
     staticCanvas.width = width;
     staticCanvas.height = height;
@@ -48,18 +52,16 @@ export default function AnimatedBackground() {
 
     let animId: number;
     let lastTime = 0;
-    const interval = 1000 / 20; // 20fps — enough for subtle glow
+    const interval = 1000 / 20;
 
     const animate = (now: number) => {
       animId = requestAnimationFrame(animate);
       if (now - lastTime < interval) return;
       lastTime = now;
 
-      // Composite static background
       ctx.clearRect(0, 0, width, height);
       ctx.drawImage(staticCanvas, 0, 0);
 
-      // Only redraw glow area near mouse
       const glowX = mouse.x;
       const glowY = mouse.y;
       const startCol = Math.max(0, Math.floor((glowX - GLOW_RADIUS) / DOT_SPACING));
@@ -101,9 +103,10 @@ export default function AnimatedBackground() {
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("resize", onResize);
     };
-  }, []);
+  }, [mounted, isMobile]);
 
-  if (isMobile) return null;
+  // Server + mobile dono pe null return karo
+  if (!mounted || isMobile) return null;
 
   return (
     <canvas

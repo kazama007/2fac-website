@@ -12,6 +12,8 @@ img{max-width:100%;height:auto;display:block}
 a{transition:color .15s,background .15s}button{transition:all .15s}
 ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:#f1f5f9}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}::-webkit-scrollbar-thumb:hover{background:#94a3b8}
 input:focus,textarea:focus,select:focus{outline:none}
+@keyframes slideDown{from{opacity:0;transform:translateX(-50%) translateY(-20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.dark-mode{filter:invert(1) hue-rotate(180deg)}
 `;
 
 export const metadata: Metadata = {
@@ -44,16 +46,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <meta name="theme-color" content="#7c3aed" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        {/* Inline critical CSS — eliminates render-blocking request */}
         <style dangerouslySetInnerHTML={{ __html: criticalCSS }} />
-        {/* Only preconnect to Supabase (used for page data) */}
         <link rel="preconnect" href="https://ukyalnzbxdokqwmupdcq.supabase.co" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://ukyalnzbxdokqwmupdcq.supabase.co" />
       </head>
       <body suppressHydrationWarning>
         {children}
 
-        {/* Google Analytics — lazyOnload: loads after page is idle */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-J24856B8ZQ"
           strategy="lazyOnload"
@@ -62,7 +61,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-J24856B8ZQ');`}
         </Script>
 
-        {/* AdSense — lazyOnload: loads after page is idle, won't block FCP/LCP */}
         <Script id="adsense-check" strategy="lazyOnload">
           {`if(!window.location.pathname.startsWith('/admin')){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4107684422068090';s.crossOrigin='anonymous';document.head.appendChild(s);}`}
         </Script>
