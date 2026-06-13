@@ -41,6 +41,8 @@ const categories = [
   {
     name: "Security", color: "#ef4444", icon: "🛡️",
     tools: [
+      { icon: "🔴", name: "WebRTC Leak Test", desc: "Check if your browser leaks real IP through WebRTC", href: "/tools/webrtc-leak" },
+      { icon: "🔍", name: "DNS Leak Test", desc: "Check if your VPN is leaking DNS queries to ISP", href: "/tools/dns-leak-test" },
       { icon: "🔗", name: "Link Checker", desc: "Check links for scams and phishing", href: "/tools/link-checker" },
       { icon: "🌐", name: "DNS Lookup", desc: "Check domain DNS records", href: "/tools/dns-lookup" },
       { icon: "📍", name: "IP Lookup", desc: "Find location of any IP address", href: "/tools/ip-lookup" },
@@ -229,7 +231,7 @@ export default function HomeClient({ seoContent }: { seoContent?: React.ReactNod
                 <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} style={{ position: "fixed", top: "64px", left: "50%", transform: "translateX(-50%)", background: "rgba(255,255,255,0.98)", border: "1px solid rgba(124,58,237,0.12)", borderRadius: "20px", padding: "8px", width: "min(900px, calc(100vw - 40px))", zIndex: 9999, boxShadow: "0 24px 60px rgba(124,58,237,0.12)" }}>
                   <div style={{ padding: "12px 16px 10px", borderBottom: "1px solid #f1f5f9", marginBottom: "8px", display: "flex", justifyContent: "space-between" }}>
                     <span style={{ fontSize: "11px", color: "#94a3b8", letterSpacing: "2px", fontWeight: "600" }}>ALL TOOLS</span>
-                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>14 tools available</span>
+                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>16 tools available</span>
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "4px", padding: "0 4px 8px" }}>
                     {categories.map(category => (
@@ -357,14 +359,14 @@ export default function HomeClient({ seoContent }: { seoContent?: React.ReactNod
 
       {/* Sub-hero */}
       <section style={{ textAlign: "center", padding: "40px 20px 32px", maxWidth: "800px", margin: "0 auto", position: "relative", zIndex: 1 }}>
-        <h2 style={{ fontSize: "clamp(24px, 4.5vw, 32px)", fontWeight: "800", lineHeight: "1.25", marginBottom: "12px", background: "linear-gradient(135deg, #1e293b 0%, #7c3aed 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Free 2FA Tools & Security Tools for Everyone</h2>
-        <p style={{ fontSize: "15px", color: "#64748b", lineHeight: "1.7" }}>14 free 2FA and cybersecurity tools — authenticator codes, passwords, JWT, DNS, QR codes and more. No signup required.</p>
+        <h2 style={{ fontSize: "clamp(24px, 4.5vw, 32px)", fontWeight: "800", lineHeight: "1.25", marginBottom: "12px", background: "linear-gradient(135deg, #1e293b 0%, #7c3aed 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Free Security Tools for Everyone</h2>
+        <p style={{ fontSize: "15px", color: "#64748b", lineHeight: "1.7" }}>16 free cybersecurity tools — passwords, JWT, DNS, WebRTC leak test and more. No signup required.</p>
       </section>
 
       {/* Trust Strip — honest, verifiable claims only */}
       <section style={{ display: "flex", justifyContent: "center", gap: "clamp(24px, 6vw, 60px)", padding: "32px 20px", borderTop: "1px solid rgba(124,58,237,0.08)", borderBottom: "1px solid rgba(124,58,237,0.08)", flexWrap: "wrap", position: "relative", zIndex: 1, background: "rgba(255,255,255,0.5)" }}>
         {[
-          { num: "14", label: "Free Security Tools" },
+          { num: "16", label: "Free Security Tools" },
           { num: "100%", label: "Browser-Based" },
           { num: "0", label: "Data Sent to Servers" },
           { num: "₹0", label: "Free Forever" },

@@ -6,7 +6,7 @@ import { HeaderAd, FooterAd } from "../adsense";
 
 
 const stats = [
-  { num: "14+", label: "Free Security Tools" },
+  { num: "16+", label: "Free Security Tools" },
   { num: "300+", label: "Daily Users" },
   { num: "100%", label: "Browser-Based" },
   { num: "0", label: "Data Collected" },
@@ -30,6 +30,8 @@ const tools = [
   { icon: "🆔", name: "UUID Generator", desc: "Generate unique identifiers" },
   { icon: "📝", name: "Base64 Encoder/Decoder", desc: "Encode and decode Base64 text" },
   { icon: "📋", name: "JSON Formatter", desc: "Format and validate JSON data" },
+  { icon: "🔴", name: "WebRTC Leak Test", desc: "Check if your browser leaks real IP via WebRTC" },
+  { icon: "🔍", name: "DNS Leak Test", desc: "Check if your VPN is leaking DNS queries" },
   { icon: "🔗", name: "Link Checker", desc: "Detect phishing and malicious links" },
   { icon: "🌐", name: "DNS Lookup", desc: "Query domain DNS records" },
   { icon: "📍", name: "IP Lookup", desc: "Find geolocation of any IP address" },
@@ -98,7 +100,7 @@ export default function AboutPage() {
       {/* Tools List */}
       <section style={{ maxWidth: "900px", margin: "0 auto 60px", padding: "0 20px", position: "relative", zIndex: 1 }}>
         <h2 style={{ fontSize: "28px", fontWeight: "700", color: "#1e293b", marginBottom: "8px", textAlign: "center" }}>All Our Tools</h2>
-        <p style={{ textAlign: "center", color: "#64748b", marginBottom: "28px", fontSize: "14px" }}>14 free tools — no account required</p>
+        <p style={{ textAlign: "center", color: "#64748b", marginBottom: "28px", fontSize: "14px" }}>16 free tools — no account required</p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "12px" }}>
           {tools.map(t => (
             <div key={t.name} style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "12px", padding: "18px", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", display: "flex", alignItems: "flex-start", gap: "12px" }}>

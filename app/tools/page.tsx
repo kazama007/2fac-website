@@ -95,6 +95,22 @@ const tools = [
     tags: ["JSON", "Format", "Validate"],
   },
   {
+    icon: "🔴",
+    name: "WebRTC Leak Test",
+    desc: "Check if your browser is leaking your real IP through WebRTC — even with a VPN.",
+    href: "/tools/webrtc-leak",
+    category: "Network",
+    tags: ["Privacy", "VPN", "Security"],
+  },
+  {
+    icon: "🔍",
+    name: "DNS Leak Test",
+    desc: "Check if your VPN is leaking DNS queries to your ISP.",
+    href: "/tools/dns-leak-test",
+    category: "Network",
+    tags: ["Privacy", "VPN", "Security"],
+  },
+  {
     icon: "🔗",
     name: "Link Checker",
     desc: "Detect phishing links, suspicious URLs, and scam websites before clicking.",
@@ -134,11 +150,11 @@ function ToolsPageInner() {
   const [search, setSearch] = useState("");
 
   const categoryHeadings: { [k: string]: { title: string; desc: string } } = {
-    "All": { title: "Free Cybersecurity Tools", desc: `${tools.length} free tools — no account required, no data collected` },
+    "All": { title: "Free Cybersecurity Tools", desc: "16 free browser-based tools — no account required, no data collected" },
     "2FA & QR": { title: "2FA & QR Code Tools", desc: "Free two-factor authentication and QR code generator tools" },
     "Password": { title: "Password Security Tools", desc: "Free password generator, strength checker, and breach detection tools" },
     "Developer": { title: "Developer Security Tools", desc: "Free JWT decoder, hash generator, UUID generator, and more" },
-    "Network": { title: "Network & Domain Tools", desc: "Free DNS lookup, IP lookup, WHOIS, and link checker tools" },
+    "Network": { title: "Network, Privacy & Security Tools", desc: "Free WebRTC leak test, DNS leak test, IP lookup, DNS lookup, WHOIS, and link checker tools" },
   };
   const currentHeading = categoryHeadings[activeCategory] || categoryHeadings["All"];
 

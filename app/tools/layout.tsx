@@ -1,17 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Free 2FA Tools & Cybersecurity Tools Online | 2FA.ac",
-  description: "14 free 2FA and security tools — 2FA code generator, QR generator for authenticator apps, password tools, JWT decoder, DNS lookup and more. No signup, no data collected.",
-  keywords: "2FA tools, 2FA tool online, free 2FA tools, two factor authentication tools, cybersecurity tools, free security tools online",
+  title: "Free Cybersecurity Tools — 14 Online Security Tools | 2FA.ac",
+  description: "16 free online security tools — 2FA generator, WebRTC leak test, DNS leak test, password generator, JWT decoder, DNS lookup and more. No account required, no data collected.",
   alternates: { canonical: "https://2fa.ac/tools" },
-  openGraph: {
-    title: "Free 2FA Tools & Cybersecurity Tools Online | 2FA.ac",
-    description: "14 free 2FA and security tools — no signup, runs in your browser.",
-    url: "https://2fa.ac/tools",
-    siteName: "2FA.ac",
-    type: "website",
-  },
 };
 
 export default function ToolsLayout({ children }: { children: React.ReactNode }) {

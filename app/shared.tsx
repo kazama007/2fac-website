@@ -52,6 +52,8 @@ export function Navbar() {
     { icon: "🆔", name: "UUID Generator", href: "/tools/uuid-generator" },
     { icon: "📝", name: "Base64 Encoder", href: "/tools/base64" },
     { icon: "📋", name: "JSON Formatter", href: "/tools/json-formatter" },
+    { icon: "🔴", name: "WebRTC Leak Test", href: "/tools/webrtc-leak" },
+    { icon: "🔍", name: "DNS Leak Test", href: "/tools/dns-leak-test" },
     { icon: "🔗", name: "Link Checker", href: "/tools/link-checker" },
     { icon: "🌐", name: "DNS Lookup", href: "/tools/dns-lookup" },
     { icon: "📍", name: "IP Lookup", href: "/tools/ip-lookup" },
@@ -76,6 +78,8 @@ export function Navbar() {
       { icon: "📋", name: "JSON Formatter", desc: "Format and validate JSON data", href: "/tools/json-formatter" },
     ]},
     { name: "Security", color: "#ef4444", icon: "🛡️", href: "/tools?category=Network", tools: [
+      { icon: "🔴", name: "WebRTC Leak Test", desc: "Check if your browser leaks real IP via WebRTC", href: "/tools/webrtc-leak" },
+      { icon: "🔍", name: "DNS Leak Test", desc: "Check if your VPN is leaking DNS queries", href: "/tools/dns-leak-test" },
       { icon: "🔗", name: "Link Checker", desc: "Check links for scams and phishing", href: "/tools/link-checker" },
       { icon: "🌐", name: "DNS Lookup", desc: "Check domain DNS records", href: "/tools/dns-lookup" },
       { icon: "📍", name: "IP Lookup", desc: "Find location of any IP address", href: "/tools/ip-lookup" },
