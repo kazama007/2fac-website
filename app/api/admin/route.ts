@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 // ─── Server-side admin API ───────────────────────────────────────────────────
 // Password is checked ON THE SERVER. Set ADMIN_PASSWORD in Vercel env vars.
 // Falls back to the legacy password so nothing breaks before the env var is set.
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "2fac@admin123";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Kazama#007";
 
 // Service key bypasses RLS for writes. Falls back to anon key so the
 // admin keeps working until RLS is enabled in Supabase.
