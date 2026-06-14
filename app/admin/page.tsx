@@ -8,6 +8,7 @@ import Link from "@tiptap/extension-link";
 import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
 import { TextStyle } from "@tiptap/extension-text-style";
+import { TOOLS_FOR_ADMIN } from "../lib/tools-list";
 import { Color } from "@tiptap/extension-color";
 
 interface BlogPost {
@@ -78,24 +79,7 @@ async function uploadToGitHub(file: File): Promise<string> {
   });
 }
 
-const ALL_TOOLS = [
-  { name: "2FA Code Generator", href: "/" },
-  { name: "QR Code Generator", href: "/tools/qr-generator" },
-  { name: "Password Generator", href: "/tools/password-generator" },
-  { name: "Password Strength Checker", href: "/tools/password-strength" },
-  { name: "Password Breach Checker", href: "/tools/password-breach" },
-  { name: "JWT Decoder", href: "/tools/jwt-decoder" },
-  { name: "Hash Generator", href: "/tools/hash-generator" },
-  { name: "UUID Generator", href: "/tools/uuid-generator" },
-  { name: "Base64 Encoder/Decoder", href: "/tools/base64" },
-  { name: "JSON Formatter", href: "/tools/json-formatter" },
-  { name: "WebRTC Leak Test", href: "/tools/webrtc-leak" },
-  { name: "DNS Leak Test", href: "/tools/dns-leak-test" },
-  { name: "Link Checker", href: "/tools/link-checker" },
-  { name: "DNS Lookup", href: "/tools/dns-lookup" },
-  { name: "IP Lookup", href: "/tools/ip-lookup" },
-  { name: "WHOIS Lookup", href: "/tools/whois-lookup" },
-];
+const ALL_TOOLS = TOOLS_FOR_ADMIN;
 
 // ─── IMAGE ALT TEXT MODAL ────────────────────────────────────────────────────
 function AltTextModal({ onConfirm, onCancel }: { onConfirm: (alt: string) => void; onCancel: () => void }) {

@@ -2,11 +2,12 @@
 import { Navbar, Footer } from "../shared";
 import AnimatedBackground from "../background";
 import { HeaderAd, FooterAd } from "../adsense";
+import { TOOLS, TOOL_COUNT } from "../lib/tools-list";
 
 
 
 const stats = [
-  { num: "16+", label: "Free Security Tools" },
+  { num: `${TOOL_COUNT}+`, label: "Free Security Tools" },
   { num: "300+", label: "Daily Users" },
   { num: "100%", label: "Browser-Based" },
   { num: "0", label: "Data Collected" },
@@ -19,24 +20,8 @@ const values = [
   { icon: "🌐", title: "Open & Transparent", desc: "We are transparent about how our tools work. No black boxes, no tracking, no ads influencing our tools." },
 ];
 
-const tools = [
-  { icon: "🔐", name: "2FA Code Generator", desc: "Generate 2FA codes like Google Authenticator" },
-  { icon: "📱", name: "QR Code Generator", desc: "Create QR codes for 2FA setup" },
-  { icon: "🔑", name: "Password Generator", desc: "Create strong, secure passwords" },
-  { icon: "💪", name: "Password Strength Checker", desc: "Test how strong your password is" },
-  { icon: "🔓", name: "Password Breach Checker", desc: "Check if your password was leaked" },
-  { icon: "🔍", name: "JWT Decoder", desc: "Decode and inspect JWT tokens" },
-  { icon: "#️⃣", name: "Hash Generator", desc: "MD5, SHA-256, SHA-512 hashing" },
-  { icon: "🆔", name: "UUID Generator", desc: "Generate unique identifiers" },
-  { icon: "📝", name: "Base64 Encoder/Decoder", desc: "Encode and decode Base64 text" },
-  { icon: "📋", name: "JSON Formatter", desc: "Format and validate JSON data" },
-  { icon: "🔴", name: "WebRTC Leak Test", desc: "Check if your browser leaks real IP via WebRTC" },
-  { icon: "🔍", name: "DNS Leak Test", desc: "Check if your VPN is leaking DNS queries" },
-  { icon: "🔗", name: "Link Checker", desc: "Detect phishing and malicious links" },
-  { icon: "🌐", name: "DNS Lookup", desc: "Query domain DNS records" },
-  { icon: "📍", name: "IP Lookup", desc: "Find geolocation of any IP address" },
-  { icon: "🏢", name: "WHOIS Lookup", desc: "Check domain owner and registration info" },
-];
+// Tools from central list
+const tools = TOOLS.map(t => ({ icon: t.icon, name: t.name, desc: t.desc }));
 
 export default function AboutPage() {
   return (
@@ -100,7 +85,7 @@ export default function AboutPage() {
       {/* Tools List */}
       <section style={{ maxWidth: "900px", margin: "0 auto 60px", padding: "0 20px", position: "relative", zIndex: 1 }}>
         <h2 style={{ fontSize: "28px", fontWeight: "700", color: "#1e293b", marginBottom: "8px", textAlign: "center" }}>All Our Tools</h2>
-        <p style={{ textAlign: "center", color: "#64748b", marginBottom: "28px", fontSize: "14px" }}>16 free tools — no account required</p>
+        <p style={{ textAlign: "center", color: "#64748b", marginBottom: "28px", fontSize: "14px" }}>{`${TOOL_COUNT} free tools — no account required`}</p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "12px" }}>
           {tools.map(t => (
             <div key={t.name} style={{ background: "#ffffff", border: "1px solid rgba(124,58,237,0.1)", borderRadius: "12px", padding: "18px", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", display: "flex", alignItems: "flex-start", gap: "12px" }}>

@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import NextImage from "next/image";
 import { HeaderAd, FooterAd } from "./adsense";
+import { TOOLS, TOOLS_BY_CATEGORY, CATEGORY_META } from "./lib/tools-list";
 
 export function Navbar() {
   const [showTools, setShowTools] = useState(false);
@@ -41,51 +42,15 @@ export function Navbar() {
     timeoutRef.current = setTimeout(() => setShowTools(false), 200);
   };
 
-  const allTools = [
-    { icon: "🔐", name: "2FA Code Generator", href: "/" },
-    { icon: "📱", name: "QR Code Generator", href: "/tools/qr-generator" },
-    { icon: "🔑", name: "Password Generator", href: "/tools/password-generator" },
-    { icon: "💪", name: "Password Strength", href: "/tools/password-strength" },
-    { icon: "🔓", name: "Breach Checker", href: "/tools/password-breach" },
-    { icon: "🔍", name: "JWT Decoder", href: "/tools/jwt-decoder" },
-    { icon: "#️⃣", name: "Hash Generator", href: "/tools/hash-generator" },
-    { icon: "🆔", name: "UUID Generator", href: "/tools/uuid-generator" },
-    { icon: "📝", name: "Base64 Encoder", href: "/tools/base64" },
-    { icon: "📋", name: "JSON Formatter", href: "/tools/json-formatter" },
-    { icon: "🔴", name: "WebRTC Leak Test", href: "/tools/webrtc-leak" },
-    { icon: "🔍", name: "DNS Leak Test", href: "/tools/dns-leak-test" },
-    { icon: "🔗", name: "Link Checker", href: "/tools/link-checker" },
-    { icon: "🌐", name: "DNS Lookup", href: "/tools/dns-lookup" },
-    { icon: "📍", name: "IP Lookup", href: "/tools/ip-lookup" },
-    { icon: "🏢", name: "WHOIS Lookup", href: "/tools/whois-lookup" },
-  ];
+  const allTools = TOOLS.map(t => ({ icon: t.icon, name: t.name, href: t.href }));
 
-  const categories = [
-    { name: "Authentication", color: "#7c3aed", icon: "🔐", href: "/tools?category=2FA+%26+QR", tools: [
-      { icon: "🔐", name: "2FA Code Generator", desc: "Generate OTP codes like Google Authenticator", href: "/" },
-      { icon: "📱", name: "QR Code Generator", desc: "Generate QR codes for authenticator apps", href: "/tools/qr-generator" },
-    ]},
-    { name: "Password", color: "#3b82f6", icon: "🔑", href: "/tools?category=Password", tools: [
-      { icon: "🔑", name: "Password Generator", desc: "Generate strong secure passwords", href: "/tools/password-generator" },
-      { icon: "💪", name: "Password Strength", desc: "Check how strong your password is", href: "/tools/password-strength" },
-      { icon: "🔓", name: "Password Breach Checker", desc: "Check if your password was leaked", href: "/tools/password-breach" },
-    ]},
-    { name: "Developer", color: "#7c3aed", icon: "👨‍💻", href: "/tools?category=Developer", tools: [
-      { icon: "🔍", name: "JWT Decoder", desc: "Decode and verify JWT tokens", href: "/tools/jwt-decoder" },
-      { icon: "#️⃣", name: "Hash Generator", desc: "Generate MD5, SHA-256, SHA-512 hashes", href: "/tools/hash-generator" },
-      { icon: "🆔", name: "UUID Generator", desc: "Generate unique IDs instantly", href: "/tools/uuid-generator" },
-      { icon: "📝", name: "Base64 Encoder", desc: "Encode and decode Base64 text", href: "/tools/base64" },
-      { icon: "📋", name: "JSON Formatter", desc: "Format and validate JSON data", href: "/tools/json-formatter" },
-    ]},
-    { name: "Security", color: "#ef4444", icon: "🛡️", href: "/tools?category=Network", tools: [
-      { icon: "🔴", name: "WebRTC Leak Test", desc: "Check if your browser leaks real IP via WebRTC", href: "/tools/webrtc-leak" },
-      { icon: "🔍", name: "DNS Leak Test", desc: "Check if your VPN is leaking DNS queries", href: "/tools/dns-leak-test" },
-      { icon: "🔗", name: "Link Checker", desc: "Check links for scams and phishing", href: "/tools/link-checker" },
-      { icon: "🌐", name: "DNS Lookup", desc: "Check domain DNS records", href: "/tools/dns-lookup" },
-      { icon: "📍", name: "IP Lookup", desc: "Find location of any IP address", href: "/tools/ip-lookup" },
-      { icon: "🏢", name: "WHOIS Lookup", desc: "Check domain owner info", href: "/tools/whois-lookup" },
-    ]},
-  ];
+  const categories = Object.entries(TOOLS_BY_CATEGORY).map(([name, tools]) => ({
+    name,
+    color: CATEGORY_META[name as keyof typeof CATEGORY_META].color,
+    icon: CATEGORY_META[name as keyof typeof CATEGORY_META].icon,
+    href: `/tools?category=${encodeURIComponent(name)}`,
+    tools,
+  }));
 
   return (
     <>

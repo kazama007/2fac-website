@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next";
 import { createClient } from "@supabase/supabase-js";
+import { TOOLS } from "./lib/tools-list";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,23 +22,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/contact`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
     { url: `${baseUrl}/privacy`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
     { url: `${baseUrl}/terms`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
-    // Tools
-    { url: `${baseUrl}/tools/qr-generator`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
-    { url: `${baseUrl}/tools/password-generator`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
-    { url: `${baseUrl}/tools/password-strength`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
-    { url: `${baseUrl}/tools/password-breach`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
-    { url: `${baseUrl}/tools/jwt-decoder`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
-    { url: `${baseUrl}/tools/hash-generator`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
-    { url: `${baseUrl}/tools/uuid-generator`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
-    { url: `${baseUrl}/tools/base64`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
-    { url: `${baseUrl}/tools/json-formatter`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
-    { url: `${baseUrl}/tools/webrtc-leak`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
-    { url: `${baseUrl}/tools/dns-leak-test`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
-    { url: `${baseUrl}/tools/link-checker`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
-    { url: `${baseUrl}/tools/dns-lookup`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
-    { url: `${baseUrl}/tools/ip-lookup`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
-    { url: `${baseUrl}/tools/whois-lookup`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
   ];
+
+  // Tool pages — automatically from central list
+  const toolPages: MetadataRoute.Sitemap = TOOLS
+    .filter(t => t.href !== "/") // skip homepage (2FA generator)
+    .map(t => ({
+      url: `${baseUrl}${t.href}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: t.sitemapPriority || 0.8,
+    }));
 
   // Dynamic blog posts from Supabase
   try {
@@ -54,8 +49,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
 
-    return [...staticPages, ...blogPages];
+    return [...staticPages, ...toolPages, ...blogPages];
   } catch {
-    return staticPages;
+    return [...staticPages, ...toolPages];
   }
 }

@@ -4,6 +4,7 @@ import NextImage from "next/image";
 import { generateTOTP } from "./totp";
 import AnimatedBackground from "./background";
 import { HeaderAd, FooterAd } from "./adsense";
+import { TOOLS_BY_CATEGORY, CATEGORY_META, TOOL_COUNT } from "./lib/tools-list";
 
 interface SavedKey {
   name: string;
@@ -12,44 +13,12 @@ interface SavedKey {
   addedTime: string;
 }
 
-const categories = [
-  {
-    name: "Authentication", color: "#7c3aed", icon: "🔐",
-    tools: [
-      { icon: "🔐", name: "2FA Code Generator", desc: "Generate OTP codes like Google Authenticator", href: "/" },
-      { icon: "📱", name: "QR Code Generator", desc: "Generate QR codes for authenticator apps", href: "/tools/qr-generator" },
-    ]
-  },
-  {
-    name: "Password", color: "#3b82f6", icon: "🔑",
-    tools: [
-      { icon: "🔑", name: "Password Generator", desc: "Generate strong secure passwords", href: "/tools/password-generator" },
-      { icon: "💪", name: "Password Strength", desc: "Check how strong your password is", href: "/tools/password-strength" },
-      { icon: "🔓", name: "Password Breach Checker", desc: "Check if your password was leaked in a data breach", href: "/tools/password-breach" },
-    ]
-  },
-  {
-    name: "Developer", color: "#7c3aed", icon: "👨‍💻",
-    tools: [
-      { icon: "🔍", name: "JWT Decoder", desc: "Decode and verify JWT tokens", href: "/tools/jwt-decoder" },
-      { icon: "#️⃣", name: "Hash Generator", desc: "Generate MD5, SHA-256, SHA-512 hashes", href: "/tools/hash-generator" },
-      { icon: "🆔", name: "UUID Generator", desc: "Generate unique IDs instantly", href: "/tools/uuid-generator" },
-      { icon: "📝", name: "Base64 Encoder", desc: "Encode and decode Base64 text", href: "/tools/base64" },
-      { icon: "📋", name: "JSON Formatter", desc: "Format and validate JSON data", href: "/tools/json-formatter" },
-    ]
-  },
-  {
-    name: "Security", color: "#ef4444", icon: "🛡️",
-    tools: [
-      { icon: "🔴", name: "WebRTC Leak Test", desc: "Check if your browser leaks real IP through WebRTC", href: "/tools/webrtc-leak" },
-      { icon: "🔍", name: "DNS Leak Test", desc: "Check if your VPN is leaking DNS queries to ISP", href: "/tools/dns-leak-test" },
-      { icon: "🔗", name: "Link Checker", desc: "Check links for scams and phishing", href: "/tools/link-checker" },
-      { icon: "🌐", name: "DNS Lookup", desc: "Check domain DNS records", href: "/tools/dns-lookup" },
-      { icon: "📍", name: "IP Lookup", desc: "Find location of any IP address", href: "/tools/ip-lookup" },
-      { icon: "🏢", name: "WHOIS Lookup", desc: "Check domain owner and registration info", href: "/tools/whois-lookup" },
-    ]
-  },
-];
+const categories = Object.entries(TOOLS_BY_CATEGORY).map(([name, tools]) => ({
+  name,
+  color: CATEGORY_META[name as keyof typeof CATEGORY_META].color,
+  icon: CATEGORY_META[name as keyof typeof CATEGORY_META].icon,
+  tools,
+}));
 
 const allToolsFlat = categories.flatMap(c => c.tools.map(t => ({ ...t, category: c.name, color: c.color })));
 
@@ -366,7 +335,7 @@ export default function HomeClient({ seoContent }: { seoContent?: React.ReactNod
       {/* Trust Strip — honest, verifiable claims only */}
       <section style={{ display: "flex", justifyContent: "center", gap: "clamp(24px, 6vw, 60px)", padding: "32px 20px", borderTop: "1px solid rgba(124,58,237,0.08)", borderBottom: "1px solid rgba(124,58,237,0.08)", flexWrap: "wrap", position: "relative", zIndex: 1, background: "rgba(255,255,255,0.5)" }}>
         {[
-          { num: "16", label: "Free Security Tools" },
+          { num: `${TOOL_COUNT}`, label: "Free Security Tools" },
           { num: "100%", label: "Browser-Based" },
           { num: "0", label: "Data Sent to Servers" },
           { num: "₹0", label: "Free Forever" },
