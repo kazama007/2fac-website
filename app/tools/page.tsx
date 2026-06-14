@@ -95,6 +95,16 @@ const tools = [
     tags: ["JSON", "Format", "Validate"],
   },
   {
+    icon: "⚡",
+    name: "Internet Speed Test",
+    desc: "Check your download speed, upload speed, ping and jitter. Instant results, no signup.",
+    href: "/tools/speed-test",
+    category: "Network",
+    badge: "New",
+    badgeColor: "#22c55e",
+    tags: ["Speed", "Internet", "Ping"],
+  },
+  {
     icon: "🔴",
     name: "WebRTC Leak Test",
     desc: "Check if your browser is leaking your real IP through WebRTC — even with a VPN.",
@@ -150,7 +160,7 @@ function ToolsPageInner() {
   const [search, setSearch] = useState("");
 
   const categoryHeadings: { [k: string]: { title: string; desc: string } } = {
-    "All": { title: "Free Cybersecurity Tools", desc: "16 free browser-based tools — no account required, no data collected" },
+    "All": { title: "Free Cybersecurity Tools", desc: "17 free browser-based tools — no account required, no data collected" },
     "2FA & QR": { title: "2FA & QR Code Tools", desc: "Free two-factor authentication and QR code generator tools" },
     "Password": { title: "Password Security Tools", desc: "Free password generator, strength checker, and breach detection tools" },
     "Developer": { title: "Developer Security Tools", desc: "Free JWT decoder, hash generator, UUID generator, and more" },

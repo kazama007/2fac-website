@@ -95,6 +95,13 @@ export const TOOLS: Tool[] = [
 
   // ── Security ─────────────────────────────────────────────
   {
+    icon: "⚡",
+    name: "Internet Speed Test",
+    desc: "Check your download speed, upload speed, ping and jitter",
+    href: "/tools/speed-test",
+    category: "Security",
+  },
+  {
     icon: "🔴",
     name: "WebRTC Leak Test",
     desc: "Check if your browser leaks real IP through WebRTC",
