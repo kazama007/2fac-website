@@ -269,9 +269,27 @@ export default function AdminPanel() {
     setTimeout(() => setAdsSaved(false), 2000);
   };
 
-  const handleLogin = () => {
-    if (password === ADMIN_PASSWORD) { setIsLoggedIn(true); sessionStorage.setItem("admin-logged-in", "true"); setLoginError(""); }
-    else setLoginError("Wrong password!");
+  const handleLogin = async () => {
+    sessionStorage.setItem("admin-pass", password);
+    try {
+      const res = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-admin-password": password },
+        body: JSON.stringify({ action: "auth" }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setIsLoggedIn(true);
+        sessionStorage.setItem("admin-logged-in", "true");
+        setLoginError("");
+      } else {
+        sessionStorage.removeItem("admin-pass");
+        setLoginError("Wrong password!");
+      }
+    } catch {
+      sessionStorage.removeItem("admin-pass");
+      setLoginError("Connection error. Try again.");
+    }
   };
 
   const handleCoverImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
