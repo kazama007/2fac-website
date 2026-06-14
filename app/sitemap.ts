@@ -6,6 +6,9 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
+// Revalidate every hour so new blog posts appear in sitemap quickly
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://2fa.ac";
 
@@ -28,6 +31,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/tools/uuid-generator`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
     { url: `${baseUrl}/tools/base64`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
     { url: `${baseUrl}/tools/json-formatter`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/tools/webrtc-leak`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/tools/dns-leak-test`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
     { url: `${baseUrl}/tools/link-checker`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
     { url: `${baseUrl}/tools/dns-lookup`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
     { url: `${baseUrl}/tools/ip-lookup`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
@@ -38,13 +43,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const { data: posts } = await supabase
       .from("blog_posts")
-      .select("slug, created_at")
+      .select("slug, created_at, updated_at")
       .eq("published", true)
       .order("created_at", { ascending: false });
 
     const blogPages: MetadataRoute.Sitemap = (posts || []).map(post => ({
       url: `${baseUrl}/blog/${post.slug}`,
-      lastModified: new Date(post.created_at),
+      lastModified: new Date(post.updated_at || post.created_at),
       changeFrequency: "weekly" as const,
       priority: 0.7,
     }));
