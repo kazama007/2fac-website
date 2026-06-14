@@ -9,6 +9,17 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 31536000,
   },
+  // www → non-www permanent redirect (fixes GSC duplicate canonical issue)
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.2fa.ac" }],
+        destination: "https://2fa.ac/:path*",
+        permanent: true,
+      },
+    ];
+  },
   headers: async () => [
     {
       source: "/(.*)",
